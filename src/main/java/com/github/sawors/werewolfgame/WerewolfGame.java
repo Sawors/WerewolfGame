@@ -23,7 +23,7 @@ public final class WerewolfGame extends JavaPlugin {
         this.saveDefaultConfig();
 
         // init JDA (Discord Bot)
-        JDA jda = DiscordBot.initJDA();
+        JDA jda = DiscordBot.initJDA(getMainConfig().getString("discord-token"), false);
     }
 
     @Override
