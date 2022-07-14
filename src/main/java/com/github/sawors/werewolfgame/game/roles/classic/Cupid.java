@@ -1,26 +1,32 @@
 package com.github.sawors.werewolfgame.game.roles.classic;
 
+import com.github.sawors.werewolfgame.game.FirstNightRole;
 import com.github.sawors.werewolfgame.game.PlayerRole;
 import com.github.sawors.werewolfgame.game.RoleType;
 
-public class Villager implements PlayerRole {
+public class Cupid implements PlayerRole, FirstNightRole {
     @Override
     public RoleType getRoleType() {
-        return RoleType.VILLAGER;
+        return RoleType.CUPID;
     }
 
     @Override
     public Integer priority() {
-        return null;
+        return -30;
     }
 
     @Override
     public void onDeathAction() {
-        // none for simple villager
+        // none
     }
 
     @Override
     public void nightAction() {
-        // none for simple villager
+        // none
+    }
+
+    @Override
+    public void doFirstNightAction() {
+        //TODO : select lovers on first night
     }
 }

@@ -1,12 +1,12 @@
 package com.github.sawors.werewolfgame.game.roles.classic;
 
 import com.github.sawors.werewolfgame.game.PlayerRole;
-import com.github.sawors.werewolfgame.game.Role;
+import com.github.sawors.werewolfgame.game.RoleType;
 
 public class Mayor implements PlayerRole {
     @Override
-    public Role getRoleType() {
-        return Role.MAYOR;
+    public RoleType getRoleType() {
+        return RoleType.MAYOR;
     }
 
     @Override

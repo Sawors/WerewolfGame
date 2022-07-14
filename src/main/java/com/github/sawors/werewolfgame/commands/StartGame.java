@@ -7,7 +7,7 @@ public class StartGame implements GameCommand{
     }
 
     @Override
-    public boolean isAdminOnly() {
+    public  boolean isAdminOnly() {
         return true;
     }
 }

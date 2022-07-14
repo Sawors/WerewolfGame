@@ -1,12 +1,12 @@
 package com.github.sawors.werewolfgame.game.roles.classic;
 
 import com.github.sawors.werewolfgame.game.PlayerRole;
-import com.github.sawors.werewolfgame.game.Role;
+import com.github.sawors.werewolfgame.game.RoleType;
 
 public class Witch implements PlayerRole {
     @Override
-    public Role getRoleType() {
-        return Role.WITCH;
+    public RoleType getRoleType() {
+        return RoleType.WITCH;
     }
 
     @Override
