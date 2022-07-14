@@ -1,12 +1,19 @@
 package com.github.sawors.werewolfgame.game;
 
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class WerewolfPlayer {
     UUID minecraftid;
-    Long discordid;
+    String discordid;
     String name;
-    Set<PlayerPreference> preferences;
+    ArrayList<PlayerPreference> preferences;
+
+    public WerewolfPlayer(UUID mcid, String discordid, String name, ArrayList<PlayerPreference> preferences){
+        this.minecraftid = mcid;
+        this.discordid = discordid;
+        this.name = name;
+        this.preferences = preferences;
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame.commands;
 
+import com.github.sawors.werewolfgame.Main;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,6 +14,14 @@ public class MinecraftCommandListener implements CommandExecutor {
                 case"start":
                     break;
                 case"test":
+                    Main.logAdmin("Player IDs");
+                    for(int i = 0; i<=8; i++){
+                        Main.logAdmin(Main.generateRandomPlayerId());
+                    }
+                    Main.logAdmin("\nGame IDs");
+                    for(int i = 0; i<=8; i++){
+                        Main.logAdmin(Main.generateRandomGameId());
+                    }
                     break;
             }
             return true;

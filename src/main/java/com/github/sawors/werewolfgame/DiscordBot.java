@@ -14,12 +14,11 @@ public class DiscordBot {
         JDABuilder builder = JDABuilder.createDefault(token);
         builder.addEventListeners(new DiscordListeners());
         builder.addEventListeners(new DiscordCommandListener());
-        
         try{
             JDA jda = builder.build();
             Main.logAdmin("Successfully started Discord Bot !");
             return jda;
-        }catch (LoginException e){
+        }catch (LoginException | IllegalArgumentException e){
             Main.logAdmin("Discord token not found, disabling Discord bot features");
             return null;
         }

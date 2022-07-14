@@ -1,6 +1,6 @@
 name: WerewolfGame
 version: '${project.version}'
-main: com.github.sawors.werewolfgame.WerewolfGame
+main: com.github.sawors.werewolfgame.PluginLauncher
 api-version: 1.18
 commands:
   ww:
