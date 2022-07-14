@@ -10,8 +10,8 @@ public class StandaloneLauncher {
             // > Using the default config folder for storing/retrieving data is probably better in the end as the config directory file structure is predictable
         } else {
             System.out.println("Discord Token not specified, could not start the bot (specify token with the first argument when launching this jar)");
+            return;
         }
-    
-        DiscordBot.initJDA(token, true);
+        Main.init(true, token);
     }
 }
