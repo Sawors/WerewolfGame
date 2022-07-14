@@ -3,27 +3,26 @@ package com.github.sawors.werewolfgame.game.roles.classic;
 import com.github.sawors.werewolfgame.game.PlayerRole;
 import com.github.sawors.werewolfgame.game.Role;
 
-public class Wolf implements PlayerRole {
+public class Hunter implements PlayerRole {
     @Override
     public Role getRoleType() {
-        return Role.WOLF;
+        return Role.HUNTER;
     }
 
     @Override
     public Integer priority() {
-        // THIS IS THE ONLY STANDARD !!!!
-        return 0;
+        return null;
     }
 
+
+    //TODO : Hunter action
     @Override
     public void onDeathAction() {
-        // do nothing since wolves don't have any particular death action
+
     }
 
-
-    //TODO : Wolf action
     @Override
     public void nightAction() {
-
+        // none
     }
 }
