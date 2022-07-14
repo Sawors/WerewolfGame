@@ -1,6 +1,5 @@
 package com.github.sawors.werewolfgame;
 
-import com.github.sawors.werewolfgame.game.GameManager;
 import net.dv8tion.jda.api.JDA;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.RandomStringUtils;
@@ -41,11 +40,12 @@ public class Main {
     }
 
     public static void registerNewGame(GameManager manager){
+        String id = generateGameId();
         activegames.put(generateGameId(), manager);
     }
 
     public static String generateGameId(){
-        return RandomStringUtils.randomAlphanumeric(8);
+        return RandomStringUtils.randomNumeric(8);
     }
 
     protected JDA getJDA(){
@@ -66,5 +66,9 @@ public class Main {
                 }
             }
         }
+    }
+
+    protected static HashMap<String, GameManager> getGamesList(){
+        return activegames;
     }
 }
