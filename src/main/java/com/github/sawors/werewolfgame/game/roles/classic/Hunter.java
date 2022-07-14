@@ -7,7 +7,6 @@ public class Hunter implements PlayerRole {
     @Override
     public Role getRoleType() {
         return Role.HUNTER;
-        //
     }
 
     @Override
