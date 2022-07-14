@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame;
 
+import com.github.sawors.werewolfgame.commands.MinecraftCommandListener;
 import net.dv8tion.jda.api.JDA;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -8,9 +9,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.logging.Level;
 
 public final class WerewolfGame extends JavaPlugin {
@@ -19,7 +20,12 @@ public final class WerewolfGame extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-
+        try{
+            Objects.requireNonNull(getServer().getPluginCommand("ww")).setExecutor(new MinecraftCommandListener());
+        } catch (NullPointerException e){
+            Bukkit.getLogger().log(Level.WARNING, "One of the plugin command has not been correctly defined, please see the following stacktrace for more info");
+            e.printStackTrace();
+        }
         // init Config
         this.saveDefaultConfig();
 

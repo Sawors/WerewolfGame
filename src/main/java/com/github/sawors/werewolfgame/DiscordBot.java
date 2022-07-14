@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame;
 
+import com.github.sawors.werewolfgame.commands.DiscordCommandListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 
@@ -15,6 +16,7 @@ public class DiscordBot {
         isstandalone = standalone;
         JDABuilder builder = JDABuilder.createDefault(token);
         builder.addEventListeners(new DiscordListeners());
+        builder.addEventListeners(new DiscordCommandListener());
         
         try{
             jda = builder.build();
