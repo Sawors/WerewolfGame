@@ -3,24 +3,42 @@ package com.github.sawors.werewolfgame;
 import net.dv8tion.jda.api.JDA;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
 public class Main {
-    static HashMap<String, GameManager> activegames;
-    static boolean standalone;
-    static boolean discordenabled = false;
-    static boolean minecraftenabled = false;
-    static JDA jda;
+    private static HashMap<String, GameManager> activegames;
+    private static boolean standalone;
+    private static boolean discordenabled = false;
+    private static boolean minecraftenabled = false;
+    private static JDA jda;
+    private static File datalocation;
+    private static File dbfile;
 
 
-    public static void init(boolean standalone, String token){
+    public static void init(boolean standalone, String token, File datastorage){
         Main.standalone = standalone;
         minecraftenabled = !Main.standalone && PluginLauncher.getPlugin().isEnabled();
+        
+        
         jda = DiscordBot.initJDA(token, Main.standalone);
         if(jda != null){
             discordenabled = true;
+        }
+        
+        
+        datastorage.mkdirs();
+        datalocation = datastorage;
+        dbfile = new File(datalocation+File.separator+"database.db");
+        try{
+            Main.logAdmin(dbfile);
+            dbfile.createNewFile();
+        } catch (IOException e){
+            e.printStackTrace();
+            Main.logAdmin("database creation failed, could not access the file");
         }
 
 
@@ -32,6 +50,10 @@ public class Main {
                     "Minecraft by successfully starting the program as a plugin and/or Discord by providing an API token." +
                     "If launched in standalone mode, provide a Discord API token as the first argument when launching the Jar file (no interaction with Minecraft possible in this mode)");
         }
+    }
+    
+    protected static File getDbFile(){
+        return dbfile;
     }
 
     public static void registerNewGame(GameManager manager){

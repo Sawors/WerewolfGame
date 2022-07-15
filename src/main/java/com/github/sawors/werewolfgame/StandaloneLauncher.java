@@ -1,5 +1,8 @@
 package com.github.sawors.werewolfgame;
 
+import java.io.File;
+import java.io.IOException;
+
 public class StandaloneLauncher {
     
     public static void main(String[] args){
@@ -13,10 +16,11 @@ public class StandaloneLauncher {
             return;
         }
         try{
-            Main.init(true, token);
+            Main.init(true, token, new File(new File(StandaloneLauncher.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getCanonicalFile()+File.separator+"WerewolfGame"));
         } catch (NoClassDefFoundError e){
-            System.out.println("mana");
             e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

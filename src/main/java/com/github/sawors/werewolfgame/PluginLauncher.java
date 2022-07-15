@@ -26,7 +26,7 @@ public final class PluginLauncher extends JavaPlugin {
         // init Config
         this.saveDefaultConfig();
 
-        Main.init(false, getMainConfig().getString("discord-token"));
+        Main.init(false, getMainConfig().getString("discord-token"), this.getDataFolder());
     }
 
     @Override
