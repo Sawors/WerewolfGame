@@ -1,17 +1,17 @@
-package com.github.sawors.werewolfgame;
+package com.github.sawors.werewolfgame.database;
 
+import com.github.sawors.werewolfgame.Main;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.Locale;
 
-public class PlayerId {
+public class UserId {
     String discriminant;
-    String tag = "WW-";
-    int iduniquelength = 6;
+    int iduniquelength = 8;
 
     @Override
     public String toString() {
-        return tag+discriminant.toUpperCase(Locale.ENGLISH);
+        return discriminant.toLowerCase(Locale.ENGLISH);
     }
 
     public String getDiscriminant(){
@@ -26,18 +26,9 @@ public class PlayerId {
      * will be WW-04AB3D).<br><br>If you input a well formatted PlayerID (WW-XXXXXX) it will be used as-is.<br><br>Every other input will
      * result in a random PlayerID.
      */
-    public PlayerId(String id){
-        Main.logAdmin(id.substring(0,tag.length()).toUpperCase(Locale.ENGLISH));
-        if(id.substring(0,tag.length()).toUpperCase(Locale.ENGLISH).equals("WW-") && id.length() == tag.length()+iduniquelength){
-            for(char ch : id.substring(tag.length(),tag.length()+iduniquelength).toCharArray()){
-                if(!Character.isLetterOrDigit(ch)){
-                    this.discriminant = generateRandomDiscriminant();
-                    return;
-                }
-            }
-
-            this.discriminant = id.substring(tag.length(),tag.length()+iduniquelength);
-        } else if(id.length() == iduniquelength){
+    public UserId(String id){
+        Main.logAdmin(id);
+        if(id.length() == iduniquelength){
             for(char ch : id.toCharArray()){
                 if(!Character.isLetterOrDigit(ch)){
                     this.discriminant = generateRandomDiscriminant();
@@ -50,11 +41,11 @@ public class PlayerId {
         }
     }
 
-    public PlayerId(){
+    public UserId(){
         this.discriminant = generateRandomDiscriminant();
     }
 
     private String generateRandomDiscriminant(){
-        return RandomStringUtils.randomAlphanumeric(iduniquelength).toUpperCase(Locale.ENGLISH);
+        return RandomStringUtils.randomAlphanumeric(iduniquelength).toLowerCase(Locale.ENGLISH);
     }
 }

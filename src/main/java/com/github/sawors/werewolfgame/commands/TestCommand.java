@@ -1,7 +1,7 @@
 package com.github.sawors.werewolfgame.commands;
 
 import com.github.sawors.werewolfgame.Main;
-import com.github.sawors.werewolfgame.PlayerId;
+import com.github.sawors.werewolfgame.database.UserId;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -10,7 +10,7 @@ public class TestCommand implements GameCommand{
     public void execute() {
         Main.logAdmin("Player IDs");
         for(int i = 0; i<=8; i++){
-            Main.logAdmin(new PlayerId());
+            Main.logAdmin(new UserId());
         }
         Main.logAdmin("\nGame IDs");
         for(int i = 0; i<=8; i++){
@@ -23,7 +23,7 @@ public class TestCommand implements GameCommand{
         StringBuilder output = new StringBuilder();
         output.append("**Player IDs**");
         for(int i = 0; i<=8; i++){
-            output.append("\n   ").append(new PlayerId());
+            output.append("\n   ").append(new UserId());
         }
         output.append("\n**Game IDs**");
         for(int i = 0; i<=8; i++){

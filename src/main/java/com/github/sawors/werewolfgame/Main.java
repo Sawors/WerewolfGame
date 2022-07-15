@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame;
 
+import com.github.sawors.werewolfgame.database.UserId;
 import net.dv8tion.jda.api.JDA;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -17,18 +18,12 @@ public class Main {
     private static JDA jda;
     private static File datalocation;
     private static File dbfile;
+    private static HashMap<UserId, String> cachedusers;
 
 
     public static void init(boolean standalone, String token, File datastorage){
         Main.standalone = standalone;
         minecraftenabled = !Main.standalone && PluginLauncher.getPlugin().isEnabled();
-        
-        
-        jda = DiscordBot.initJDA(token, Main.standalone);
-        if(jda != null){
-            discordenabled = true;
-        }
-        
         
         datastorage.mkdirs();
         datalocation = datastorage;
@@ -40,7 +35,13 @@ public class Main {
             e.printStackTrace();
             Main.logAdmin("database creation failed, could not access the file");
         }
-
+        
+        jda = DiscordBot.initJDA(token, Main.standalone);
+        if(jda != null){
+            discordenabled = true;
+        }
+        
+        DatabaseManager.connectInit();
 
 
         // shut down if no execution context is found

@@ -16,7 +16,8 @@ public class StandaloneLauncher {
             return;
         }
         try{
-            Main.init(true, token, new File(new File(StandaloneLauncher.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getCanonicalFile()+File.separator+"WerewolfGame"));
+            //TODO : remove the second File.getParent() for distribution
+            Main.init(true, token, new File(new File(StandaloneLauncher.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getParentFile().getCanonicalFile()+File.separator+"WerewolfGame"));
         } catch (NoClassDefFoundError e){
             e.printStackTrace();
         } catch (IOException e) {
