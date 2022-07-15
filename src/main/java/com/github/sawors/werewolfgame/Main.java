@@ -1,16 +1,11 @@
 package com.github.sawors.werewolfgame;
 
 import net.dv8tion.jda.api.JDA;
-import net.kyori.adventure.text.Component;
-import org.apache.commons.lang.RandomStringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.logging.Level;
 
 public class Main {
     static HashMap<String, GameManager> activegames;
@@ -57,14 +52,9 @@ public class Main {
         time = "[WerewolfGame : "+time+"] ";
 
         if(standalone){
-            System.out.println(time+text.toString());
+            System.out.println(time+text);
         } else {
-            Bukkit.getLogger().log(Level.INFO, time+text.toString());
-            for(Player p : Bukkit.getOnlinePlayers()){
-                if(p.isOp()){
-                    p.sendMessage(Component.text(ChatColor.YELLOW+time+text));
-                }
-            }
+            PluginLauncher.logToOp(time+text);
         }
     }
 
