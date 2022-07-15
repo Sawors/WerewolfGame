@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame.database;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -12,13 +13,13 @@ public class LinkedUser {
     HashSet<UserPreference> preferences;
     HashSet<UserTag> tags;
 
-    public LinkedUser(UUID mcid, String discordid, String name, Set<UserPreference> preferences, Set<UserTag> tags){
+    public LinkedUser(String name, UUID mcid, String discordid, @Nullable Set<UserPreference> preferences, @Nullable Set<UserTag> tags){
         id = new UserId();
         this.minecraftid = mcid;
         this.discordid = discordid;
         this.name = name;
-        this.preferences = new HashSet<>(preferences);
-        this.tags = new HashSet<>(tags);
+        this.preferences = preferences == null ? null : new HashSet<>(preferences);
+        this.tags = tags == null ? null : new HashSet<>(tags);
     }
     
     public LinkedUser(){
@@ -32,6 +33,10 @@ public class LinkedUser {
     
     public static LinkedUser getFromId(UserId id){
         return new LinkedUser();
+    }
+    
+    public UserId getId(){
+        return id;
     }
     
     public UUID getMinecraftid() {
@@ -59,7 +64,7 @@ public class LinkedUser {
     }
     
     public Set<UserPreference> getPreferences() {
-        return Set.copyOf(preferences);
+        return preferences == null ? null : Set.copyOf(preferences);
     }
     
     public void addPreference(UserPreference preference) {
@@ -71,7 +76,7 @@ public class LinkedUser {
     }
     
     public Set<UserTag> getTags() {
-        return Set.copyOf(tags);
+        return tags == null ? null : Set.copyOf(tags);
     }
     
     public void addTag(UserTag tag) {

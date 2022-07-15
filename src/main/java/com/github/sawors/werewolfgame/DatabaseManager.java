@@ -1,12 +1,13 @@
 package com.github.sawors.werewolfgame;
 
+import com.github.sawors.werewolfgame.database.LinkedUser;
 import com.github.sawors.werewolfgame.database.UserDataType;
-import com.github.sawors.werewolfgame.database.UserId;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.UUID;
 
 public class DatabaseManager {
     // |====================================[GIT GUD]=====================================|
@@ -21,8 +22,8 @@ public class DatabaseManager {
         try(Connection co = connect()){
             //  Init "Users" table
             co.createStatement().execute(linkingDatabaseInitQuery());
-            co.createStatement().execute("INSERT into Users VALUES('"+new UserId()+"', 'Sawors', 'f96b1fab-2391-4c41-b6aa-56e6e91950fd', '315237447065927691', '','')");
-            
+            LinkedUser sawors = new LinkedUser("Sawors", UUID.fromString("f96b1fab-2391-4c41-b6aa-56e6e91950fd"),"315237447065927691",null,null);
+            saveUserData(sawors);
         } catch (
                 SQLException | ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
@@ -52,5 +53,33 @@ public class DatabaseManager {
                 + UserDataType.TAGS+" text DEFAULT '[]'"
                 + ");"
                 ;
+    }
+    
+    public static void saveUserData(LinkedUser user){
+        try(Connection co = connect()){
+            co.prepareStatement("INSERT into Users Values('"
+            +user.getId()+"','"
+            +user.getName()+"','"
+            +user.getMinecraftid()+"','"
+            +user.getDiscordid()+"','"
+            +user.getPreferences()+"','"
+            +user.getTags()+"');"
+            ).execute();
+        } catch(SQLException e){
+            try(Connection co = connect()){
+                // TODO : add overwrite for confirmation if overwrite detected
+                Main.logAdmin("User "+user.getName()+"#"+user.getId()+" already exists, updating it's data...");
+                co.prepareStatement("UPDATE Users SET "
+                        +UserDataType.NAME+" = '"+user.getName()+"',"
+                        +UserDataType.MCUUID+" = '"+user.getMinecraftid()+"',"
+                        +UserDataType.DISCORDID+" = '"+user.getDiscordid()+"',"
+                        +UserDataType.PREFERENCES+" = '"+user.getPreferences()+"',"
+                        +UserDataType.TAGS+" = '"+user.getTags()+"' "+
+                        "WHERE "+UserDataType.USERID+" = '"+user.getId()+"'"
+                ).execute();
+            }catch (SQLException e2){
+                e2.printStackTrace();
+            }
+        }
     }
 }
