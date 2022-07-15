@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.logging.Level;
 
 public class Main {
@@ -47,10 +46,6 @@ public class Main {
 
     public static String generateRandomGameId(){
         return RandomStringUtils.randomNumeric(8);
-    }
-
-    public static String generateRandomPlayerId(){
-        return "WW-"+RandomStringUtils.randomAlphanumeric(4).toUpperCase(Locale.ENGLISH);
     }
 
     protected JDA getJDA(){
