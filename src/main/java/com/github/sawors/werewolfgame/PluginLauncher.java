@@ -1,8 +1,11 @@
 package com.github.sawors.werewolfgame;
 
 import com.github.sawors.werewolfgame.commands.MinecraftCommandListener;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
@@ -37,5 +40,14 @@ public final class PluginLauncher extends JavaPlugin {
 
     public static JavaPlugin getPlugin(){
         return instance;
+    }
+    
+    static void logToOp(Object text){
+        Bukkit.getLogger().log(Level.INFO, text.toString());
+        for(Player p : Bukkit.getOnlinePlayers()){
+            if(p.isOp()){
+                p.sendMessage(Component.text(ChatColor.YELLOW+text.toString()));
+            }
+        }
     }
 }
