@@ -1,4 +1,8 @@
-package com.github.sawors.werewolfgame.database;
+package com.github.sawors.werewolfgame;
+
+import com.github.sawors.werewolfgame.database.UserId;
+import com.github.sawors.werewolfgame.database.UserPreference;
+import com.github.sawors.werewolfgame.database.UserTag;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -6,40 +10,44 @@ import java.util.Set;
 import java.util.UUID;
 
 public class LinkedUser {
-    UserId id;
-    UUID minecraftid;
-    String discordid;
-    String name;
-    HashSet<UserPreference> preferences;
-    HashSet<UserTag> tags;
+    private UserId id;
+    private UUID minecraftid;
+    private String discordid;
+    private String name;
+    private HashSet<UserPreference> preferences;
+    private HashSet<UserTag> tags;
 
-    public LinkedUser(String name, UUID mcid, String discordid, @Nullable Set<UserPreference> preferences, @Nullable Set<UserTag> tags){
+    public LinkedUser(UserId id, String name, UUID mcid, String discordid, @Nullable Set<UserPreference> preferences, @Nullable Set<UserTag> tags){
         id = new UserId();
         this.minecraftid = mcid;
         this.discordid = discordid;
         this.name = name;
-        this.preferences = preferences == null ? null : new HashSet<>(preferences);
-        this.tags = tags == null ? null : new HashSet<>(tags);
+        this.preferences = preferences == null ? new HashSet<>() : new HashSet<>(preferences);
+        this.tags = tags == null ? new HashSet<>() : new HashSet<>(tags);
     }
     
     public LinkedUser(){
         id = new UserId();
         this.minecraftid = null;
-        this.discordid = null;
-        this.name = null;
-        this.preferences = null;
-        this.tags = null;
+        this.discordid = "";
+        this.name = "";
+        this.preferences = new HashSet<>();
+        this.tags = new HashSet<>();
     }
     
-    public static LinkedUser getFromId(UserId id){
-        return new LinkedUser();
+    public static @Nullable LinkedUser fromId(UserId id){
+        
+        if(Main.useUserCache()){
+            return Main.getCachedUser(id);
+        }
+        return DatabaseManager.retrieveUserData(id);
     }
     
     public UserId getId(){
         return id;
     }
     
-    public UUID getMinecraftid() {
+    public UUID getMinecraftId() {
         return minecraftid;
     }
     
@@ -47,7 +55,7 @@ public class LinkedUser {
         this.minecraftid = minecraftid;
     }
     
-    public String getDiscordid() {
+    public String getDiscordId() {
         return discordid;
     }
     

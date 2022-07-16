@@ -18,7 +18,8 @@ public class Main {
     private static JDA jda;
     private static File datalocation;
     private static File dbfile;
-    private static HashMap<UserId, String> cachedusers;
+    private static boolean usecaching = true;
+    private static HashMap<UserId, LinkedUser> cachedusers;
 
 
     public static void init(boolean standalone, String token, File datastorage){
@@ -83,5 +84,21 @@ public class Main {
 
     protected static HashMap<String, GameManager> getGamesList(){
         return activegames;
+    }
+    
+    public static void cacheUser(UserId id, LinkedUser user){
+        cachedusers.put(id,user);
+    }
+    
+    public static void cacheUser(LinkedUser user){
+        cachedusers.put(user.getId(),user);
+    }
+    
+    public static boolean useUserCache(){
+        return usecaching;
+    }
+    
+    protected static LinkedUser getCachedUser(UserId id){
+        return cachedusers.get(id);
     }
 }

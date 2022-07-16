@@ -7,7 +7,7 @@ import java.util.Locale;
 
 public class UserId {
     String discriminant;
-    int iduniquelength = 8;
+    static int iduniquelength = 8;
 
     @Override
     public String toString() {
@@ -47,5 +47,18 @@ public class UserId {
 
     private String generateRandomDiscriminant(){
         return RandomStringUtils.randomAlphanumeric(iduniquelength).toLowerCase(Locale.ENGLISH);
+    }
+    
+    public static UserId fromString(String id) throws IllegalArgumentException{
+        if(id.length() == iduniquelength){
+            for(char ch : id.toCharArray()){
+                if(!Character.isLetterOrDigit(ch)){
+                    throw new IllegalArgumentException(id+" is not a correctly formatted PlayerId (only alphanumeric characters are allowed)");
+                }
+            }
+            return new UserId(id);
+        } else {
+            throw new IllegalArgumentException(id+" is not a correctly formatted PlayerId (only "+iduniquelength+" characters allowed, got "+id.length()+")");
+        }
     }
 }
