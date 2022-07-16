@@ -1,0 +1,9 @@
+
+This file contains a tutorial on how to install and create extensions for the base game.
+
+=====[INSTALLATION]======
+To install extensions, simply drop the .jar files in the directory containing this text file (./extensions)
+If an extension provides a config file it should appear in a subdirectory with the extension's name (./extensions/your_extension_name/config.yml)
+
+=====[FOR DEVELOPERS]=====
+TUTORIAL NOT WRITTEN YET

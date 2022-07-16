@@ -1,7 +1,7 @@
 package com.github.sawors.werewolfgame;
 
 import com.github.sawors.werewolfgame.database.UserId;
-import com.github.sawors.werewolfgame.game.RoleType;
+import com.github.sawors.werewolfgame.game.WerewolfPlayer;
 import net.dv8tion.jda.api.entities.Guild;
 import org.bukkit.Server;
 
@@ -12,7 +12,7 @@ public class GameManager {
 
     private GameType gametype;
     private GamePhase gamephase;
-    private HashMap<UserId, RoleType> playerlist = new HashMap<>();
+    private HashMap<UserId, WerewolfPlayer> playerlist = new HashMap<>();
     private String id;
     private Guild discordserver;
     private Server mcserver;
@@ -26,7 +26,7 @@ public class GameManager {
     public void addPlayer(UserId playerid){
         // instead of using a set
         if(!playerlist.containsKey(playerid)){
-            playerlist.put(playerid, RoleType.NOT_SET);
+            playerlist.put(playerid, new WerewolfPlayer());
         }
     }
 
@@ -41,8 +41,6 @@ public class GameManager {
     public void setGameType(GameType gametype) {
         this.gametype = gametype;
     }
-
-
 
 
 
