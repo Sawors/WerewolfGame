@@ -1,10 +1,9 @@
 package com.github.sawors.werewolfgame.game.roles.classic;
 
 import com.github.sawors.werewolfgame.game.FirstNightRole;
-import com.github.sawors.werewolfgame.game.PlayerRole;
 import com.github.sawors.werewolfgame.game.RoleType;
 
-public class Lover implements PlayerRole, FirstNightRole {
+public class Lover extends FirstNightRole {
 
     @Override
     public RoleType getRoleType() {
@@ -16,15 +15,9 @@ public class Lover implements PlayerRole, FirstNightRole {
         return -20;
     }
 
-    //TODO : Lover action (kill)
     @Override
     public void onDeathAction() {
-        // none
-    }
-
-    @Override
-    public void nightAction() {
-        // none
+        //TODO : Lover action (kill)
     }
 
     @Override

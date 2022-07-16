@@ -1,7 +1,7 @@
 package com.github.sawors.werewolfgame.game;
 
-public interface PlayerRole {
-        RoleType getRoleType();
+public abstract class PlayerRole {
+        protected abstract RoleType getRoleType();
 
 
         /**
@@ -12,9 +12,9 @@ public interface PlayerRole {
          * By default, "classic" roles use an increment of 10 to let some space for other roles to be played
          * between without having to shift the entire role set.
         **/
-        Integer priority();
+        protected abstract Integer priority();
 
-        void onDeathAction();
+        protected void onDeathAction(){};
 
-        void nightAction();
+        protected void nightAction(){};
 }

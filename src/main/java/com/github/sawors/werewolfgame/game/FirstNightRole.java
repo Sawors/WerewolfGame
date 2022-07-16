@@ -1,5 +1,5 @@
 package com.github.sawors.werewolfgame.game;
 
-public interface FirstNightRole {
-    void doFirstNightAction();
+public abstract class FirstNightRole extends PlayerRole{
+    protected abstract void doFirstNightAction();
 }

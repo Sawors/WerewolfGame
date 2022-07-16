@@ -3,7 +3,7 @@ package com.github.sawors.werewolfgame.game.roles.classic;
 import com.github.sawors.werewolfgame.game.PlayerRole;
 import com.github.sawors.werewolfgame.game.RoleType;
 
-public class Hunter implements PlayerRole {
+public class Hunter extends PlayerRole {
     @Override
     public RoleType getRoleType() {
         return RoleType.HUNTER;
@@ -14,15 +14,8 @@ public class Hunter implements PlayerRole {
         return null;
     }
 
-
-    //TODO : Hunter action
     @Override
     public void onDeathAction() {
-
-    }
-
-    @Override
-    public void nightAction() {
-        // none
+        //TODO : Hunter action
     }
 }

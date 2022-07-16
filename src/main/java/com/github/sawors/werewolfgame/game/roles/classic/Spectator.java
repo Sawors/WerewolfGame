@@ -3,7 +3,7 @@ package com.github.sawors.werewolfgame.game.roles.classic;
 import com.github.sawors.werewolfgame.game.PlayerRole;
 import com.github.sawors.werewolfgame.game.RoleType;
 
-public class Spectator implements PlayerRole {
+public class Spectator extends PlayerRole {
     @Override
     public RoleType getRoleType() {
         return RoleType.SPECTATOR;
@@ -13,10 +13,4 @@ public class Spectator implements PlayerRole {
     public Integer priority() {
         return null;
     }
-    
-    @Override
-    public void onDeathAction() {}
-    
-    @Override
-    public void nightAction() {}
 }
