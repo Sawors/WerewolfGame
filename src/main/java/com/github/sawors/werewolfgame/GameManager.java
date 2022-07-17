@@ -21,6 +21,7 @@ public class GameManager {
     public GameManager(GameType type){
         this.id = Main.generateRandomGameId();
         this.gametype = type;
+        Main.registerNewGame(this);
     }
 
     public void addPlayer(UserId playerid){
