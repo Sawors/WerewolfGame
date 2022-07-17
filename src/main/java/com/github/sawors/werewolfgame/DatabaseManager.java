@@ -6,6 +6,7 @@ import com.github.sawors.werewolfgame.database.UserPreference;
 import com.github.sawors.werewolfgame.database.UserTag;
 import com.github.sawors.werewolfgame.discord.GuildDataType;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 
@@ -252,7 +253,7 @@ public class DatabaseManager {
                 ;
     }
     
-    public static void registerGuild(Guild guild){
+    public static void registerGuildBlank(Guild guild){
         try(Connection co = connect()){
             co.prepareStatement("INSERT INTO Guilds Values("
                     +guild.getId()+", "
@@ -301,6 +302,70 @@ public class DatabaseManager {
                 e.printStackTrace();
             }
             
+        }
+    }
+    
+    public static void registerGuildAuto(Guild guild){
+        TextChannel admins = null;
+        TextChannel invites = null;
+        VoiceChannel waiting = null;
+    
+        List<GuildChannel> channels = guild.getChannels();
+        for(GuildChannel chan : channels){
+            String name = chan.getName();
+            switch(name){
+                case"lg-admins":
+                case"lg-admin":
+                    if(chan.getType().isMessage()){
+                        admins = (TextChannel) chan;
+                    }
+                    break;
+                case"lg-invites":
+                case"lg-parties":
+                    if(chan.getType().isMessage()){
+                        invites = (TextChannel) chan;
+                    }
+                    break;
+                case"LG Waiting Room":
+                case"lg waiting room":
+                    if(chan.getType().isAudio()){
+                        waiting = (VoiceChannel) chan;
+                    }
+                    break;
+            }
+        }
+    
+        DatabaseManager.registerGuild(guild,admins,invites,waiting);
+    }
+    
+    protected static void setGuildData(GuildChannel channel, GuildDataType datatype){
+        if(datatype != GuildDataType.GUILD_ID || datatype != GuildDataType.GUILD_OPTIONS){
+            try(Connection co = connect()){
+                ResultSet checkreg = co.prepareStatement("SELECT * FROM Guilds WHERE "+GuildDataType.GUILD_ID+"="+channel.getGuild().getId()).executeQuery();
+                String query;
+                if(checkreg.isClosed()){
+                    query = "UPDATE Guilds SET "+datatype+"="+channel.getId()+" WHERE "+GuildDataType.GUILD_ID+" = "+channel.getGuild().getId();
+                } else {
+                    long adminid = 0L;
+                    long invitesid = 0L;
+                    long waitingid = 0L;
+                    switch(datatype){
+                        case ADMIN_TEXT_CHANNEL_ID:
+                            adminid = channel.getIdLong();
+                        case GAME_INVITES_TEXT_CHANNEL_ID:
+                        case WAITING_ROOM_VOICE_CHANNEL_ID:
+                    }
+                    query = "INSERT INTO Guilds Values("
+                            +channel.getGuild().getId()+", "
+                            +adminid+", "
+                            +invitesid+", "
+                            +waitingid+", "
+                            +"'[]'"
+                            +")";
+                }
+            } catch (SQLException e){
+                e.printStackTrace();
+            }
         }
     }
 }
