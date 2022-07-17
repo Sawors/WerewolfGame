@@ -1,6 +1,7 @@
 package com.github.sawors.werewolfgame;
 
 import com.github.sawors.werewolfgame.commands.DiscordCommandListener;
+import com.github.sawors.werewolfgame.discord.DiscordListeners;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 

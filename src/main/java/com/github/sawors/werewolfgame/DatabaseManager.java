@@ -4,7 +4,12 @@ import com.github.sawors.werewolfgame.database.UserDataType;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.database.UserPreference;
 import com.github.sawors.werewolfgame.database.UserTag;
+import com.github.sawors.werewolfgame.discord.GuildDataType;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -25,6 +30,7 @@ public class DatabaseManager {
         try(Connection co = connect()){
             //  Init "Users" table
             co.createStatement().execute(linkingDatabaseInitQuery());
+            co.createStatement().execute(guildOptionsDatabaseInitQuery());
             LinkedUser sawors = new LinkedUser(new UserId(),"SaworsUwu", UUID.fromString("f96b1fab-2391-4c41-b6aa-56e6e91950fd"),"315237447065927691",null,null);
             sawors.addPreference(UserPreference.DO_NOT_AUTOMOVE);
             sawors.addPreference(UserPreference.USE_GLOBAL_SYNCHRONISATION);
@@ -73,6 +79,7 @@ public class DatabaseManager {
             +user.getPreferences()+"','"
             +user.getTags()+"')"
             ).execute();
+            
         } catch(SQLException e){
             try(Connection co = connect()){
                 String query = "UPDATE Users SET "
@@ -225,6 +232,75 @@ public class DatabaseManager {
         }catch (SQLException e){
             e.printStackTrace();
             return null;
+        }
+    }
+    
+    
+    
+    //
+    //      GUILD OPTIONS METHODS
+    //
+    
+    private static String guildOptionsDatabaseInitQuery(){
+        return "CREATE TABLE IF NOT EXISTS Guilds ("
+                + GuildDataType.GUILD_ID+" integer NOT NULL UNIQUE,"
+                + GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID+" integer,"
+                + GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID+" integer,"
+                + GuildDataType.ADMIN_TEXT_CHANNEL_ID+" integer,"
+                + GuildDataType.GUILD_OPTIONS+" text DEFAULT '[]'"
+                + ");"
+                ;
+    }
+    
+    public static void registerGuild(Guild guild){
+        try(Connection co = connect()){
+            co.prepareStatement("INSERT INTO Guilds Values("
+                    +guild.getId()+", "
+                    +0+", "
+                    +0+", "
+                    +0+", "
+                    +"'[]'"
+                    +")").execute();
+        } catch (SQLException e){
+            e.printStackTrace();
+            Main.logAdmin("Guild "+guild.getName()+":"+guild.getId()+" already registered (this is NOT an error)");
+        }
+    }
+    
+    public static void registerGuild(Guild guild, @Nullable TextChannel admin, @Nullable TextChannel invites, @Nullable VoiceChannel waintingroom){
+        long adminid = 0L;
+        long invitesid = 0L;
+        long waintingid = 0L;
+        if(admin != null){
+            adminid = admin.getIdLong();
+        }
+        if(invites != null){
+            invitesid = invites.getIdLong();
+        }
+        if(waintingroom != null){
+            waintingid = waintingroom.getIdLong();
+        }
+        try(Connection co = connect()){
+            co.prepareStatement("INSERT INTO Guilds Values("
+                    +guild.getId()+", "
+                    +adminid+", "
+                    +invitesid+", "
+                    +waintingid+", "
+                    +"'[]'"
+                    +")").execute();
+        } catch (SQLException e){
+            Main.logAdmin("Guild "+guild.getName()+":"+guild.getId()+" already registered, overwriting its data...");
+            try(Connection co = connect()){
+                co.prepareStatement("UPDATE Guilds SET "
+                        +GuildDataType.ADMIN_TEXT_CHANNEL_ID+" = "+adminid+", "
+                        +GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID+" = "+invitesid+", "
+                        +GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID+" = "+waintingid
+                        +" WHERE "+GuildDataType.GUILD_ID+" = "+guild.getId()
+                ).execute();
+            } catch (SQLException e2){
+                e.printStackTrace();
+            }
+            
         }
     }
 }

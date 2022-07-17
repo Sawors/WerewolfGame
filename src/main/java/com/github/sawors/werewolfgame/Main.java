@@ -1,6 +1,7 @@
 package com.github.sawors.werewolfgame;
 
 import com.github.sawors.werewolfgame.database.UserId;
+import com.github.sawors.werewolfgame.game.GameManager;
 import net.dv8tion.jda.api.JDA;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -82,7 +83,7 @@ public class Main {
         }
     }
 
-    protected static HashMap<String, GameManager> getGamesList(){
+    public static HashMap<String, GameManager> getGamesList(){
         return activegames;
     }
     

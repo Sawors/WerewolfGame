@@ -1,11 +1,13 @@
-package com.github.sawors.werewolfgame;
+package com.github.sawors.werewolfgame.game;
 
+import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
-import com.github.sawors.werewolfgame.game.WerewolfPlayer;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildChannel;
 import org.bukkit.Server;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GameManager {
@@ -13,6 +15,7 @@ public class GameManager {
     private GameType gametype;
     private GamePhase gamephase;
     private HashMap<UserId, WerewolfPlayer> playerlist = new HashMap<>();
+    private ArrayList<GuildChannel> temporarychannels = new ArrayList<>();
     private String id;
     private Guild discordserver;
     private Server mcserver;

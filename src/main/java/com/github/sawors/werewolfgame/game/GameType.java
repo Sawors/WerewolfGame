@@ -1,4 +1,4 @@
-package com.github.sawors.werewolfgame;
+package com.github.sawors.werewolfgame.game;
 
 public enum GameType {
     MINECRAFT, DISCORD, MIXED
