@@ -27,7 +27,9 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 String gameid = buttonid.replace("join:", "");
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
-                    gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
+                    if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                        gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
+                    }
                     event.deferEdit().queue();
                 } else {
                     Main.logAdmin("Error : game "+gameid+" does not exist");
@@ -37,7 +39,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
 
                         act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel("Game Finished")));
                     }
-                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setActionRow(disabled).queue();
+                    event.getMessage().editMessageEmbeds(event.getMessage().getEmbeds()).setActionRow(disabled).queue();
                     event.deferEdit().queue();
                 }
             } else if(buttonid.contains("joinprivate:")){
@@ -45,13 +47,17 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 String gameid = buttonid.replace("joinprivate:", "");
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
-                    TextInput joincode = TextInput.create("codeinput","Please input the private code of this game", TextInputStyle.SHORT)
-                            .setPlaceholder("the unique 5 number code for this game")
-                            .setRequired(true)
-                            .setRequiredRange(4,6)
-                            .build();
-                    event.replyModal(Modal.create("codemodal:"+gm.getId(),"Private Game Code").addActionRow(joincode).build()).queue();
-                    Main.logAdmin("joined private game");
+                    if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                        TextInput joincode = TextInput.create("codeinput","Please input your 5 number code", TextInputStyle.SHORT)
+                                .setPlaceholder("very secret code here")
+                                .setRequired(true)
+                                .setRequiredRange(4,6)
+                                .build();
+                        event.replyModal(Modal.create("codemodal:"+gm.getId(),"Private Game Code").addActionRow(joincode).build()).queue();
+                        Main.logAdmin("joined private game");
+                    } else {
+                        event.deferEdit().queue();
+                    }
                 } else {
                     Main.logAdmin("Error : game "+gameid+" does not exist");
                     List<ActionRow> rows = event.getMessage().getActionRows();
@@ -60,7 +66,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
             
                         act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel("Game Finished")));
                     }
-                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setActionRow(disabled).queue();
+                    event.getMessage().editMessageEmbeds(event.getMessage().getEmbeds()).setActionRow(disabled).queue();
                     event.deferEdit().queue();
                 }
                 

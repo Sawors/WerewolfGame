@@ -108,7 +108,9 @@ public class DiscordCommandListener extends ListenerAdapter {
                     GameManager gm = new GameManager(event.getGuild(), GameType.DISCORD, jointype);
                     gm.sendInvite();
                     event.getChannel().sendMessage("Game created ! ID : "+gm.getId()).queue();
-                    event.getAuthor().openPrivateChannel().queue(chan -> chan.sendMessage("Hello "+event.getAuthor().getAsMention()+" !"+"\nSince you created a new Werewolf game in **Private** mode players must this code to join it : **`"+gm.getJoinKey()+"`**").queue());
+                    if(jointype == JoinType.PRIVATE){
+                        event.getAuthor().openPrivateChannel().queue(chan -> chan.sendMessage("Hello "+event.getAuthor().getAsMention()+" !"+"\nSince you created a new Werewolf game in **Private** mode players must this code to join it : **`"+gm.getJoinKey()+"`**").queue());
+                    }
                 case"clean":
                 case"clear":
                     if(args.length >= 3){
