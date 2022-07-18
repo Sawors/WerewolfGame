@@ -1,7 +1,6 @@
 package com.github.sawors.werewolfgame.game.roles.classic;
 
 import com.github.sawors.werewolfgame.game.FirstNightRole;
-import com.github.sawors.werewolfgame.game.RoleType;
 
 public class Lover extends FirstNightRole {
     

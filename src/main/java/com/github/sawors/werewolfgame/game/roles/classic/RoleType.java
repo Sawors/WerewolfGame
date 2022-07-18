@@ -1,4 +1,4 @@
-package com.github.sawors.werewolfgame.game;
+package com.github.sawors.werewolfgame.game.roles.classic;
 
 public enum RoleType {
     VILLAGER, WOLF, HUNTER, WITCH, SEER, LITTLE_GIRL, CUPID, LOVER, MAYOR, SPECTATOR, NOT_SET
