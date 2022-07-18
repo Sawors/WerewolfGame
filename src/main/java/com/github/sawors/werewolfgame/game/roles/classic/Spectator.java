@@ -5,8 +5,8 @@ import com.github.sawors.werewolfgame.game.RoleType;
 
 public class Spectator extends PlayerRole {
     @Override
-    public RoleType getRoleType() {
-        return RoleType.SPECTATOR;
+    public String toString() {
+        return RoleType.SPECTATOR.toString();
     }
     
     @Override

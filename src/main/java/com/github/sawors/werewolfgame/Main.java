@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class Main {
-    private static HashMap<String, GameManager> activegames;
+    private static HashMap<String, GameManager> activegames = new HashMap<>();
     private static boolean standalone;
     private static boolean discordenabled = false;
     private static boolean minecraftenabled = false;
@@ -20,7 +20,9 @@ public class Main {
     private static File datalocation;
     private static File dbfile;
     private static boolean usecaching = true;
-    private static HashMap<UserId, LinkedUser> cachedusers;
+    private static HashMap<UserId, LinkedUser> cachedusers = new HashMap<>();
+    // I use this linking map to avoid creating a new JDA Event Listener each time a new GameManager is created
+    private static HashMap<Long, String> channellink = new HashMap<>();
 
 
     public static void init(boolean standalone, String token, File datastorage){
@@ -55,20 +57,42 @@ public class Main {
         }
     }
     
+    public static void linkChannel(Long channelid, String gamemanagerid){
+        channellink.put(channelid, gamemanagerid);
+        Main.logAdmin(channellink);
+    }
+    
+    public static boolean isLinked(Long channelid){
+        Main.logAdmin(channellink);
+        return channellink.containsKey(channelid);
+    }
+    
+    public static void unlinkChannel(Long channelid){
+        channellink.remove(channelid);
+        Main.logAdmin(channellink);
+    }
+    
+    public static GameManager getManager(Long channelid){
+        return GameManager.fromId(getManagerId(channelid));
+    }
+    
+    public static String getManagerId(Long channelid){
+        return channellink.get(channelid);
+    }
+    
     protected static File getDbFile(){
         return dbfile;
     }
 
     public static void registerNewGame(GameManager manager){
-        String id = generateRandomGameId();
-        activegames.put(generateRandomGameId(), manager);
+        activegames.put(manager.getGameID(), manager);
     }
 
     public static String generateRandomGameId(){
         return RandomStringUtils.randomNumeric(8);
     }
 
-    protected JDA getJDA(){
+    protected static JDA getJDA(){
         return jda;
     }
 

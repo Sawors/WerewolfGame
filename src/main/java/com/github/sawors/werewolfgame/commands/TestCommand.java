@@ -20,16 +20,7 @@ public class TestCommand implements GameCommand{
     
     public void execute(Message msg) {
         MessageChannel chan = msg.getChannel();
-        StringBuilder output = new StringBuilder();
-        output.append("**Player IDs**");
-        for(int i = 0; i<=8; i++){
-            output.append("\n   ").append(new UserId());
-        }
-        output.append("\n**Game IDs**");
-        for(int i = 0; i<=8; i++){
-            output.append("\n   ").append(Main.generateRandomGameId());
-        }
-        chan.sendMessage(output.toString()).queue();
+        chan.sendMessage("Click **HERE** to join the game").queue();
     }
     
     @Override

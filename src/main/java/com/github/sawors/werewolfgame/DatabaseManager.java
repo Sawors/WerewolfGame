@@ -225,7 +225,7 @@ public class DatabaseManager {
     private static String getUserData(UserId user, UserDataType data){
         try(Connection co = connect()){
             ResultSet dataget = co.prepareStatement("SELECT "+data+" FROM Users WHERE "+UserDataType.USERID+"='"+user+"'").executeQuery();
-            if(!dataget.isClosed() && dataget.getFetchSize() > 0){
+            if(!dataget.isClosed()){
                 return dataget.getString(data.toString());
             } else {
                 return null;
@@ -236,7 +236,15 @@ public class DatabaseManager {
         }
     }
     
+    public static String getDiscordId(UserId user){
+        return getUserData(user, UserDataType.DISCORDID);
+    }
     
+    public static UUID getMinecraftUUID(UserId user){
+        String id = getUserData(user, UserDataType.MCUUID);
+        
+        return id != null ? UUID.fromString(id) : null;
+    }
     
     //
     //      GUILD OPTIONS METHODS
@@ -339,13 +347,11 @@ public class DatabaseManager {
     }
     
     protected static void setGuildData(GuildChannel channel, GuildDataType datatype){
-        if(datatype != GuildDataType.GUILD_ID || datatype != GuildDataType.GUILD_OPTIONS){
+        if(datatype != GuildDataType.GUILD_ID && datatype != GuildDataType.GUILD_OPTIONS){
             try(Connection co = connect()){
                 ResultSet checkreg = co.prepareStatement("SELECT * FROM Guilds WHERE "+GuildDataType.GUILD_ID+"="+channel.getGuild().getId()).executeQuery();
                 String query;
                 if(checkreg.isClosed()){
-                    query = "UPDATE Guilds SET "+datatype+"="+channel.getId()+" WHERE "+GuildDataType.GUILD_ID+" = "+channel.getGuild().getId();
-                } else {
                     long adminid = 0L;
                     long invitesid = 0L;
                     long waitingid = 0L;
@@ -362,10 +368,59 @@ public class DatabaseManager {
                             +waitingid+", "
                             +"'[]'"
                             +")";
+                } else {
+                    query = "UPDATE Guilds SET "+datatype+"="+channel.getId()+" WHERE "+GuildDataType.GUILD_ID+" = "+channel.getGuild().getId();
                 }
+                co.prepareStatement(query).execute();
             } catch (SQLException e){
                 e.printStackTrace();
             }
         }
+    }
+    
+    public static void setGuildAdminChannel(TextChannel channel){
+        setGuildData(channel, GuildDataType.ADMIN_TEXT_CHANNEL_ID);
+    }
+    
+    public static void setGuildInvitesChannel(TextChannel channel){
+        setGuildData(channel, GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID);
+    }
+    
+    public static void setGuildWaitingChannel(VoiceChannel channel){
+        setGuildData(channel, GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID);
+    }
+    
+    public static TextChannel getGuildAdminChannel(Guild guild){
+        String chanid = getGuildData(guild.getId(), GuildDataType.ADMIN_TEXT_CHANNEL_ID);
+        if(chanid != null && !chanid.equals("0")){
+            return guild.getChannelById(TextChannel.class, chanid);
+        }
+        return null;
+    }
+    public static TextChannel getGuildInvitesChannel(Guild guild){
+        String chanid = getGuildData(guild.getId(), GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID);
+        if(chanid != null && !chanid.equals("0")){
+            return guild.getChannelById(TextChannel.class, chanid);
+        }
+        return null;
+    }
+    public static VoiceChannel getGuildWaitingChannel(Guild guild){
+        String chanid = getGuildData(guild.getId(), GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID);
+        if(chanid != null && !chanid.equals("0")){
+            return guild.getChannelById(VoiceChannel.class, chanid);
+        }
+        return null;
+    }
+    
+    private static String getGuildData(String guildid, GuildDataType data){
+        try(Connection co = connect()) {
+            ResultSet rset = co.prepareStatement("SELECT "+data+" FROM Guilds WHERE "+GuildDataType.GUILD_ID+"="+guildid).executeQuery();
+            if(!rset.isClosed()){
+                return rset.getString(data.toString());
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 }

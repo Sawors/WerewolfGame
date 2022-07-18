@@ -5,8 +5,8 @@ import com.github.sawors.werewolfgame.game.RoleType;
 
 public class Villager extends PlayerRole {
     @Override
-    public RoleType getRoleType() {
-        return RoleType.VILLAGER;
+    public String toString() {
+        return RoleType.VILLAGER.toString();
     }
 
     @Override

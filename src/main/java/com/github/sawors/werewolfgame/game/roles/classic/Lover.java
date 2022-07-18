@@ -4,10 +4,10 @@ import com.github.sawors.werewolfgame.game.FirstNightRole;
 import com.github.sawors.werewolfgame.game.RoleType;
 
 public class Lover extends FirstNightRole {
-
+    
     @Override
-    public RoleType getRoleType() {
-        return RoleType.LOVER;
+    public String toString() {
+        return RoleType.LOVER.toString();
     }
 
     @Override

@@ -5,8 +5,8 @@ import com.github.sawors.werewolfgame.game.RoleType;
 
 public class Cupid extends FirstNightRole {
     @Override
-    public RoleType getRoleType() {
-        return RoleType.CUPID;
+    public String toString() {
+        return RoleType.CUPID.toString();
     }
 
     @Override

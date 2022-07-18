@@ -5,8 +5,8 @@ import com.github.sawors.werewolfgame.game.RoleType;
 
 public class Witch extends PlayerRole {
     @Override
-    public RoleType getRoleType() {
-        return RoleType.WITCH;
+    public String toString() {
+        return RoleType.WITCH.toString();
     }
 
     @Override

@@ -5,8 +5,8 @@ import com.github.sawors.werewolfgame.game.RoleType;
 
 public class Seer extends PlayerRole {
     @Override
-    public RoleType getRoleType() {
-        return RoleType.SEER;
+    public String toString() {
+        return RoleType.SEER.toString();
     }
 
     @Override

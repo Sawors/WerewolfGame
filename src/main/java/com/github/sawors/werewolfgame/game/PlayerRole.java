@@ -1,9 +1,8 @@
 package com.github.sawors.werewolfgame.game;
 
 public abstract class PlayerRole {
-        protected abstract RoleType getRoleType();
-
-
+        @Override
+        public abstract String toString();
         /**
          * Everything before wolves is <0, everything after >0.
          *

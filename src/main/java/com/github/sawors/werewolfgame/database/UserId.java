@@ -1,9 +1,11 @@
 package com.github.sawors.werewolfgame.database;
 
+import com.github.sawors.werewolfgame.DatabaseManager;
 import com.github.sawors.werewolfgame.Main;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.Locale;
+import java.util.UUID;
 
 public class UserId {
     String discriminant;
@@ -60,5 +62,13 @@ public class UserId {
         } else {
             throw new IllegalArgumentException(id+" is not a correctly formatted PlayerId (only "+iduniquelength+" characters allowed, got "+id.length()+")");
         }
+    }
+    
+    public static UserId fromDiscordId(String discordid){
+        return DatabaseManager.getUserId(discordid);
+    }
+    
+    public static UserId fromMinecraftUUID(UUID mcuuid){
+        return DatabaseManager.getUserId(mcuuid);
     }
 }
