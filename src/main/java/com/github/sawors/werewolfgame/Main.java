@@ -85,7 +85,7 @@ public class Main {
     }
 
     public static void registerNewGame(GameManager manager){
-        activegames.put(manager.getGameID(), manager);
+        activegames.put(manager.getId(), manager);
     }
 
     public static String generateRandomGameId(){

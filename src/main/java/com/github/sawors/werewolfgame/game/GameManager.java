@@ -9,12 +9,12 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.apache.commons.lang3.RandomStringUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 public class GameManager {
 
@@ -23,36 +23,35 @@ public class GameManager {
     private HashMap<UserId, WerewolfPlayer> playerlist = new HashMap<>();
     private HashMap<String, UserId> discordlink = new HashMap<>();
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
-    
     private HashMap<GuildChannel, PlayerRole> rolechannels = new HashMap<>();
     private GuildChannel admin;
-    
     private final String id;
     private final Guild guild;
     //private Server mcserver;
     private ArrayList<Message> invites = new ArrayList<>();
     private Category category;
+    private JoinType jointype = JoinType.PUBLIC;
+    private String joinkey = "";
 
     String tutorial =
             "**Command List :**" +
             "\n"+
-            "\n - `clean`  :  removes all channels created for this game (including this one) and deletes the category";
+            "\n - `clean` : removes all channels created for this game (including this one) and deletes the category";
     
 
-    public GameManager(Guild guild, GameType type){
-        
+    public GameManager(Guild guild, GameType type, JoinType accessibility){
         this.id = Main.generateRandomGameId();
         this.gametype = type;
         this.guild = guild;
+        this.jointype = accessibility;
+        this.joinkey = RandomStringUtils.randomNumeric(5);
         
         guild.createCategory("WEREWOLF : "+id).queue(this::createChannels);
         
-        
-        
-        
-        
         Main.registerNewGame(this);
     }
+    
+    
     
     private void createChannels(Category category){
         if(this.category == null){
@@ -103,7 +102,11 @@ public class GameManager {
        }
     }
 
-    public void addPlayer(UserId playerid){
+    public void addPlayer(UserId playerid, String privatekey){
+        if(jointype == JoinType.PRIVATE && !Objects.equals(privatekey,joinkey)){
+            Main.logAdmin(playerid+" could not join game "+id+" reason : (private game) wrong key -> "+privatekey+"!="+joinkey);
+            return;
+        }
         // instead of using a set
         if(playerid != null){
             if(!playerlist.containsKey(playerid)){
@@ -122,9 +125,17 @@ public class GameManager {
         Main.logAdmin(discordlink);
         Main.logAdmin(minecraftlink);
     }
+    
+    public void addplayer(UserId playerid){
+        addPlayer(playerid, null);
+    }
 
-    public String getGameID(){
+    public String getId(){
         return id;
+    }
+    
+    public String getJoinKey(){
+        return joinkey;
     }
 
     public GameType getGameType() {
@@ -141,26 +152,24 @@ public class GameManager {
     public static GameManager fromId(String id){
         return Main.getGamesList().getOrDefault(id, null);
     }
-
-    public static GameManager restoreFromFile(File backup) {
-        //TODO : Restoration process (priority : not important)
-        return new GameManager(null, GameType.MIXED);
-    }
     
     // TODO : create a method to send these invites to anybody
-    public void sendInvites(){
+    public void sendInvite(){
         TextChannel chan = DatabaseManager.getGuildInvitesChannel(guild);
         if(chan != null){
-            sendInvites(chan);
+            sendInvite(chan);
         } else {
             throw new NullPointerException("no channel found for guild "+guild+":"+guild.getId());
         }
     }
     
-    protected void sendInvites(TextChannel channel){
-        MessageAction msg =channel.sendMessage("Click **HERE** to join the game").setActionRow(Button.primary("join:"+id, "Join Game"));
-        Consumer<Message> loginvite = this::logInvite;
-        msg.queue(loginvite);
+    protected void sendInvite(TextChannel channel){
+        Button joinbutton = Button.primary("join:"+id, "Join Game");
+        if(jointype == JoinType.PRIVATE){
+            joinbutton = Button.secondary("joinprivate:"+id, "Join Private Game");
+        }
+        MessageAction msg =channel.sendMessage("Click **HERE** to join the game").setActionRow(joinbutton);
+        msg.queue(this::logInvite);
     }
     
     private void logInvite(Message msg){

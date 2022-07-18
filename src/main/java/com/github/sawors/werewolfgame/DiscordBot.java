@@ -1,7 +1,7 @@
 package com.github.sawors.werewolfgame;
 
-import com.github.sawors.werewolfgame.discord.DiscordButtonListener;
 import com.github.sawors.werewolfgame.discord.DiscordCommandListener;
+import com.github.sawors.werewolfgame.discord.DiscordInteractionsListener;
 import com.github.sawors.werewolfgame.discord.DiscordListeners;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -14,7 +14,7 @@ public class DiscordBot {
         builder
             .addEventListeners(new DiscordListeners())
             .addEventListeners(new DiscordCommandListener())
-            .addEventListeners(new DiscordButtonListener());
+            .addEventListeners(new DiscordInteractionsListener());
         
         try{
             Main.logAdmin("Successfully started Discord Bot !");

@@ -6,6 +6,7 @@ import com.github.sawors.werewolfgame.commands.RegisterGuildCommand;
 import com.github.sawors.werewolfgame.commands.TestCommand;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.GameType;
+import com.github.sawors.werewolfgame.game.JoinType;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -95,14 +96,19 @@ public class DiscordCommandListener extends ListenerAdapter {
                         Main.logAdmin(args[2]);
                         GameManager gm = GameManager.fromId(args[2]);
                         if(gm != null){
-                            gm.sendInvites();
+                            gm.sendInvite();
                         }
                     }
                     break;
                 case"create":
-                    GameManager gm = new GameManager(event.getGuild(), GameType.DISCORD);
-                    gm.sendInvites();
-                    event.getChannel().sendMessage("Game created ! ID : "+gm.getGameID()).queue();
+                    JoinType jointype = JoinType.PUBLIC;
+                    if(args.length >= 3 && args[2].equalsIgnoreCase("private")){
+                        jointype = JoinType.PRIVATE;
+                    }
+                    GameManager gm = new GameManager(event.getGuild(), GameType.DISCORD, jointype);
+                    gm.sendInvite();
+                    event.getChannel().sendMessage("Game created ! ID : "+gm.getId()).queue();
+                    event.getAuthor().openPrivateChannel().queue(chan -> chan.sendMessage("Hello "+event.getAuthor().getAsMention()+" !"+"\nSince you created a new Werewolf game in **Private** mode players must this code to join it : **`"+gm.getJoinKey()+"`**").queue());
                 case"clean":
                 case"clear":
                     if(args.length >= 3){
