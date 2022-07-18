@@ -1,4 +1,4 @@
-package com.github.sawors.werewolfgame.commands;
+package com.github.sawors.werewolfgame.discord;
 
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;

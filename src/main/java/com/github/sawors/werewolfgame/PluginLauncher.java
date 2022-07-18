@@ -1,6 +1,6 @@
 package com.github.sawors.werewolfgame;
 
-import com.github.sawors.werewolfgame.commands.MinecraftCommandListener;
+import com.github.sawors.werewolfgame.minecraft.MinecraftCommandListener;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

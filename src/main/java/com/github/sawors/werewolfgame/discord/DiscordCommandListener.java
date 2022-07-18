@@ -1,8 +1,9 @@
-package com.github.sawors.werewolfgame.commands;
+package com.github.sawors.werewolfgame.discord;
 
 import com.github.sawors.werewolfgame.DatabaseManager;
 import com.github.sawors.werewolfgame.Main;
-import com.github.sawors.werewolfgame.discord.DiscordManager;
+import com.github.sawors.werewolfgame.commands.RegisterGuildCommand;
+import com.github.sawors.werewolfgame.commands.TestCommand;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.GameType;
 import net.dv8tion.jda.api.entities.Category;
@@ -22,7 +23,7 @@ public class DiscordCommandListener extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         String content = event.getMessage().getContentDisplay();
         String[] args = content.split(" ");
-        if(args.length >= 2 && args[0].equals("!ww")){
+        if(args.length >= 2 && args[0].equals("!ww") && !Main.isLinked(event.getChannel().getIdLong())){
             
             switch(args[1]){
                 case"test":

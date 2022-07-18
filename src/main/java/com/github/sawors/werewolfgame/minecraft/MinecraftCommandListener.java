@@ -1,5 +1,6 @@
-package com.github.sawors.werewolfgame.commands;
+package com.github.sawors.werewolfgame.minecraft;
 
+import com.github.sawors.werewolfgame.commands.TestCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

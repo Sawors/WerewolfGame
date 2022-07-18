@@ -5,6 +5,7 @@ import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
@@ -32,6 +33,11 @@ public class GameManager {
     private ArrayList<Message> invites = new ArrayList<>();
     private Category category;
 
+    String tutorial =
+            "**Command List :**" +
+            "\n"+
+            "\n - `clean`  :  removes all channels created for this game (including this one) and deletes the category";
+    
 
     public GameManager(Guild guild, GameType type){
         
@@ -53,7 +59,8 @@ public class GameManager {
             this.category = category;
         }
         if(this.category != null){
-            this.category.createTextChannel("Admin").queue(admin -> cacheChannel(admin, ChannelType.ADMIN));
+            // create admin
+            this.category.createTextChannel("admin").queue(admin -> cacheChannel(admin, ChannelType.ADMIN));
             
         }
     }
@@ -67,6 +74,11 @@ public class GameManager {
             case ADMIN:
                 admin = channel;
                 Main.linkChannel(channel.getIdLong(), id);
+                // send command tutorial in @admin
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setColor(0x89CFF0);
+                embed.setDescription(tutorial);
+                ((TextChannel) admin).sendMessageEmbeds(embed.build()).queue();
                 break;
             case ANNOUNCEMENTS:
                 break;
