@@ -27,6 +27,9 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 String gameid = buttonid.replace("join:", "");
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
+                    Main.logAdmin(gm.getPlayerList());
+                    Main.logAdmin(UserId.fromDiscordId(event.getUser().getId()));
+                    Main.logAdmin(gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId())));
                     if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
                         gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
                     }

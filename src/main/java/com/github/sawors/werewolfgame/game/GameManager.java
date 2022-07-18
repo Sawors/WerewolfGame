@@ -26,7 +26,7 @@ public class GameManager {
     private HashMap<String, UserId> discordlink = new HashMap<>();
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
     private HashMap<GuildChannel, PlayerRole> rolechannels = new HashMap<>();
-    private GuildChannel admin;
+    //private GuildChannel admin;
     private final String id;
     private final Guild guild;
     //private Server mcserver;
@@ -35,15 +35,19 @@ public class GameManager {
     private final JoinType jointype;
     private final String joinkey;
     private VoiceChannel mainvoice;
+    private TextChannel maintext;
+    private TextChannel adminchannel;
     private Role gamerole;
+    private Role adminrole;
+    private User owner;
 
-    private String tutorial =
+    private final String tutorial =
             "**Command List :**" +
             "\n"+
             "\n - `clean` : removes all channels created for this game (including this one) and deletes the category"
             ;
     
-    private String invitetemplate =
+    private final String invitetemplate =
                     "Join Game "+"**?ID?**"+
                     "\n" +
                     "\n*created on " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy-HH:mm:ss"))+"*"+
@@ -58,9 +62,10 @@ public class GameManager {
         this.jointype = accessibility;
         this.joinkey = RandomStringUtils.randomNumeric(5);
         
-        createRole(
+        createRoles(
                 a0 -> guild.createCategory("WEREWOLF : "+id)
                         .addRolePermissionOverride(gamerole.getIdLong(), List.of(Permission.VIEW_CHANNEL), List.of(Permission.MANAGE_CHANNEL))
+                        .addRolePermissionOverride(adminrole.getIdLong(),List.of(Permission.VIEW_CHANNEL), List.of())
                         .addRolePermissionOverride(guild.getPublicRole().getIdLong(),List.of(), List.of(Permission.VIEW_CHANNEL))
                         .queue(a1 -> {
                     category = a1;
@@ -72,11 +77,39 @@ public class GameManager {
         Main.registerNewGame(this);
     }
     
-    private void createRole(Consumer<?> chainedaction){
-        guild.createRole().setColor(0xffffff).setName(id).setMentionable(false).queue(a -> {
-            this.gamerole = a;
-            chainedaction.accept(null);
-        });
+    private void createRoles(Consumer<?> chainedaction){
+        guild.createRole().setName("WW:"+id+":ADMIN").setMentionable(false).queue(a -> {
+                    this.adminrole = a;
+                    guild.createRole().setName("WW:" + id).setMentionable(false).queue(b -> {
+                        this.gamerole = b;
+                        if(owner != null){
+                            setAdmin(owner);
+                        }
+                        chainedaction.accept(null);
+                    });
+                }
+        )
+        ;
+    }
+    
+    public void setOwner(User owner){
+        this.owner = owner;
+    }
+    
+    public User getOwner(){
+        return this.owner;
+    }
+    
+    public void setAdmin(User user){
+        if(adminrole != null){
+            guild.addRoleToMember(UserSnowflake.fromId(user.getId()), adminrole).queue();
+        }
+    }
+    
+    public void removeAdmin(User user){
+        if(adminrole != null){
+            guild.removeRoleFromMember(UserSnowflake.fromId(user.getId()), adminrole).queue();
+        }
     }
     
     private void createChannels(Category category){
@@ -84,15 +117,17 @@ public class GameManager {
             this.category = category;
         }
         if(this.category != null){
-            // create admin
-            createTextChannel("admin", ChannelType.ADMIN);
-    
+            // create admin text channel
+            setupTextChannel("admin", ChannelType.ADMIN);
+            // create main text channel
+            setupTextChannel("village-place", ChannelType.ANNOUNCEMENTS);
+            
             // create main voice channel
-            category.createVoiceChannel("Village Place").queue(channel -> this.mainvoice = channel);
+            category.createVoiceChannel("Vocal").queue(channel -> this.mainvoice = channel);
         }
     }
     
-    private void createTextChannel(String name, ChannelType type){
+    private void setupTextChannel(String name, ChannelType type){
         this.category.createTextChannel(name).queue(channel -> cacheChannel(channel, type));
     }
     
@@ -103,17 +138,23 @@ public class GameManager {
             case ROLE:
                 break;
             case ADMIN:
-                admin = channel;
-                Main.linkChannel(channel.getIdLong(), id);
+                adminchannel = (TextChannel) channel;
                 // send command tutorial in @admin
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.setColor(0x89CFF0);
                 embed.setDescription(tutorial);
-                ((TextChannel) admin).sendMessageEmbeds(embed.build()).queue();
+                adminchannel.sendMessageEmbeds(embed.build()).queue(a -> adminchannel.pinMessageById(a.getId()).queue());
+                adminchannel.getPermissionContainer().getManager()
+                        .putRolePermissionOverride(adminrole.getIdLong(), Permission.VIEW_CHANNEL.getRawValue(),Permission.MANAGE_CHANNEL.getRawValue())
+                        .putRolePermissionOverride(gamerole.getIdLong(), Permission.UNKNOWN.getRawValue(),Permission.VIEW_CHANNEL.getRawValue())
+                        .queue();
+                
                 break;
             case ANNOUNCEMENTS:
+                this.maintext = (TextChannel) channel;
                 break;
         }
+        Main.linkChannel(channel.getIdLong(), id);
     }
     
     public Set<UserId> getPlayerList(){
@@ -129,6 +170,7 @@ public class GameManager {
         clearInvites();
         DiscordManager.cleanCategory(category);
         gamerole.delete().queue();
+        adminrole.delete().queue();
     }
     
     private void deleteCategory(){
@@ -187,7 +229,7 @@ public class GameManager {
     }
     
     public GuildChannel getAdminChannel(){
-        return admin;
+        return adminchannel;
     }
     public void setGameType(GameType gametype) {
         this.gametype = gametype;
