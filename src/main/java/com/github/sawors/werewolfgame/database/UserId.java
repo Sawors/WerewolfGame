@@ -1,7 +1,6 @@
 package com.github.sawors.werewolfgame.database;
 
 import com.github.sawors.werewolfgame.DatabaseManager;
-import com.github.sawors.werewolfgame.Main;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.Locale;
@@ -29,7 +28,6 @@ public class UserId {
      * result in a random PlayerID.
      */
     public UserId(String id){
-        Main.logAdmin(id);
         if(id.length() == iduniquelength){
             for(char ch : id.toCharArray()){
                 if(!Character.isLetterOrDigit(ch)){

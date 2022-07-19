@@ -35,14 +35,16 @@ public class GameManager {
     private Category category;
     private JoinType jointype;
     private final String joinkey;
-    private VoiceChannel mainvoice;
-    private TextChannel maintext;
+    private VoiceChannel mainvoicechannel;
+    private TextChannel maintextchannel;
     private TextChannel adminchannel;
     private Role gamerole;
     private Role adminrole;
     private User owner;
     private int paramstringlength = 0;
+    private Map<PlayerRole, Integer> rolepool;
 
+    
     private final String tutorial =
             "**Command List :**" +
             "\n"+
@@ -75,6 +77,13 @@ public class GameManager {
                     }
                 )
         );
+        
+        for(PlayerRole role : Main.getRolePool()){
+            Integer prio = role.priority();
+            if(prio != null){
+                rolepool.put(role, prio);
+            }
+        }
         
         Main.registerNewGame(this);
     }
@@ -170,7 +179,7 @@ public class GameManager {
             setupTextChannel("village-place", ChannelType.ANNOUNCEMENTS);
             
             // create main voice channel
-            category.createVoiceChannel("Vocal").queue(channel -> this.mainvoice = channel);
+            category.createVoiceChannel("Vocal").queue(channel -> this.mainvoicechannel = channel);
         }
     }
     
@@ -198,7 +207,7 @@ public class GameManager {
                 
                 break;
             case ANNOUNCEMENTS:
-                this.maintext = (TextChannel) channel;
+                this.maintextchannel = (TextChannel) channel;
                 break;
         }
         Main.linkChannel(channel.getIdLong(), id);
@@ -241,7 +250,12 @@ public class GameManager {
             if(discord != null && !discordlink.containsKey(discord)){
                 discordlink.put(discord, playerid);
                 try{
-                    guild.addRoleToMember(UserSnowflake.fromId(discord), gamerole).queue();
+                    Main.getJDA().retrieveUserById(discord).queue(user ->{
+                        guild.addRoleToMember(user, gamerole).queue();
+                        Main.logAdmin(discord);
+                        maintextchannel.sendMessage(":arrow_right: **Player** "+user.getAsMention()+" **Joined the Game !**").queue();
+                    });
+                    
                 }catch (IllegalArgumentException e1){
                     Main.logAdmin("User "+discord+" unknown, could not give the role");
                 }catch (InsufficientPermissionException e2){
@@ -254,9 +268,6 @@ public class GameManager {
             }
             
         }
-        Main.logAdmin(playerlist);
-        Main.logAdmin(discordlink);
-        Main.logAdmin(minecraftlink);
     }
     
     public void addplayer(UserId playerid){

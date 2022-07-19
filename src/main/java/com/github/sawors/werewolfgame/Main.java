@@ -3,6 +3,8 @@ package com.github.sawors.werewolfgame;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.extensions.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
+import com.github.sawors.werewolfgame.game.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.classic.*;
 import net.dv8tion.jda.api.JDA;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -14,9 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
     private static HashMap<String, GameManager> activegames = new HashMap<>();
@@ -29,7 +29,11 @@ public class Main {
     private static boolean usecaching = true;
     private static HashMap<UserId, LinkedUser> cachedusers = new HashMap<>();
     // I use this linking map to avoid creating a new JDA Event Listener each time a new GameManager is created
+    // Long : Channel ID
+    // String : GameManager ID
     private static HashMap<Long, String> channellink = new HashMap<>();
+    // Use this to get all loaded roles
+    private static Set<PlayerRole> rolepool = new HashSet<>();
 
 
     public static void init(boolean standalone, String token, File datastorage){
@@ -40,7 +44,7 @@ public class Main {
         datalocation = datastorage;
         dbfile = new File(datalocation+File.separator+"database.db");
         try{
-            Main.logAdmin(dbfile);
+            Main.logAdmin("Database located at "+dbfile);
             dbfile.createNewFile();
         } catch (IOException e){
             e.printStackTrace();
@@ -63,6 +67,17 @@ public class Main {
                     "If launched in standalone mode, provide a Discord API token as the first argument when launching the Jar file (no interaction with Minecraft possible in this mode)");
         }
         
+        //TODO : Extension loading
+        
+        // add classic extension (by hand method)
+        rolepool.add(new Cupid());
+        rolepool.add(new Hunter());
+        rolepool.add(new LittleGirl());
+        rolepool.add(new Seer());
+        rolepool.add(new Villager());
+        rolepool.add(new Witch());
+        rolepool.add(new Wolf());
+        
         /*for(File subfile : Objects.requireNonNull(datalocation.listFiles())){
             if(subfile.getName().contains(".jar")){
                 loadExtension(subfile);
@@ -70,19 +85,20 @@ public class Main {
         }*/
     }
     
+    public static Set<PlayerRole> getRolePool(){
+        return rolepool;
+    }
+    
     public static void linkChannel(Long channelid, String gamemanagerid){
         channellink.put(channelid, gamemanagerid);
-        Main.logAdmin(channellink);
     }
     
     public static boolean isLinked(Long channelid){
-        Main.logAdmin(channellink);
         return channellink.containsKey(channelid);
     }
     
     public static void unlinkChannel(Long channelid){
         channellink.remove(channelid);
-        Main.logAdmin(channellink);
     }
     
     public static GameManager getManager(Long channelid){
@@ -105,7 +121,7 @@ public class Main {
         return RandomStringUtils.randomNumeric(8);
     }
 
-    protected static JDA getJDA(){
+    public static JDA getJDA(){
         return jda;
     }
 

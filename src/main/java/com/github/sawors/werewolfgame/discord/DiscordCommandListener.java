@@ -93,7 +93,6 @@ public class DiscordCommandListener extends ListenerAdapter {
                 case"invitations":
                 case"invs":
                     if(args.length >= 3){
-                        Main.logAdmin(args[2]);
                         GameManager gm = GameManager.fromId(args[2]);
                         if(gm != null){
                             gm.sendInvite();
@@ -115,7 +114,6 @@ public class DiscordCommandListener extends ListenerAdapter {
                 case"clean":
                 case"clear":
                     if(args.length >= 3){
-                        Main.logAdmin(args[2]);
                         GameManager gmclear = GameManager.fromId(args[2]);
                         if(gmclear != null){
                             gmclear.clean();

@@ -27,9 +27,6 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 String gameid = buttonid.replace("join:", "");
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
-                    Main.logAdmin(gm.getPlayerList());
-                    Main.logAdmin(UserId.fromDiscordId(event.getUser().getId()));
-                    Main.logAdmin(gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId())));
                     if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
                         gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
                     }
@@ -79,20 +76,14 @@ public class DiscordInteractionsListener extends ListenerAdapter {
     
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
-        Main.logAdmin("l1");
         if(event.getModalId().contains("codemodal:")){
-            Main.logAdmin("l2");
             String gmid = event.getModalId().replace("codemodal:", "");
             if(gmid.length()>1 && GameManager.fromId(gmid) != null){
-                Main.logAdmin("l3");
                 GameManager gm = GameManager.fromId(gmid);
                 String key = gm.getJoinKey();
                 ModalMapping input = event.getValue("codeinput");
                 
-                Main.logAdmin(input);
-                
                 if(input != null && key.equals(input.getAsString())){
-                    Main.logAdmin("l4");
                     Main.logAdmin("added player to private game "+gm.getId()+" with key "+input.getAsString());
                     gm.addPlayer(UserId.fromDiscordId(event.getUser().getId()), input.getAsString());
                 }
