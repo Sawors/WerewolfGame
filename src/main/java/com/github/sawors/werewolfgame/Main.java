@@ -1,15 +1,22 @@
 package com.github.sawors.werewolfgame;
 
 import com.github.sawors.werewolfgame.database.UserId;
+import com.github.sawors.werewolfgame.extensions.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
 import net.dv8tion.jda.api.JDA;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
     private static HashMap<String, GameManager> activegames = new HashMap<>();
@@ -55,6 +62,12 @@ public class Main {
                     "Minecraft by successfully starting the program as a plugin and/or Discord by providing an API token." +
                     "If launched in standalone mode, provide a Discord API token as the first argument when launching the Jar file (no interaction with Minecraft possible in this mode)");
         }
+        
+        /*for(File subfile : Objects.requireNonNull(datalocation.listFiles())){
+            if(subfile.getName().contains(".jar")){
+                loadExtension(subfile);
+            }
+        }*/
     }
     
     public static void linkChannel(Long channelid, String gamemanagerid){
@@ -125,5 +138,43 @@ public class Main {
     
     protected static LinkedUser getCachedUser(UserId id){
         return cachedusers.get(id);
+    }
+    
+    private static Class<?> loadExtension(File file){
+        URL pathtofile;
+        try{
+           pathtofile = new URL("file://"+file.getCanonicalPath());
+           try(URLClassLoader loader = URLClassLoader.newInstance(new URL[]{pathtofile})){
+               try(InputStream config = loader.getResourceAsStream("resources/extension.yml")){
+                   Main.logAdmin(config);
+                   Main.logAdmin(pathtofile);
+                   Class<?> loaded0 = loader.loadClass("com/github/sawors/Main");
+                   Main.logAdmin(loaded0.getMethods());
+                   if(config != null){
+                       Yaml yaml = new Yaml();
+                       Map<String, String> data = yaml.load(config);
+                       String main = data.get("main");
+                       if(main != null){
+                           Class<?> loaded = loader.loadClass(main);
+                           if(loaded.isInstance(WerewolfExtension.class)){
+                               Main.logAdmin("uwu loaded : "+loaded.getName());
+                               loaded.getDeclaredMethod("load").invoke(null);
+                               return loaded;
+                           }
+                       }
+                   }
+                   
+               } catch (NoSuchMethodException e) {
+                   e.printStackTrace();
+               } catch (InvocationTargetException | IllegalAccessException e) {
+                   throw new RuntimeException(e);
+               }
+           } catch (ClassNotFoundException e) {
+               e.printStackTrace();
+           }
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 }
