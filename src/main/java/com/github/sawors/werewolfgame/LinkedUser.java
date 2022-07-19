@@ -18,7 +18,7 @@ public class LinkedUser {
     private HashSet<UserTag> tags;
 
     public LinkedUser(UserId id, String name, UUID mcid, String discordid, @Nullable Set<UserPreference> preferences, @Nullable Set<UserTag> tags){
-        id = new UserId();
+        this.id = id;
         this.minecraftid = mcid;
         this.discordid = discordid;
         this.name = name;
@@ -27,7 +27,7 @@ public class LinkedUser {
     }
     
     public LinkedUser(){
-        id = new UserId();
+        this.id = new UserId();
         this.minecraftid = null;
         this.discordid = "";
         this.name = "";
