@@ -26,13 +26,14 @@ public class GameManager {
     private HashMap<String, UserId> discordlink = new HashMap<>();
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
     private HashMap<GuildChannel, PlayerRole> rolechannels = new HashMap<>();
+    private ArrayList<PlayerRole> rolelist = new ArrayList<>();
     //private GuildChannel admin;
     private final String id;
     private final Guild guild;
     //private Server mcserver;
     private ArrayList<Message> invites = new ArrayList<>();
     private Category category;
-    private final JoinType jointype;
+    private JoinType jointype;
     private final String joinkey;
     private VoiceChannel mainvoice;
     private TextChannel maintext;
@@ -40,6 +41,7 @@ public class GameManager {
     private Role gamerole;
     private Role adminrole;
     private User owner;
+    private int paramstringlength = 0;
 
     private final String tutorial =
             "**Command List :**" +
@@ -90,6 +92,51 @@ public class GameManager {
                 }
         )
         ;
+    }
+    
+    
+    //TODO : Find a better way to implement that
+    // BE CAREFUL WHEN MODIFYING THE ORDER !
+    public String getPreferencesString(){
+        StringBuilder prefs = new StringBuilder();
+        // pos 0
+        prefs.append(jointype == JoinType.PUBLIC ? '0' : '1');
+        paramstringlength++;
+    
+        /*// pos 1
+        prefs.append(jointype == JoinType.PUBLIC ? '0' : '1');
+        paramstringlength++;
+    
+        // pos 2
+        prefs.append(jointype == JoinType.PUBLIC ? '0' : '1');
+        paramstringlength++;
+    
+        // pos 3
+        prefs.append(jointype == JoinType.PUBLIC ? '0' : '1');
+        paramstringlength++;*/
+        
+        
+        
+        return prefs.toString();
+    }
+    
+    // BE CAREFUL WHEN MODIFYING THE ORDER !
+    public void setPreferences(String prefscode){
+        for(int i = 0; i<=paramstringlength-1; i++){
+            char c = prefscode.toCharArray()[i];
+            switch(i){
+                case 0:
+                    if(c == '0'){
+                        jointype = JoinType.PUBLIC;
+                    } else if(c == '1'){
+                        jointype = JoinType.PRIVATE;
+                    }
+                    break;
+                case 1:
+                case 2:
+                case 3:
+            }
+        }
     }
     
     public void setOwner(User owner){
