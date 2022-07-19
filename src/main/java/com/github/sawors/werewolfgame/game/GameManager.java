@@ -42,13 +42,14 @@ public class GameManager {
     private Role adminrole;
     private User owner;
     private int paramstringlength = 0;
-    private Map<PlayerRole, Integer> rolepool;
+    private Map<PlayerRole, Integer> rolepool = new HashMap<>();
+    private List<PlayerRole> roleset;
 
     
     private final String tutorial =
-            "**Command List :**" +
-            "\n"+
-            "\n - `clean` : removes all channels created for this game (including this one) and deletes the category"
+            "**Command List :**"
+            +"\n\n - `clean` : removes all channels created for this game (including this one) and deletes the category"
+            +"\n\n - `start` : force start the game"
             ;
     
     private final String invitetemplate =
@@ -86,6 +87,10 @@ public class GameManager {
         }
         
         Main.registerNewGame(this);
+    }
+    
+    public void startGame(){
+        Main.logAdmin("Let's gooooooooooooooooooo");
     }
     
     private void createRoles(Consumer<?> chainedaction){
@@ -241,10 +246,9 @@ public class GameManager {
             Main.logAdmin(playerid+" could not join game "+id+" reason : (private game) wrong key -> "+privatekey+"!="+joinkey);
             return;
         }
-        // instead of using a set
         if(playerid != null){
             if(!playerlist.containsKey(playerid)){
-                playerlist.put(playerid, new WerewolfPlayer());
+                playerlist.put(playerid, new WerewolfPlayer(playerid, this));
             }
             String discord = DatabaseManager.getDiscordId(playerid);
             if(discord != null && !discordlink.containsKey(discord)){

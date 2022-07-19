@@ -24,7 +24,7 @@ public class DiscordCommandListener extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         String content = event.getMessage().getContentDisplay();
         String[] args = content.split(" ");
-        if(args.length >= 2 && args[0].equals("!ww") && !Main.isLinked(event.getChannel().getIdLong())){
+        if(event.isFromGuild() && args.length >= 2 && args[0].equals("!ww") && !Main.isLinked(event.getChannel().getIdLong())){
             
             switch(args[1]){
                 case"test":
@@ -128,6 +128,23 @@ public class DiscordCommandListener extends ListenerAdapter {
                         }
                     }
                     break;
+            }
+        }
+    
+        if(Main.isLinked(event.getChannel().getIdLong()) && event.isFromGuild() && !event.getAuthor().isSystem() && !event.getAuthor().isBot()){
+            GameManager manager = Main.getManager(event.getChannel().getIdLong());
+            if(manager != null && manager.getAdminChannel().getId().equals(event.getChannel().getId())){
+                String[] commands = event.getMessage().getContentDisplay().split(" ");
+                if(commands.length > 0){
+                    switch(commands[0]){
+                        case"clean":
+                            manager.clean();
+                            break;
+                        case"start":
+                            manager.startGame();
+                            break;
+                    }
+                }
             }
         }
     }

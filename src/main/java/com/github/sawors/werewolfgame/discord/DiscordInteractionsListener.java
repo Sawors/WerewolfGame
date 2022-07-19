@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
@@ -37,7 +38,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     List<Button> disabled = new ArrayList<>();
                     for(ActionRow act : rows){
 
-                        act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel("Game Finished")));
+                        act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel("Game Finished").withStyle(ButtonStyle.SECONDARY)));
                     }
                     event.getMessage().editMessageEmbeds(event.getMessage().getEmbeds()).setActionRow(disabled).queue();
                     event.deferEdit().queue();
