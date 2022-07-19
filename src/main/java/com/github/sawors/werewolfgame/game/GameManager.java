@@ -16,6 +16,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.SynchronousQueue;
 import java.util.function.Consumer;
 
 public class GameManager {
@@ -44,6 +45,8 @@ public class GameManager {
     private int paramstringlength = 0;
     private Map<PlayerRole, Integer> rolepool = new HashMap<>();
     private List<PlayerRole> roleset;
+    private Queue<GamePhase> eventqueue = new SynchronousQueue<>();
+    private int round = 0;
 
     
     private final String tutorial =
@@ -89,10 +92,6 @@ public class GameManager {
         Main.registerNewGame(this);
     }
     
-    public void startGame(){
-        Main.logAdmin("Let's gooooooooooooooooooo");
-    }
-    
     private void createRoles(Consumer<?> chainedaction){
         guild.createRole().setName("WW:"+id+":ADMIN").setMentionable(false).queue(a -> {
                     this.adminrole = a;
@@ -107,7 +106,6 @@ public class GameManager {
         )
         ;
     }
-    
     
     //TODO : Find a better way to implement that
     // BE CAREFUL WHEN MODIFYING THE ORDER !
@@ -336,5 +334,24 @@ public class GameManager {
             msg.delete().queue();
         }
     }
-
+    
+    
+/*
+    |------------------------------------------------|
+    |=================[EVENT QUEUE]==================|
+    |------------------------------------------------|
+*/
+    
+    
+    public void startGame(){
+        Main.logAdmin("Let's gooooooooooooooooooo");
+    }
+    
+    private void buildQueue(){
+    
+    }
+    
+    protected void nextPhase(){
+    
+    }
 }
