@@ -1,0 +1,15 @@
+invites:
+  invite-body: "hello !"
+commands:
+  admin:
+    clean-command-description: "removes all channels created for this game (including this one) and deletes the category"
+  ww:
+    create-description:
+    create-success-message:
+
+
+
+
+
+# DO NOT EDIT THIS
+do-not-edit-version: 0
