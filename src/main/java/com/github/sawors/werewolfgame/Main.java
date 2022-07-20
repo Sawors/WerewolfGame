@@ -81,8 +81,17 @@ public class Main {
         rolepool.add(new Wolf());
 
         // load default locale
-        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream( BundledLocale.DEFAULT+".yml"), BundledLocale.DEFAULT.toString());
-
+        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream( BundledLocale.DEFAULT.getPath()), BundledLocale.DEFAULT.toString());
+        File localespath = new File(datalocation+"/locales/");
+        localespath.mkdirs();
+        File[] toload = localespath.listFiles();
+        if(toload != null){
+            for(File locale : toload){
+                if(locale.getName().toLowerCase(Locale.ENGLISH).endsWith(".yml") || locale.getName().toLowerCase(Locale.ENGLISH).endsWith(".yaml") ){
+                    TranslatableText.load(locale);
+                }
+            }
+        }
 
 
         Main.logAdmin("Translated : "+TranslatableText.get("invites.invite-body", BundledLocale.DEFAULT.toString()));
