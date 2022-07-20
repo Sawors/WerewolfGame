@@ -4,7 +4,10 @@
 # Some entries use placeholders, when translating please DO NOT modify these (you can move them,
 # but in most case do not remove placeholders from the entry).
 # A placeholder looks like this : %data%
-#
+
+
+# PLURAL CANNOT BE USED YET !
+
 # To make plurals you can use the additive plural format (friend -> friends) by appending %-p% at the end of your
 # word, to define this plural form use additive-plural-mark.
 # If your language uses more than just the additive plural form (most languages) you can use up to 8 plural replacements
@@ -22,13 +25,12 @@
 #     singular : query
 #     plural : queries
 
-#additive-plural-mark: "s"
+# PLURAL CANNOT BE USED YET !
 additive-plural-mark: "s"
 plural-replacements:
   y: "ie"
 
 invites:
-  #invite-body: "hello !"
   invite-body: "hello !"
   #
   #   CUSTOM INVITES
@@ -56,14 +58,6 @@ invites:
   #   %id% : the game unique ID, useless for most players
   #   %message% : UNUSED at the moment, might be used in the future to allow users to append custom messages to their invites
   #   %type% : indicate if the game is public or private in a Discord code-block style (`public` for instance)
-  #
-  #invite-body-customizable: |-
-  #    Game %id%
-  #
-  #    this game is %type%,
-  #    to join it click on the **Join Game**
-  #
-  #    *Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*
   invite-body-customizable: |-
     Game %id%
     
@@ -93,21 +87,20 @@ channels:
     main: "village-place"
     admin: "admin"
 
-
+events:
+  player-join-message: ""
 
 commands:
   admin:
     title: "**Command List :**"
-    #clean-description: "removes all channels created for this game (including this one) and deletes the category"
     clean-description: "removes all channels created for this game (including this one) and deletes the category"
-    #start-description: "force start the game"
     start-description: "force start the game"
   ww:
     register:
       success: "Server *%name%:%id%* successfully registered"
     create:
       success: "Game created ! ID : %id%"
-      private-game-code-message:
+      private-game-code-message: "Hello %user% ! \nSince you created a new Werewolf game in **Private** mode players must this code to join it : **`%key%`**"
     set:
       admin-text-success: "**Admin Channel** successfully set to text channel %channel%"
       invites-text-success: "**Invitations Channel** successfully set to text channel %channel%"
@@ -115,9 +108,7 @@ commands:
       waiting-vocal-created-success: "**Waiting Room** successfully set to new voice channel ***%name%***"
       waiting-vocal-permission-error: "Can't create voice channel *%name%*, permission **Manage Channels** not granted"
   error-messages:
-    #private-message-error: "This command does not work in private messages"
     private-message-error: "This command does not work in private messages"
-    #guild-message-error: "This command does not work in Discord servers, please use private messages"
     guild-message-error: "This command does not work in Discord servers, please use private messages"
 
 

@@ -113,6 +113,7 @@ commands:
     create:
       #success: "Game created ! ID : %id%"
       success:
+      #private-game-code-message: "Hello %user% ! \nSince you created a new Werewolf game in **Private** mode players must this code to join it : **`%key%`**"
       private-game-code-message:
     set:
       #admin-text-success: "**Admin Channel** successfully set to text channel %channel%"

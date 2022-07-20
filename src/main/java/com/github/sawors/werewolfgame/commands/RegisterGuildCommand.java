@@ -1,6 +1,8 @@
 package com.github.sawors.werewolfgame.commands;
 
 import com.github.sawors.werewolfgame.DatabaseManager;
+import com.github.sawors.werewolfgame.localization.BundledLocale;
+import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 
 public class RegisterGuildCommand implements GameCommand{
@@ -19,7 +21,7 @@ public class RegisterGuildCommand implements GameCommand{
             DatabaseManager.registerGuildAuto(source.getGuild());
             source.getChannel().sendMessage("Server *"+source.getGuild().getName()+":"+source.getGuild().getId()+"* successfully registered").queue();
         } else {
-            source.getChannel().sendMessage("This command does not work in private messages").queue();
+            source.getChannel().sendMessage(TranslatableText.get("commands.error-messages.private-message-error", BundledLocale.DEFAULT)).queue();
         }
     }
     

@@ -50,6 +50,12 @@ public class TranslatableText {
             return "locale "+locale+" not loaded, it usually indicate an error in locale name";
         }
         String[] hierarchy = textkey.split("\\.");
+        if(hierarchy.length <= 0){
+            return "";
+        }
+        if(hierarchy[0].equals("plural-replacements")){
+            return "";
+        }
         //Main.logAdmin("Hierarchy"+ Arrays.toString(hierarchy));
         String error = "key \""+textkey+"\" in locale "+locale+" (loaded from stream) not found, it probably indicate an inexistent or outdated locale, report this to the locale's Author or on https://github.com/Sawors/WerewolfGame/issues/new";
         String translated;
@@ -93,5 +99,12 @@ public class TranslatableText {
             return error;
         }
         return translated;
+    }
+
+    public static String getPluralForm(String word){
+        return word+"s";
+    }
+    public static String getSingularForm(String word){
+        return word+"s";
     }
 }
