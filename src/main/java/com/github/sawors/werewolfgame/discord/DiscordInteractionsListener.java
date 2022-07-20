@@ -3,6 +3,7 @@ package com.github.sawors.werewolfgame.discord;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.game.GameManager;
+import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -38,7 +39,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     List<Button> disabled = new ArrayList<>();
                     for(ActionRow act : rows){
 
-                        act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel("Game Finished").withStyle(ButtonStyle.SECONDARY)));
+                        act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel(TranslatableText.get("buttons.expired-game")).withStyle(ButtonStyle.SECONDARY)));
                     }
                     event.getMessage().editMessageEmbeds(event.getMessage().getEmbeds()).setActionRow(disabled).queue();
                     event.deferEdit().queue();
@@ -49,12 +50,12 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
                     if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
-                        TextInput joincode = TextInput.create("codeinput","Please input your 5 number code", TextInputStyle.SHORT)
-                                .setPlaceholder("very secret code here")
+                        TextInput joincode = TextInput.create("codeinput",TranslatableText.get("forms.private-game-code.code-field-title"), TextInputStyle.SHORT)
+                                .setPlaceholder(TranslatableText.get("forms.private-game-code.text-placeholder"))
                                 .setRequired(true)
                                 .setRequiredRange(4,6)
                                 .build();
-                        event.replyModal(Modal.create("codemodal:"+gm.getId(),"Private Game Code").addActionRow(joincode).build()).queue();
+                        event.replyModal(Modal.create("codemodal:"+gm.getId(),TranslatableText.get("forms.private-game-code.title")).addActionRow(joincode).build()).queue();
                         Main.logAdmin("joined private game");
                     } else {
                         event.deferEdit().queue();
@@ -65,7 +66,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     List<Button> disabled = new ArrayList<>();
                     for(ActionRow act : rows){
             
-                        act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel("Game Finished")));
+                        act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel(TranslatableText.get("buttons.expired-game"))));
                     }
                     event.getMessage().editMessageEmbeds(event.getMessage().getEmbeds()).setActionRow(disabled).queue();
                     event.deferEdit().queue();

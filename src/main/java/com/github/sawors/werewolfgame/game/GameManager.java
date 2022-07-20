@@ -5,6 +5,8 @@ import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
+import com.github.sawors.werewolfgame.localization.BundledLocale;
+import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -13,8 +15,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.SynchronousQueue;
 import java.util.function.Consumer;
@@ -47,20 +47,16 @@ public class GameManager {
     private List<PlayerRole> roleset;
     private Queue<GamePhase> eventqueue = new SynchronousQueue<>();
     private int round = 0;
+    private String language = BundledLocale.DEFAULT.toString();
 
     
     private final String tutorial =
-            "**Command List :**"
-            +"\n\n - `clean` : removes all channels created for this game (including this one) and deletes the category"
-            +"\n\n - `start` : force start the game"
+            TranslatableText.get("commands.admin.title",language)
+            +"\n\n - `clean` : "+TranslatableText.get("commands.admin.clean-description",language)
+            +"\n\n - `start` : "+TranslatableText.get("commands.admin.start-description",language)
             ;
     
-    private final String invitetemplate =
-                    "Join Game "+"**?ID?**"+
-                    "\n" +
-                    "\n*created on " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy-HH:mm:ss"))+"*"+
-                    ""
-            ;
+    private final String invitetemplate = TranslatableText.get("invites.invite-body-customizable",language);
     
 
     public GameManager(Guild guild, GameType type, JoinType accessibility){
@@ -177,12 +173,12 @@ public class GameManager {
         }
         if(this.category != null){
             // create admin text channel
-            setupTextChannel("admin", ChannelType.ADMIN);
+            setupTextChannel(TranslatableText.get("channels.text.admin",language), ChannelType.ADMIN);
             // create main text channel
-            setupTextChannel("village-place", ChannelType.ANNOUNCEMENTS);
+            setupTextChannel(TranslatableText.get("channels.text.main",language), ChannelType.ANNOUNCEMENTS);
             
             // create main voice channel
-            category.createVoiceChannel("Vocal").queue(channel -> this.mainvoicechannel = channel);
+            category.createVoiceChannel(TranslatableText.get("channels.voice.main",language)).queue(channel -> this.mainvoicechannel = channel);
         }
     }
     
@@ -255,7 +251,7 @@ public class GameManager {
                     Main.getJDA().retrieveUserById(discord).queue(user ->{
                         guild.addRoleToMember(user, gamerole).queue();
                         Main.logAdmin(discord);
-                        maintextchannel.sendMessage(":arrow_right: **Player** "+user.getAsMention()+" **Joined the Game !**").queue();
+                        maintextchannel.sendMessage(TranslatableText.get("events.player-join-message",language).replaceAll("%user%",user.getAsMention())).queue();
                     });
                     
                 }catch (IllegalArgumentException e1){
@@ -310,9 +306,9 @@ public class GameManager {
     }
     
     protected void sendInvite(TextChannel channel){
-        Button joinbutton = Button.primary("join:"+id, "Join Game");
+        Button joinbutton = Button.primary("join:"+id, TranslatableText.get("buttons.join-game", language));
         if(jointype == JoinType.PRIVATE){
-            joinbutton = Button.secondary("joinprivate:"+id, "Join Private Game");
+            joinbutton = Button.secondary("joinprivate:"+id, TranslatableText.get("buttons.join-private-game", language));
         }
         EmbedBuilder builder = new EmbedBuilder();
             builder

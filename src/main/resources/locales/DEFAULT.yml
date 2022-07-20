@@ -31,7 +31,6 @@ plural-replacements:
   y: "ie"
 
 invites:
-  invite-body: "hello !"
   #
   #   CUSTOM INVITES
   #
@@ -71,6 +70,7 @@ invites:
 
 buttons:
   join-game: "Join Game"
+  join-private-game: "Join Private Game"
   expired-game: "Game Finished"
 
 forms:
@@ -88,7 +88,7 @@ channels:
     admin: "admin"
 
 events:
-  player-join-message: ""
+  player-join-message: ":arrow_right: **Player** %user% **Joined the Game !**"
 
 commands:
   admin:

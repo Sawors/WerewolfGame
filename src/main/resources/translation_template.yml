@@ -4,7 +4,10 @@
 # Some entries use placeholders, when translating please DO NOT modify these (you can move them,
 # but in most case do not remove placeholders from the entry).
 # A placeholder looks like this : %data%
-#
+
+
+# PLURAL CANNOT BE USED YET !
+
 # To make plurals you can use the additive plural format (friend -> friends) by appending %-p% at the end of your
 # word, to define this plural form use additive-plural-mark.
 # If your language uses more than just the additive plural form (most languages) you can use up to 8 plural replacements
@@ -22,14 +25,13 @@
 #     singular : query
 #     plural : queries
 
+# PLURAL CANNOT BE USED YET !
 #additive-plural-mark: "s"
 additive-plural-mark:
 plural-replacements:
   #y: "ie"
 
 invites:
-  #invite-body: "hello !"
-  invite-body:
   #
   #   CUSTOM INVITES
   #
@@ -73,6 +75,8 @@ invites:
 buttons:
   #join-game: "Join Game"
   join-game:
+  #join-private-game: "Join Private Game"
+  join-private-game:
   #expired-game: "Game Finished"
   expired-game:
 
@@ -96,7 +100,9 @@ channels:
     #admin: "admin"
     admin:
 
-
+events:
+  #player-join-message: ":arrow_right: **Player** %user% **Joined the Game !**"
+  player-join-message:
 
 commands:
   admin:

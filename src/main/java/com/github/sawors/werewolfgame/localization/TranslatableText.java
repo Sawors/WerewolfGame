@@ -40,6 +40,10 @@ public class TranslatableText {
             e.printStackTrace();
         }
     }
+    
+    public static String get(String textkey){
+        return get(textkey, BundledLocale.DEFAULT);
+    }
 
     public static String get(String textkey, @NotNull BundledLocale locale){
         return get(textkey, locale.toString());
