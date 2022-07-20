@@ -5,26 +5,27 @@
 # but in most case do not remove placeholders from the entry).
 # A placeholder looks like this : %data%
 #
-# To make plurals you can use the additive plural format (friend -> friends) by appending %-s% (by default) at the end of your
+# To make plurals you can use the additive plural format (friend -> friends) by appending %-p% at the end of your
 # word, to define this plural form use additive-plural-mark.
 # If your language uses more than just the additive plural form (most languages) you can use up to 8 plural replacements
 # defined in plural-replaces. This list is dynamically loaded, so you can define as many replacements as you want
 # to define a replacement use this method :
 #   singular: plural
 # Example :
-#   y: ie
+#   y: "ie"
 # to use them simply use the placeholder %y% and replace the "y" with the singular form of your replacement
 # Examples :
-#   friend%-s%
+#   friend%-p%
 #     singular : friend
 #     plural : friends
 #   quer%y%
 #     singular : query
 #     plural : queries
 
-#additive-plural-mark: "-s"
-additive-plural-mark: "-s"
-plural-replaces:
+#additive-plural-mark: "s"
+additive-plural-mark: "s"
+plural-replacements:
+  y: "ie"
 
 invites:
   #invite-body: "hello !"
@@ -74,16 +75,50 @@ invites:
   # in place of invite-body-customizable
   private-invite-override:
 
+buttons:
+  join-game: "Join Game"
+  expired-game: "Game Finished"
+
+forms:
+  private-game-code:
+    title: "Private Game Code"
+    code-field-title: "Please input your 5 number code"
+    text-placeholder: "very secret code here"
+
+channels:
+  voice:
+    main: "Vocal"
+  text:
+  # for text channels Discord restrictions applies, no capital letter, spaces are replaced by "-"
+    main: "village-place"
+    admin: "admin"
+
+
 
 commands:
   admin:
+    title: "**Command List :**"
     #clean-description: "removes all channels created for this game (including this one) and deletes the category"
     clean-description: "removes all channels created for this game (including this one) and deletes the category"
     #start-description: "force start the game"
     start-description: "force start the game"
   ww:
-    create-description:
-    create-success-message:
+    register:
+      success: "Server *%name%:%id%* successfully registered"
+    create:
+      success: "Game created ! ID : %id%"
+      private-game-code-message:
+    set:
+      admin-text-success: "**Admin Channel** successfully set to text channel %channel%"
+      invites-text-success: "**Invitations Channel** successfully set to text channel %channel%"
+      waiting-vocal-existing-success: "**Waiting Room** successfully set to existing voice channel ***%name%***"
+      waiting-vocal-created-success: "**Waiting Room** successfully set to new voice channel ***%name%***"
+      waiting-vocal-permission-error: "Can't create voice channel *%name%*, permission **Manage Channels** not granted"
+  error-messages:
+    #private-message-error: "This command does not work in private messages"
+    private-message-error: "This command does not work in private messages"
+    #guild-message-error: "This command does not work in Discord servers, please use private messages"
+    guild-message-error: "This command does not work in Discord servers, please use private messages"
 
 
 

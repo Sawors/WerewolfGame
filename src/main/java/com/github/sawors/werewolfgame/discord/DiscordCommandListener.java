@@ -44,10 +44,10 @@ public class DiscordCommandListener extends ListenerAdapter {
                             case"admin":
                                 if(event.getMessage().getMentions().getChannels().size() > 0){
                                     DatabaseManager.setGuildAdminChannel((TextChannel) event.getMessage().getMentions().getChannels().get(0));
-                                    event.getChannel().sendMessage("**Admins Channel** successfully set to text channel "+event.getMessage().getMentions().getChannels().get(0).getAsMention()).queue();
+                                    event.getChannel().sendMessage("**Admin Channel** successfully set to text channel "+event.getMessage().getMentions().getChannels().get(0).getAsMention()).queue();
                                 } else {
                                     DatabaseManager.setGuildAdminChannel(event.getTextChannel());
-                                    event.getChannel().sendMessage("**Admins Channel** successfully set to text channel "+event.getTextChannel().getAsMention()).queue();
+                                    event.getChannel().sendMessage("**Admin Channel** successfully set to text channel "+event.getTextChannel().getAsMention()).queue();
                                 }
                                 return;
                             case"invites":
