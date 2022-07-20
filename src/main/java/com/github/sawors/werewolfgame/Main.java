@@ -5,6 +5,8 @@ import com.github.sawors.werewolfgame.extensions.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.classic.*;
+import com.github.sawors.werewolfgame.localization.BundledLocale;
+import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.JDA;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -77,12 +79,13 @@ public class Main {
         rolepool.add(new Villager());
         rolepool.add(new Witch());
         rolepool.add(new Wolf());
-        
-        /*for(File subfile : Objects.requireNonNull(datalocation.listFiles())){
-            if(subfile.getName().contains(".jar")){
-                loadExtension(subfile);
-            }
-        }*/
+
+        // load default locale
+        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream( BundledLocale.DEFAULT+".yml"), BundledLocale.DEFAULT.toString());
+
+
+
+        Main.logAdmin("Translated : "+TranslatableText.get("invites.invite-body", BundledLocale.DEFAULT.toString()));
     }
     
     public static Set<PlayerRole> getRolePool(){
@@ -129,10 +132,22 @@ public class Main {
         String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
         time = "[WerewolfGame : "+time+"] ";
 
+        String message = time+text;
         if(standalone){
-            System.out.println(time+text);
+            System.out.println(message);
         } else {
-            PluginLauncher.logToOp(time+text);
+            PluginLauncher.logToOp(message);
+        }
+    }
+
+    public static void logAdmin(Object title, Object text){
+        String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        time = "[WerewolfGame : "+time+"] ";
+        String message = time+title+" : "+text;
+        if(standalone){
+            System.out.println(message);
+        } else {
+            PluginLauncher.logToOp(message);
         }
     }
 
