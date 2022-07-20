@@ -96,7 +96,7 @@ public class TranslatableText {
                 }
             }
             //Main.logAdmin("Type1 : "+text.getClass().getName());
-        } while (text instanceof Collection);
+        } while (text instanceof Collection || text instanceof Map);
         //Main.logAdmin("Type2 : "+text.getClass().getName());
         translated = String.valueOf(text);
         if(translated == null || translated.equals("")){

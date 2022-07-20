@@ -111,7 +111,7 @@ public class DiscordCommandListener extends ListenerAdapter {
                     GameManager gm = new GameManager(event.getGuild(), GameType.DISCORD, jointype);
                     gm.sendInvite();
                     gm.setOwner(event.getAuthor());
-                    event.getChannel().sendMessage(TranslatableText.get("commands.ww.create.success", BundledLocale.DEFAULT)).queue();
+                    event.getChannel().sendMessage(TranslatableText.get("commands.ww.create.success", BundledLocale.DEFAULT).replaceAll("%id%", gm.getId())).queue();
                     if(jointype == JoinType.PRIVATE){
                         event.getAuthor().openPrivateChannel().queue(chan -> chan.sendMessage(TranslatableText.get("commands.ww.create.private-game-code-message", BundledLocale.DEFAULT).replaceAll("%user%", event.getAuthor().getAsMention()).replaceAll("%key%", gm.getJoinKey())).queue());
                     }

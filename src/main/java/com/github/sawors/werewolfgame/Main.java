@@ -94,7 +94,7 @@ public class Main {
         }
 
 
-        Main.logAdmin("Translated : "+TranslatableText.get("invites.invite-body", BundledLocale.DEFAULT.toString()));
+        Main.logAdmin("Translated : "+TranslatableText.get("invites.invite-body-customizable", BundledLocale.DEFAULT.toString()));
     }
     
     public static Set<PlayerRole> getRolePool(){
