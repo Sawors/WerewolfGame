@@ -1,10 +1,86 @@
+# This file can be used as a translation template, original text (en_DEFAULT)
+# is added on top of each entry for you to know easily what to translate.
+#
+# Some entries use placeholders, when translating please DO NOT modify these (you can move them,
+# but in most case do not remove placeholders from the entry).
+# A placeholder looks like this : %data%
+#
+# To make plurals you can use the additive plural format (friend -> friends) by appending %-s% (by default) at the end of your
+# word, to define this plural form use additive-plural-mark.
+# If your language uses more than just the additive plural form (most languages) you can use up to 8 plural replacements
+# defined in plural-replaces. This list is dynamically loaded, so you can define as many replacements as you want
+# to define a replacement use this method :
+#   singular: plural
+# Example :
+#   y: ie
+# to use them simply use the placeholder %y% and replace the "y" with the singular form of your replacement
+# Examples :
+#   friend%-s%
+#     singular : friend
+#     plural : friends
+#   quer%y%
+#     singular : query
+#     plural : queries
+
+#additive-plural-mark: "-s"
+additive-plural-mark: "-s"
+plural-replaces:
+
 invites:
   #invite-body: "hello !"
   invite-body: "hello !"
+  #
+  #   CUSTOM INVITES
+  #
+  # Discord formatting is allowed (styles can be combined) :
+  #   *text* : italic
+  #   **text** : bold
+  #   ***text*** : bold italic
+  #   __text__ : underline
+  #   ~~text~~ : strikethrough
+  #   > text : indent (quote)
+  #   >>> text : multiline indent (quote)
+  #   ||text|| : spoiler
+  #   `text` : code block (single line)
+  #   ```text``` : code block (multiple lines)
+  #
+  # DO NOT remove the little "|-" at the beginning, it allows you to write your invite with multiple lines.
+  # Allowed PLACEHOLDERS in invite body :
+  #   %HH% : hour of when the invite has been sent with two digits in 24h format (01, 23, 13, 03, 00)
+  #   %mm% : minutes, format like hour
+  #   %ss% : seconds, format like hour
+  #   %YYYY% : year, with 4 digits (2004, 2022, 2132, 1142)
+  #   %MM% : month, with 2 digits (12, 01, 04)
+  #   %dd% : day of month, with 2 digits (31, 01, 28)
+  #   %id% : the game unique ID, useless for most players
+  #   %message% : UNUSED at the moment, might be used in the future to allow users to append custom messages to their invites
+  #   %type% : indicate if the game is public or private in a Discord code-block style (`public` for instance)
+  #
+  #invite-body-customizable: |-
+  #    Game %id%
+  #
+  #    this game is %type%,
+  #    to join it click on the **Join Game**
+  #
+  #    *Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*
+  invite-body-customizable: |-
+    Game %id%
+    
+    this game is %type%,
+    to join it click on the **Join Game**
+    
+    *Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*
+  # leave blank to use the same format as invite-body-customizable, otherwise it will be used for private invites
+  # in place of invite-body-customizable
+  private-invite-override:
+
+
 commands:
   admin:
-    #clean-command-description: "removes all channels created for this game (including this one) and deletes the category"
-    clean-command-description: "removes all channels created for this game (including this one) and deletes the category"
+    #clean-description: "removes all channels created for this game (including this one) and deletes the category"
+    clean-description: "removes all channels created for this game (including this one) and deletes the category"
+    #start-description: "force start the game"
+    start-description: "force start the game"
   ww:
     create-description:
     create-success-message:
