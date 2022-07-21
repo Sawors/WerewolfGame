@@ -1,3 +1,5 @@
 discord-token:
 database-file: default
 instance-language: "en_UK"
+
+regenerate: false

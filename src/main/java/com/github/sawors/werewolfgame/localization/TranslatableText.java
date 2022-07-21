@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame.localization;
 
+import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.YamlMapParser;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
@@ -47,7 +48,7 @@ public class TranslatableText {
     }
     
     public static String get(String textkey){
-        return get(textkey, BundledLocale.DEFAULT);
+        return get(textkey, Main.getLocale());
     }
 
     public static String get(String textkey, @NotNull BundledLocale locale){

@@ -60,12 +60,17 @@ public class Main {
             File createconf = new File(datalocation+File.separator+"config.yml");
             try{
                 createconf.createNewFile();
-                try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
-                    if(config != null){
-                        configmap = new Yaml().load(config);
-                        Main.logAdmin(configmap);
+                try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml"); InputStream config2 = Main.class.getClassLoader().getResourceAsStream("config.yml")){
+                    boolean overwrite = true;
+                    try(InputStream loadold = new FileInputStream(createconf)){
+                        overwrite = Boolean.parseBoolean(YamlMapParser.getString(new Yaml().load(loadold), "regenerate"));
+                    } catch (FileNotFoundException e){
+                        overwrite = true;
+                    }
+                    if(config != null && overwrite){
                         writer.write(config.readAllBytes());
                     }
+                    configmap = new Yaml().load(config2);
                 }
             }catch (IOException e){
                 e.printStackTrace();

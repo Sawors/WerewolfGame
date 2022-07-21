@@ -5,7 +5,6 @@ import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
-import com.github.sawors.werewolfgame.localization.BundledLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -47,7 +46,7 @@ public class GameManager {
     private List<PlayerRole> roleset;
     private Queue<GamePhase> eventqueue = new SynchronousQueue<>();
     private int round = 0;
-    private String language = BundledLocale.DEFAULT.toString();
+    private String language = Main.getLocale();
 
     
     private final String tutorial =
