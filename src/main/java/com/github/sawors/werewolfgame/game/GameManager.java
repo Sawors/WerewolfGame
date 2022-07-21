@@ -329,7 +329,7 @@ public class GameManager {
                         invitetemplate
                         .replaceAll("%id%",getId())
                         .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT))
-                        .replaceAll("%join%",TranslatableText.get(buttontitle, language)))
+                        .replaceAll("%join%",buttontitle))
                 .setColor(0x8510d8);
         MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
         msg.queue(this::logInvite);
