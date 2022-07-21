@@ -59,8 +59,8 @@ invites:
   invite-body-customizable: |-
     Partie %id%
     
-    cette partie est de type %type%,
-    pour la rejoindre cliquez sur le boutton %join%
+    cette partie est de type `%type%`,
+    pour la rejoindre cliquez sur le boutton **%join%**
     
   #*Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*
   # leave blank to use the same format as invite-body-customizable, otherwise it will be used for private invites
@@ -87,7 +87,7 @@ channels:
     admin: "admin"
 
 events:
-  player-join-message: ":arrow_right: %user% **À rejoint la partie !**"
+  player-join-message: ":arrow_right: %user% **A rejoint la partie !**"
 
 commands:
   admin:

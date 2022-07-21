@@ -317,9 +317,10 @@ public class GameManager {
     }
     
     protected void sendInvite(TextChannel channel){
-        Button joinbutton = Button.primary("join:"+id, TranslatableText.get("buttons.join-game", language));
+        String buttontitle = jointype == JoinType.PUBLIC ? TranslatableText.get("buttons.join-game", language) : TranslatableText.get("buttons.join-private-game", language);
+        Button joinbutton = Button.primary("join:"+id, buttontitle);
         if(jointype == JoinType.PRIVATE){
-            joinbutton = Button.secondary("joinprivate:"+id, TranslatableText.get("buttons.join-private-game", language));
+            joinbutton = Button.secondary("joinprivate:"+id, buttontitle);
         }
         EmbedBuilder builder = new EmbedBuilder();
             builder
@@ -328,7 +329,7 @@ public class GameManager {
                         invitetemplate
                         .replaceAll("%id%",getId())
                         .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT))
-                        .replaceAll("%join%",TranslatableText.get("buttons.join-private-game", language)))
+                        .replaceAll("%join%",TranslatableText.get(buttontitle, language)))
                 .setColor(0x8510d8);
         MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
         msg.queue(this::logInvite);

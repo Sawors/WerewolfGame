@@ -60,17 +60,31 @@ public class Main {
             File createconf = new File(datalocation+File.separator+"config.yml");
             try{
                 createconf.createNewFile();
-                try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml"); InputStream config2 = Main.class.getClassLoader().getResourceAsStream("config.yml")){
-                    boolean overwrite = true;
-                    try(InputStream loadold = new FileInputStream(createconf)){
-                        overwrite = Boolean.parseBoolean(YamlMapParser.getString(new Yaml().load(loadold), "regenerate"));
-                    } catch (FileNotFoundException e){
-                        overwrite = true;
+                boolean overwrite = true;
+                try(InputStream loadold = new FileInputStream(createconf)){
+                    Map<String, Object> oldconfig = new Yaml().load(loadold);
+                    Main.logAdmin(oldconfig);
+                    String regen = YamlMapParser.getString(oldconfig, "regenerate");
+                    Main.logAdmin(regen);
+                    if(regen != null && regen.length() >= 2){
+                        overwrite = !regen.equalsIgnoreCase("false");
                     }
-                    if(config != null && overwrite){
-                        writer.write(config.readAllBytes());
+                } catch (FileNotFoundException e){
+                    overwrite = true;
+                }
+                Main.logAdmin(overwrite);
+                if(overwrite){
+                    try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
+                        if(config != null){
+                            Main.logAdmin("regenerating config.yml (replacing the old file if it existed");
+                            writer.write(config.readAllBytes());
+                        }
                     }
-                    configmap = new Yaml().load(config2);
+                } else {
+                    Main.logAdmin("config file found, loading it !");
+                }
+                try(InputStream config = new FileInputStream(createconf)){
+                    configmap = new Yaml().load(config);
                 }
             }catch (IOException e){
                 e.printStackTrace();
@@ -118,6 +132,8 @@ public class Main {
         BundledLocale defloc = BundledLocale.en_UK;
         
         TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(defloc.getPath()), defloc.toString());
+        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.en_UK.getPath()), BundledLocale.en_UK.toString());
+        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.fr_FR.getPath()), BundledLocale.fr_FR.toString());
         File localespath = new File(datalocation+File.separator+"locales"+File.separator);
         localespath.mkdirs();
         File[] toload = localespath.listFiles();
@@ -129,11 +145,14 @@ public class Main {
             }
         }
         String defaultlocale = getConfigData("instance-language");
+        Main.logAdmin(configmap);
+        Main.logAdmin(defaultlocale);
         if(defaultlocale != null && TranslatableText.getLoadedLocales().contains(defaultlocale)){
             instancelanguage = defaultlocale;
         } else {
             instancelanguage = defloc.toString();
         }
+        Main.logAdmin("Default language set to",instancelanguage);
     }
     
     public static String getLocale(){
