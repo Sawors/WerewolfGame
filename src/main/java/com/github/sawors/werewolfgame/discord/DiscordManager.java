@@ -23,7 +23,7 @@ public class DiscordManager {
                 } else {
                     // "a" is unused
                     Main.logAdmin("Deleted channel "+id+":"+chans.get(i).getName());
-                    chans.get(i).delete().queue(a -> category.delete().queue());
+                    chans.get(i).delete().queue();
                 }
             }
         } else {

@@ -342,7 +342,7 @@ public class GameManager {
                         .replaceAll("%join%",buttontitle))
                 .setColor(0x8510d8);
         MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
-        msg.queue(this::logInvite);
+        msg.queue();
     }
     
     private void logInvite(Message msg){
