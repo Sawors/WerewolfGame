@@ -155,7 +155,7 @@ public class Main {
         Main.logAdmin("Default language set to",instancelanguage);
     }
     
-    public static String getLocale(){
+    public static String getLanguage(){
         return instancelanguage;
     }
     
@@ -202,6 +202,10 @@ public class Main {
 
     public static void registerNewGame(GameManager manager){
         activegames.put(manager.getId(), manager);
+    }
+    
+    public static void removeGame(String managerid){
+        activegames.remove(managerid);
     }
 
     public static String generateRandomGameId(){

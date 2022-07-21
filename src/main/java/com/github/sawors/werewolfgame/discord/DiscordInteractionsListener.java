@@ -7,17 +7,11 @@ import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Modal;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DiscordInteractionsListener extends ListenerAdapter {
     @Override
@@ -38,13 +32,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     event.deferEdit().queue();
                 } else {
                     Main.logAdmin("Error : game "+gameid+" does not exist");
-                    List<ActionRow> rows = event.getMessage().getActionRows();
-                    List<Button> disabled = new ArrayList<>();
-                    for(ActionRow act : rows){
-
-                        act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel(TranslatableText.get("buttons.expired-game")).withStyle(ButtonStyle.SECONDARY)));
-                    }
-                    event.getMessage().editMessageEmbeds(event.getMessage().getEmbeds()).setActionRow(disabled).queue();
+                    GameManager.setInviteSpoiled(event.getMessage(), Main.getLanguage());
                     event.deferEdit().queue();
                 }
             } else if(buttonid.contains("joinprivate:")){
@@ -65,13 +53,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     }
                 } else {
                     Main.logAdmin("Error : game "+gameid+" does not exist");
-                    List<ActionRow> rows = event.getMessage().getActionRows();
-                    List<Button> disabled = new ArrayList<>();
-                    for(ActionRow act : rows){
-            
-                        act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel(TranslatableText.get("buttons.expired-game"))));
-                    }
-                    event.getMessage().editMessageEmbeds(event.getMessage().getEmbeds()).setActionRow(disabled).queue();
+                    GameManager.setInviteSpoiled(event.getMessage(), Main.getLanguage());
                     event.deferEdit().queue();
                 }
                 

@@ -21,7 +21,7 @@ public class RegisterGuildCommand implements GameCommand{
             DatabaseManager.registerGuildAuto(source.getGuild());
             source.getChannel().sendMessage("Server *"+source.getGuild().getName()+":"+source.getGuild().getId()+"* successfully registered").queue();
         } else {
-            source.getChannel().sendMessage(TranslatableText.get("commands.error-messages.private-message-error", Main.getLocale())).queue();
+            source.getChannel().sendMessage(TranslatableText.get("commands.error-messages.private-message-error", Main.getLanguage())).queue();
         }
     }
     

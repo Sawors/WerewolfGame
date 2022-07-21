@@ -48,7 +48,7 @@ public class TranslatableText {
     }
     
     public static String get(String textkey){
-        return get(textkey, Main.getLocale());
+        return get(textkey, Main.getLanguage());
     }
 
     public static String get(String textkey, @NotNull BundledLocale locale){

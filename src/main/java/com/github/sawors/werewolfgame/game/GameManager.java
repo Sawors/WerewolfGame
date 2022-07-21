@@ -10,7 +10,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -46,7 +48,7 @@ public class GameManager {
     private List<PlayerRole> roleset;
     private Queue<GamePhase> eventqueue = new SynchronousQueue<>();
     private int round = 0;
-    private String language = Main.getLocale();
+    private String language = Main.getLanguage();
     
     private final String invitetemplate = TranslatableText.get("invites.invite-body-customizable",language);
     
@@ -231,10 +233,14 @@ public class GameManager {
     public void clean(){
         Main.logAdmin("Cleaning game ["+id+"]");
         clearInvites();
+        Main.unlinkChannel(adminchannel.getIdLong());
+        Main.unlinkChannel(maintextchannel.getIdLong());
+        Main.unlinkChannel(mainvoicechannel.getIdLong());
         DiscordManager.cleanCategory(category);
         deleteCategory();
         gamerole.delete().queue();
         adminrole.delete().queue();
+        Main.removeGame(id);
     }
     
     private void deleteCategory(){
@@ -342,7 +348,7 @@ public class GameManager {
                         .replaceAll("%join%",buttontitle))
                 .setColor(0x8510d8);
         MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
-        msg.queue();
+        msg.queue(m -> invites.add(m));
     }
     
     private void logInvite(Message msg){
@@ -354,8 +360,19 @@ public class GameManager {
     
     private void clearInvites(){
         for(Message msg : invites){
-            msg.delete().queue();
+            setInviteSpoiled(msg, language);
         }
+    }
+    
+    public static void setInviteSpoiled(Message invite, String language){
+        List<ActionRow> rows = invite.getActionRows();
+        List<Button> disabled = new ArrayList<>();
+        for(ActionRow act : rows){
+            act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel(TranslatableText.get("buttons.expired-game", language)).withStyle(ButtonStyle.SECONDARY)));
+        }
+        List<MessageEmbed> embeds = invite.getEmbeds();
+        embeds.forEach(em -> new EmbedBuilder(em).setColor(0x40454c).build());
+        invite.editMessageEmbeds(embeds).setActionRow(disabled).queue();
     }
     
     
