@@ -59,8 +59,9 @@ public class Main {
                 createconf.createNewFile();
                 try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
                     if(config != null){
-                        writer.write(config.readAllBytes());
                         configmap = new Yaml().load(config);
+                        Main.logAdmin(configmap);
+                        writer.write(config.readAllBytes());
                     }
                 }
             }catch (IOException e){
@@ -116,7 +117,7 @@ public class Main {
                 }
             }
         }
-        
+        Main.logAdmin(configmap);
         Main.logAdmin(getConfigData("database-file"));
     }
     

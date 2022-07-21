@@ -11,8 +11,8 @@ import java.util.Map;
 
 public class YamlMapParser {
     public static String getData(Map<String, Object> loadedyaml, String key) throws InvalidKeyException, ParseException {
-        if(key == null){
-            throw new InvalidKeyException("Do not use null keys");
+        if(key == null || loadedyaml == null){
+            throw new InvalidKeyException("Do not use null keys or null maps");
         }
         String output;
         String[] hierarchy = key.split("\\.");
