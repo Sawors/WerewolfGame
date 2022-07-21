@@ -47,13 +47,6 @@ public class GameManager {
     private Queue<GamePhase> eventqueue = new SynchronousQueue<>();
     private int round = 0;
     private String language = Main.getLocale();
-
-    
-    private final String tutorial =
-            TranslatableText.get("commands.admin.title",language)
-            +"\n\n - `clean` : "+TranslatableText.get("commands.admin.clean-description",language)
-            +"\n\n - `start` : "+TranslatableText.get("commands.admin.start-description",language)
-            ;
     
     private final String invitetemplate = TranslatableText.get("invites.invite-body-customizable",language);
     
@@ -85,6 +78,14 @@ public class GameManager {
         }
         
         Main.registerNewGame(this);
+    }
+    
+    private String buildTutorial(){
+        return TranslatableText.get("commands.admin.title",language)
+                +"\n\n - `clean` : "+TranslatableText.get("commands.admin.clean-description",language)
+                +"\n\n - `start` : "+TranslatableText.get("commands.admin.start-description",language)
+                +"\n\n - `lang` : "+TranslatableText.get("commands.admin.lang-description",language)
+        ;
     }
     
     private void createRoles(Consumer<?> chainedaction){
@@ -166,6 +167,11 @@ public class GameManager {
         }
     }
     
+    public void setLanguage(String locale){
+        this.language = locale;
+        adminchannel.sendMessage(TranslatableText.get("commands.admin.lang-success", language)).queue(m -> adminchannel.sendMessage(buildTutorial()).queue());
+    }
+    
     private void createChannels(Category category){
         if(this.category == null){
             this.category = category;
@@ -196,7 +202,7 @@ public class GameManager {
                 // send command tutorial in @admin
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.setColor(0x89CFF0);
-                embed.setDescription(tutorial);
+                embed.setDescription(buildTutorial());
                 adminchannel.sendMessageEmbeds(embed.build()).queue(a -> adminchannel.pinMessageById(a.getId()).queue());
                 adminchannel.getPermissionContainer().getManager()
                         .putRolePermissionOverride(adminrole.getIdLong(), Permission.VIEW_CHANNEL.getRawValue(),Permission.MANAGE_CHANNEL.getRawValue())

@@ -7,6 +7,7 @@ import com.github.sawors.werewolfgame.commands.TestCommand;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.GameType;
 import com.github.sawors.werewolfgame.game.JoinType;
+import com.github.sawors.werewolfgame.localization.BundledLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -133,7 +134,9 @@ public class DiscordCommandListener extends ListenerAdapter {
                     break;
             }
         }
-    
+        
+        
+    // game admin commands
         if(Main.isLinked(event.getChannel().getIdLong()) && event.isFromGuild() && !event.getAuthor().isSystem() && !event.getAuthor().isBot()){
             GameManager manager = Main.getManager(event.getChannel().getIdLong());
             if(manager != null && manager.getAdminChannel().getId().equals(event.getChannel().getId())){
@@ -145,6 +148,25 @@ public class DiscordCommandListener extends ListenerAdapter {
                             break;
                         case"start":
                             manager.startGame();
+                            break;
+                        case"lang":
+                            if(commands.length >= 2){
+                                String lang = commands[1];
+                                if(lang.contains("_") && lang.length() == 5){
+                                    if(TranslatableText.getLoadedLocales().contains(lang)){
+                                        manager.setLanguage(lang);
+                                        break;
+                                    } else {
+                                        manager.setLanguage(Main.getLocale());
+                                        break;
+                                    }
+                                } else {
+                                    switch (lang) {
+                                        case "english" -> manager.setLanguage(BundledLocale.en_UK.toString());
+                                        case "french" -> manager.setLanguage(BundledLocale.fr_FR.toString());
+                                    }
+                                }
+                            }
                             break;
                     }
                 }
