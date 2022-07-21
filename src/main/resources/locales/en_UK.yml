@@ -93,7 +93,7 @@ commands:
     title: "**Command List :**"
     clean-description: "removes all channels created for this game (including this one) and deletes the category"
     start-description: "force start the game"
-    lang-description: "change the game language to the first argument (structure : lang <language>). \n - Example : *language english* command sets the language to english. \n - Registered languages : **english**, **french**. \n - **Advanced Users** : you can directly set the language locale format (if loaded in the instance : xx_XX)"
+    lang-description: "change the game language to the first argument (structure : lang <language>). \n Example : *language english* command sets the language to english. \n Registered languages : **english**, **french**. \n **Advanced Users** : you can directly set the language locale format (if loaded in the instance : xx_XX)"
     lang-success: "language successfully set to **English**"
   ww:
     register:

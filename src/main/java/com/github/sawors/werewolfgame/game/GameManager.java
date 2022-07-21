@@ -82,9 +82,9 @@ public class GameManager {
     
     private String buildTutorial(){
         return TranslatableText.get("commands.admin.title",language)
-                +"\n\n - `clean` : "+TranslatableText.get("commands.admin.clean-description",language)
-                +"\n\n - `start` : "+TranslatableText.get("commands.admin.start-description",language)
-                +"\n\n - `lang` : "+TranslatableText.get("commands.admin.lang-description",language)
+                +"\n\n `clean` : "+TranslatableText.get("commands.admin.clean-description",language)
+                +"\n\n `start` : "+TranslatableText.get("commands.admin.start-description",language)
+                +"\n\n `lang` : "+TranslatableText.get("commands.admin.lang-description",language)
         ;
     }
     
@@ -169,7 +169,10 @@ public class GameManager {
     
     public void setLanguage(String locale){
         this.language = locale;
-        adminchannel.sendMessage(TranslatableText.get("commands.admin.lang-success", language)).queue(m -> adminchannel.sendMessage(buildTutorial()).queue());
+        adminchannel.getManager().setName(TranslatableText.get("channels.text.admin", language)).queue();
+        maintextchannel.getManager().setName(TranslatableText.get("channels.text.main", language)).queue();
+        mainvoicechannel.getManager().setName(TranslatableText.get("channels.voice.main", language)).queue();
+        adminchannel.sendMessage(TranslatableText.get("commands.admin.lang-success", language)).queue(m -> adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build()).queue());
     }
     
     private void createChannels(Category category){
