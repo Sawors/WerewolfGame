@@ -32,7 +32,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     event.deferEdit().queue();
                 } else {
                     Main.logAdmin("Error : game "+gameid+" does not exist");
-                    GameManager.setInviteSpoiled(event.getMessage(), Main.getLanguage());
+                    GameManager.setInviteExpired(event.getMessage(), Main.getLanguage());
                     event.deferEdit().queue();
                 }
             } else if(buttonid.contains("joinprivate:")){
@@ -53,7 +53,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     }
                 } else {
                     Main.logAdmin("Error : game "+gameid+" does not exist");
-                    GameManager.setInviteSpoiled(event.getMessage(), Main.getLanguage());
+                    GameManager.setInviteExpired(event.getMessage(), Main.getLanguage());
                     event.deferEdit().queue();
                 }
                 

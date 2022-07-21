@@ -17,17 +17,13 @@ public class DiscordManager {
         if(chans.size() > 0){
             for(int i = 0; i<chans.size(); i++){
                 Main.unlinkChannel(chans.get(i).getIdLong());
-                if(i != chans.size()-1){
-                    Main.logAdmin("Deleted channel "+id+":"+chans.get(i).getName());
-                    chans.get(i).delete().queue();
-                } else {
-                    // "a" is unused
-                    Main.logAdmin("Deleted channel "+id+":"+chans.get(i).getName());
-                    chans.get(i).delete().queue();
+                Main.logAdmin("Deleted channel "+id+":"+chans.get(i).getName());
+                chans.get(i).delete().queue();
+                if(i >= chans.size()-1){
+                    Main.logAdmin("Deleted category "+category.getName());
+                    category.delete().queue();
                 }
             }
-        } else {
-            category.delete().queue();
         }
     }
 }

@@ -237,17 +237,9 @@ public class GameManager {
         Main.unlinkChannel(maintextchannel.getIdLong());
         Main.unlinkChannel(mainvoicechannel.getIdLong());
         DiscordManager.cleanCategory(category);
-        deleteCategory();
         gamerole.delete().queue();
         adminrole.delete().queue();
         Main.removeGame(id);
-    }
-    
-    private void deleteCategory(){
-       if(category != null){
-           Main.logAdmin("Deleted category "+category.getName());
-           this.category.delete().queue();
-       }
     }
 
     public void addPlayer(UserId playerid, String privatekey){
@@ -346,7 +338,7 @@ public class GameManager {
                         .replaceAll("%id%",getId())
                         .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT))
                         .replaceAll("%join%",buttontitle))
-                .setColor(0x8510d8);
+                .setColor(0xb491c8);
         MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
         msg.queue(m -> invites.add(m));
     }
@@ -360,19 +352,22 @@ public class GameManager {
     
     private void clearInvites(){
         for(Message msg : invites){
-            setInviteSpoiled(msg, language);
+            setInviteExpired(msg, language);
         }
     }
     
-    public static void setInviteSpoiled(Message invite, String language){
+    public static void setInviteExpired(Message invite, String language){
+        Main.logAdmin("marking invite "+invite.getId()+" as expired");
         List<ActionRow> rows = invite.getActionRows();
         List<Button> disabled = new ArrayList<>();
         for(ActionRow act : rows){
             act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel(TranslatableText.get("buttons.expired-game", language)).withStyle(ButtonStyle.SECONDARY)));
         }
-        List<MessageEmbed> embeds = invite.getEmbeds();
-        embeds.forEach(em -> new EmbedBuilder(em).setColor(0x40454c).build());
-        invite.editMessageEmbeds(embeds).setActionRow(disabled).queue();
+        List<MessageEmbed> newembeds = new ArrayList<>();
+        invite.getEmbeds().forEach(em -> newembeds.add(new EmbedBuilder(em).setColor(0x40454c).setAuthor(TranslatableText.get("buttons.expired-game")).build()));
+        
+        invite.editMessageEmbeds(invite.getEmbeds()).setActionRow(disabled).queue();
+        invite.editMessageEmbeds(invite.getEmbeds()).setEmbeds(newembeds).queue();
     }
     
     

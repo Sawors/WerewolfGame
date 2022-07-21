@@ -54,7 +54,7 @@ invites:
   #   %dd% : day of month, with 2 digits (31, 01, 28)
   #   %id% : the game unique ID, useless for most players
   #   %message% : UNUSED at the moment, might be used in the future to allow users to append custom messages to their invites
-  #   %type% : indicates if the game is public or private in a Discord code-block style (`public` for instance)
+  #   %type% : indicates if the game is public or private
   #   %join% : the text displayed on the join button
   invite-body-customizable: |-
     Partie %id%
