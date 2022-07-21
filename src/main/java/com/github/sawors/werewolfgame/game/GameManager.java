@@ -253,6 +253,18 @@ public class GameManager {
                         Main.logAdmin(discord);
                         maintextchannel.sendMessage(TranslatableText.get("events.player-join-message",language).replaceAll("%user%",user.getAsMention())).queue();
                     });
+                    //user successfully added to the game
+                    guild.retrieveMember(UserSnowflake.fromId(discord)).queue(m ->{
+                        if(m != null && maintextchannel != null){
+                            try{
+                                guild.moveVoiceMember(m, mainvoicechannel).queue();
+                            } catch (InsufficientPermissionException noperm){
+                                Main.logAdmin("Bot does not have enough permissions to move user "+discord+" in guild "+guild.getId());
+                            } catch (IllegalStateException ignore){
+                                //Main.logAdmin("Bot does not have enough permissions to move user "+discord+" in guild "+guild.getId());
+                            }
+                        }
+                    });
                     
                 }catch (IllegalArgumentException e1){
                     Main.logAdmin("User "+discord+" unknown, could not give the role");
@@ -316,7 +328,7 @@ public class GameManager {
                 .setDescription(
                         invitetemplate
                         .replaceAll("%id%",getId())
-                        .replaceAll("%type%",jointype.toString()))
+                        .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT)))
                 .setColor(0x8510d8);
         MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
         msg.queue(this::logInvite);

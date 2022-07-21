@@ -32,6 +32,7 @@ public class DatabaseManager {
             //  Init "Users" table
             co.createStatement().execute(linkingDatabaseInitQuery());
             co.createStatement().execute(guildOptionsDatabaseInitQuery());
+            /*
             LinkedUser sawors = new LinkedUser(new UserId(),"SaworsUwu", UUID.fromString("f96b1fab-2391-4c41-b6aa-56e6e91950fd"),"315237447065927691",null,null);
             sawors.addPreference(UserPreference.DO_NOT_AUTOMOVE);
             sawors.addPreference(UserPreference.USE_GLOBAL_SYNCHRONISATION);
@@ -39,6 +40,7 @@ public class DatabaseManager {
             sawors.addTag(UserTag.WEREWOLF);
             sawors.addTag(UserTag.ADVANCEMENT_RUSH);
             saveUserData(sawors);
+            */
         } catch (
                 SQLException | ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();

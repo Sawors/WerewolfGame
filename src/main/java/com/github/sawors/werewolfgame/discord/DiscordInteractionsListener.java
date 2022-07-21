@@ -30,6 +30,9 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
                     if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                        
+                        // player validated, adding it to the game
+                        
                         gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
                     }
                     event.deferEdit().queue();
@@ -86,6 +89,9 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 ModalMapping input = event.getValue("codeinput");
                 
                 if(input != null && key.equals(input.getAsString())){
+    
+                    // player validated, adding it to the game
+                    
                     Main.logAdmin("added player to private game "+gm.getId()+" with key "+input.getAsString());
                     gm.addPlayer(UserId.fromDiscordId(event.getUser().getId()), input.getAsString());
                 }

@@ -114,3 +114,4 @@ run/
 /copyplugintoserver.bat
 /deleteoldbuild.bat
 /WerewolfGame/database.db
+/WerewolfGame/config.yml

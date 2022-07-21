@@ -11,9 +11,7 @@ import net.dv8tion.jda.api.JDA;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -36,14 +34,40 @@ public class Main {
     private static HashMap<Long, String> channellink = new HashMap<>();
     // Use this to get all loaded roles
     private static Set<PlayerRole> rolepool = new HashSet<>();
+    private static String instancelanguage;
+    private static Map<String, Object> configmap;
 
 
     public static void init(boolean standalone, String token, File datastorage){
-        Main.standalone = standalone;
-        minecraftenabled = !Main.standalone && PluginLauncher.getPlugin().isEnabled();
-        
+        //[=======================Do Not Put Init Code Here=========================]
         datastorage.mkdirs();
         datalocation = datastorage;
+        Main.standalone = standalone;
+        try{
+            Main.logAdmin("Data stored under "+datalocation.getCanonicalPath());
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        //[=========================================================================]
+        
+        
+        minecraftenabled = !Main.standalone && PluginLauncher.getPlugin().isEnabled();
+        
+        if(standalone){
+            File createconf = new File(datalocation+File.separator+"config.yml");
+            try{
+                createconf.createNewFile();
+                try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
+                    if(config != null){
+                        writer.write(config.readAllBytes());
+                        configmap = new Yaml().load(config);
+                    }
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        
         dbfile = new File(datalocation+File.separator+"database.db");
         try{
             Main.logAdmin("Database located at "+dbfile);
@@ -82,7 +106,7 @@ public class Main {
 
         // load default locale
         TranslatableText.load(Main.class.getClassLoader().getResourceAsStream( BundledLocale.DEFAULT.getPath()), BundledLocale.DEFAULT.toString());
-        File localespath = new File(datalocation+"/locales/");
+        File localespath = new File(datalocation+File.separator+"locales"+File.separator);
         localespath.mkdirs();
         File[] toload = localespath.listFiles();
         if(toload != null){
@@ -92,9 +116,21 @@ public class Main {
                 }
             }
         }
-
-
-        Main.logAdmin("Translated : "+TranslatableText.get("invites.invite-body-customizable", BundledLocale.DEFAULT.toString()));
+        
+        Main.logAdmin(getConfigData("database-file"));
+    }
+    
+    //TODO : handle config without bukkit methods
+    public static Map<String, Object> getConfigMap(){
+        return Map.copyOf(configmap);
+    }
+    public static String getConfigData(String key){
+        return YamlMapParser.getString(configmap,key);
+    }
+    public static void saveConfig() throws IOException {
+        try(OutputStream writer = new FileOutputStream(datalocation+File.separator+"config.yml")){
+            writer.write(new Yaml().dump(configmap).getBytes());
+        }
     }
     
     public static Set<PlayerRole> getRolePool(){

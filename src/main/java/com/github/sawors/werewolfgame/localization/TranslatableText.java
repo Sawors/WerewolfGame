@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame.localization;
 
+import com.github.sawors.werewolfgame.YamlMapParser;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
@@ -8,7 +9,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.security.InvalidKeyException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class TranslatableText {
 
@@ -53,6 +58,15 @@ public class TranslatableText {
         if(!locales.containsKey(locale)){
             return "locale "+locale+" not loaded, it usually indicate an error in locale name";
         }
+        String error = "key \""+textkey+"\" in locale "+locale+" (loaded from stream) not found, it probably indicate an inexistent or outdated locale, report this to the locale's Author or on https://github.com/Sawors/WerewolfGame/issues/new";
+        try{
+            return YamlMapParser.getData(locales.get(locale), textkey);
+        } catch (ParseException e) {
+            return error+" "+e.getMessage();
+        } catch (InvalidKeyException e) {
+            return error;
+        }
+    /*
         String[] hierarchy = textkey.split("\\.");
         if(hierarchy.length <= 0){
             return "";
@@ -61,7 +75,7 @@ public class TranslatableText {
             return "";
         }
         //Main.logAdmin("Hierarchy"+ Arrays.toString(hierarchy));
-        String error = "key \""+textkey+"\" in locale "+locale+" (loaded from stream) not found, it probably indicate an inexistent or outdated locale, report this to the locale's Author or on https://github.com/Sawors/WerewolfGame/issues/new";
+        
         String translated;
         Map<String, Object> data = locales.get(locale);
         if(data.containsKey(textkey) && !(data.get(textkey) instanceof Collection)){
@@ -92,7 +106,7 @@ public class TranslatableText {
                 if(((List<?>) text).contains(key)){
                     text = ((List<?>) text).get(((List<?>) text).indexOf(key));
                 } else {
-                    return error+" (parsing error at level : "+key+")";
+                
                 }
             }
             //Main.logAdmin("Type1 : "+text.getClass().getName());
@@ -102,7 +116,7 @@ public class TranslatableText {
         if(translated == null || translated.equals("")){
             return error;
         }
-        return translated;
+        return translated;*/
     }
 
     public static String getPluralForm(String word){
