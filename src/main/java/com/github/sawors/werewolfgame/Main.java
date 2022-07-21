@@ -63,16 +63,13 @@ public class Main {
                 boolean overwrite = true;
                 try(InputStream loadold = new FileInputStream(createconf)){
                     Map<String, Object> oldconfig = new Yaml().load(loadold);
-                    Main.logAdmin(oldconfig);
                     String regen = YamlMapParser.getString(oldconfig, "regenerate");
-                    Main.logAdmin(regen);
                     if(regen != null && regen.length() >= 2){
                         overwrite = !regen.equalsIgnoreCase("false");
                     }
                 } catch (FileNotFoundException e){
                     overwrite = true;
                 }
-                Main.logAdmin(overwrite);
                 if(overwrite){
                     try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
                         if(config != null){
@@ -145,8 +142,6 @@ public class Main {
             }
         }
         String defaultlocale = getConfigData("instance-language");
-        Main.logAdmin(configmap);
-        Main.logAdmin(defaultlocale);
         if(defaultlocale != null && TranslatableText.getLoadedLocales().contains(defaultlocale)){
             instancelanguage = defaultlocale;
         } else {

@@ -110,7 +110,14 @@ public class DiscordCommandListener extends ListenerAdapter {
                         jointype = JoinType.PRIVATE;
                     }
                     GameManager gm = new GameManager(event.getGuild(), GameType.DISCORD, jointype);
-                    gm.sendInvite();
+                    try{
+                        gm.sendInvite();
+                    }catch (NullPointerException e){
+                        DatabaseManager.registerGuildAuto(event.getGuild());
+                        try {
+                            gm.sendInvite();
+                        }catch (NullPointerException ignored){}
+                    }
                     gm.setOwner(event.getAuthor());
                     event.getChannel().sendMessage(TranslatableText.get("commands.ww.create.success", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))).replaceAll("%id%", gm.getId())).queue();
                     if(jointype == JoinType.PRIVATE){
