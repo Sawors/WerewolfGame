@@ -80,11 +80,11 @@ forms:
 
 channels:
   voice:
-    main: "Vocal"
+    main: ":loud_sound: Vocal"
   text:
     # for text channels Discord restrictions applies : no capital letter, spaces are replaced by "-"
-    main: "place-du-village"
-    admin: "admin"
+    main: ":postal_horn:place-du-village"
+    admin: ":wrench:admin"
 
 events:
   player-join-message: ":arrow_right: %user% **a rejoint la partie !**"
@@ -95,7 +95,7 @@ commands:
     clean-description: "supprime tout les salons créés pour cette partie (même celui-ci) ainsi que la catégorie"
     start-description: "lance la partie de force"
     #lang-description: "change the game language to the first argument (structure : lang <language>). \n Example : *language english* command sets the language to english. \n Registered languages : **english**, **french**. \n **Advanced Users** : you can directly set the language locale format (if loaded in the instance : xx_XX)"
-    lang-description: "change la langue de la partie selon le premier argument (structure : lang <language>). \n Exemple : la commande *language english* change la langue en anglais. \n Langues disponibles : **english**, **french**. \n - **Utilisateurs Avancés** : vous pouvez directement définir la langue selon le format de sa localisation (si chargée dans l'instance : xx_XX)"
+    lang-description: "change la langue de la partie selon le premier argument (structure : lang <language>). \n Exemple : la commande *language english* change la langue en anglais. \n Langues disponibles : **english**, **french**. \n **Utilisateurs Avancés** : vous pouvez directement définir la langue selon le format de sa localisation (si chargée dans l'instance : xx_XX)"
     #lang-success: "language successfully set to **English**"
     lang-success: "langue changé avec succès en **Français**"
 

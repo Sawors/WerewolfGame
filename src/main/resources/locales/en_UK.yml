@@ -79,11 +79,11 @@ forms:
 
 channels:
   voice:
-    main: "Vocal"
+    main: ":loud_sound: Vocal"
   text:
     # for text channels Discord restrictions applies : no capital letter, spaces are replaced by "-"
-    main: "village-place"
-    admin: "admin"
+    main: ":postal_horn:village-place"
+    admin: ":wrench:admin"
 
 events:
   player-join-message: ":arrow_right: **Player** %user% **Joined the Game !**"
