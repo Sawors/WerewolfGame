@@ -328,7 +328,8 @@ public class GameManager {
                 .setDescription(
                         invitetemplate
                         .replaceAll("%id%",getId())
-                        .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT)))
+                        .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT))
+                        .replaceAll("%join%",TranslatableText.get("buttons.join-private-game", language)))
                 .setColor(0x8510d8);
         MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
         msg.queue(this::logInvite);

@@ -50,6 +50,9 @@ public class Main {
         }
         //[=========================================================================]
         
+        if((token == null || token.length() < 8) && getConfigData("discord-token") != null && getConfigData("discord-token").length() > 8){
+            token = getConfigData("discord-token");
+        }
         
         minecraftenabled = !Main.standalone && PluginLauncher.getPlugin().isEnabled();
         
@@ -106,7 +109,10 @@ public class Main {
         rolepool.add(new Wolf());
 
         // load default locale
-        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream( BundledLocale.DEFAULT.getPath()), BundledLocale.DEFAULT.toString());
+        
+        BundledLocale defloc = BundledLocale.en_UK;
+        
+        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(defloc.getPath()), defloc.toString());
         File localespath = new File(datalocation+File.separator+"locales"+File.separator);
         localespath.mkdirs();
         File[] toload = localespath.listFiles();
@@ -117,8 +123,16 @@ public class Main {
                 }
             }
         }
-        Main.logAdmin(configmap);
-        Main.logAdmin(getConfigData("database-file"));
+        String defaultlocale = getConfigData("instance-language");
+        if(defaultlocale != null && TranslatableText.getLoadedLocales().contains(defaultlocale)){
+            instancelanguage = defaultlocale;
+        } else {
+            instancelanguage = defloc.toString();
+        }
+    }
+    
+    public static String getLocale(){
+        return instancelanguage;
     }
     
     //TODO : handle config without bukkit methods

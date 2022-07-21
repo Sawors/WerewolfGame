@@ -31,7 +31,7 @@ public class TranslatableText {
     }
 
     public static Set<String> getLoadedLocales(){
-        return locales.keySet();
+        return Set.copyOf(locales.keySet());
     }
 
     public static void load(@WillClose InputStream localestream, String localename){

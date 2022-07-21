@@ -6,8 +6,7 @@
 # A placeholder looks like this : %data%
 
 
-# PLURAL CANNOT BE USED YET !
-
+# PLURAL CANNOT BE USED YET, PLEASE IGNORE THE FOLLOWING COMMENT BLOCK!
 # To make plurals you can use the additive plural format (friend -> friends) by appending %-p% at the end of your
 # word, to define this plural form use additive-plural-mark.
 # If your language uses more than just the additive plural form (most languages) you can use up to 8 plural replacements
@@ -24,12 +23,10 @@
 #   quer%y%
 #     singular : query
 #     plural : queries
-
 # PLURAL CANNOT BE USED YET !
 #additive-plural-mark: "s"
-additive-plural-mark:
-plural-replacements:
-  #y: "ie"
+#plural-replacements:
+#  y: "ie"
 
 invites:
   #
@@ -57,86 +54,61 @@ invites:
   #   %dd% : day of month, with 2 digits (31, 01, 28)
   #   %id% : the game unique ID, useless for most players
   #   %message% : UNUSED at the moment, might be used in the future to allow users to append custom messages to their invites
-  #   %type% : indicate if the game is public or private in a Discord code-block style (`public` for instance)
-  #
-  #invite-body-customizable: |-
-  #    Game %id%
-  #
-  #    this game is %type%,
-  #    to join it click on the **Join Game**
-  #
-  ##    *Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*
-  invite-body-customizable:
-
+  #   %type% : indicates if the game is public or private in a Discord code-block style (`public` for instance)
+  #   %join% : the text displayed on the join button
+  invite-body-customizable: |-
+    Partie %id%
+    
+    cette partie est de type %type%,
+    pour la rejoindre cliquez sur le boutton %join%
+    
+  #*Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*
   # leave blank to use the same format as invite-body-customizable, otherwise it will be used for private invites
   # in place of invite-body-customizable
   private-invite-override:
 
 buttons:
-  #join-game: "Join Game"
-  join-game:
-  #join-private-game: "Join Private Game"
-  join-private-game:
-  #expired-game: "Game Finished"
-  expired-game:
+  join-game: "Rejoindre"
+  join-private-game: "Rejoindre (privée)"
+  expired-game: "Partie terminée"
 
 forms:
   private-game-code:
-    #title: "Private Game Code"
-    title:
-    #"Please input your 5 number code"
-    code-field-title:
-    #"very secret code here"
-    text-placeholder:
+    title: "Code de partie privée"
+    code-field-title: "entrez le code à 5 chiffres de la partie"
+    text-placeholder: "12345"
 
 channels:
   voice:
-    #main: "Vocal"
-    main:
+    main: "Vocal"
   text:
-  # for text channels Discord restrictions applies, no capital letter, spaces are replaced by "-"
-    #main: "village-place"
-    main:
-    #admin: "admin"
-    admin:
+    # for text channels Discord restrictions applies : no capital letter, spaces are replaced by "-"
+    main: "place-du-village"
+    admin: "admin"
 
 events:
-  #player-join-message: ":arrow_right: **Player** %user% **Joined the Game !**"
-  player-join-message:
+  player-join-message: ":arrow_right: %user% **À rejoint la partie !**"
 
 commands:
   admin:
-    #title: "**Command List :**"
-    title:
-    #clean-description: "removes all channels created for this game (including this one) and deletes the category"
-    clean-description:
-    #start-description: "force start the game"
-    start-description:
+    title: "**Liste des Commandes :**"
+    clean-description: "supprime tout les salons créés pour cette partie (même celui-ci) ainsi que la catégorie"
+    start-description: "lance la partie de force"
   ww:
     register:
-      #success: "Server *%name%:%id%* successfully registered"
-      success:
+      success: "Serveur *%name%:%id%* enregistré avec succès"
     create:
-      #success: "Game created ! ID : %id%"
-      success:
-      #private-game-code-message: "Hello %user% ! \nSince you created a new Werewolf game in **Private** mode players must this code to join it : **`%key%`**"
-      private-game-code-message:
+      success: "Partie créée ! ID : %id%"
+      private-game-code-message: "Coucou %user% ! \nPuisque tu as créé une partie de Loup-Garou en mode **Privé** tes joueurs doivent utiliser ce code pour rejoindre : **`%key%`**"
     set:
-      #admin-text-success: "**Admin Channel** successfully set to text channel %channel%"
-      admin-text-success:
-      #invites-text-success: "**Invitations Channel** successfully set to text channel %channel%"
-      invites-text-success:
-      #waiting-vocal-existing-success: "**Waiting Room** successfully set to existing voice channel ***%name%***"
-      waiting-vocal-existing-success:
-      #waiting-vocal-created-success: "**Waiting Room** successfully set to new voice channel ***%name%***"
-      waiting-vocal-created-success:
-      #waiting-vocal-permission-error: "Can't create voice channel *%name%*, permission **Manage Channels** not granted"
-      waiting-vocal-permission-error:
+      admin-text-success: "Le **Salon Admin** est maintenant %channel% !"
+      invites-text-success: "Le **Salon Invitations** est maintenant %channel% !"
+      waiting-vocal-existing-success: "Le Salon Vocal **Salle d'Attente** a été attribué au salon vocal ***%name%***"
+      waiting-vocal-created-success: "Le Salon Vocal **Salle d'Attente** a été créé avec le nom ***%name%***"
+      waiting-vocal-permission-error: "Erreur dans la création du salon vocal *%name%*, la permission **Manage Channels** n'est pas attribuée au bot (contactez l'administrateur de votre instance)"
   error-messages:
-    #private-message-error: "This command does not work in private messages"
-    private-message-error:
-    #guild-message-error: "This command does not work in Discord servers, please use private messages"
-    guild-message-error:
+    private-message-error: "Cette commande ne fonctionne pas en messages privés"
+    guild-message-error: "Cette commande ne fonctionne pas dans un Serveur, elle n'est utilisable qu'en messages privés"
 
 
 

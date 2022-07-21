@@ -22,7 +22,11 @@ public class YamlMapParser {
         }
         
         if(loadedyaml.containsKey(key) && !(loadedyaml.get(key) instanceof Collection)){
-            return String.valueOf(loadedyaml.get(key));
+            output = String.valueOf(loadedyaml.get(key));
+            if(output.equals("null")){
+                return null;
+            }
+            return output;
         }
     
         int level = 0;
@@ -58,6 +62,9 @@ public class YamlMapParser {
         output = String.valueOf(text);
         if(output == null || output.equals("")){
             throw new InvalidKeyException("Key not found while parsing");
+        }
+        if(output.equals("null")){
+            return null;
         }
         return output;
     }
