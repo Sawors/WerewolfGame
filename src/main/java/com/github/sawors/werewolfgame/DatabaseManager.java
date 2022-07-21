@@ -299,7 +299,7 @@ public class DatabaseManager {
                     +adminid+", "
                     +invitesid+", "
                     +waintingid+", "
-                    +language+", "
+                    +"'"+language+"', "
                     +"'[]'"
                     +")").execute();
         } catch (SQLException e){
@@ -309,11 +309,12 @@ public class DatabaseManager {
                         +GuildDataType.ADMIN_TEXT_CHANNEL_ID+" = "+adminid+", "
                         +GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID+" = "+invitesid+", "
                         +GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID+" = "+waintingid+", "
-                        +GuildDataType.LANGUAGE+" = "+language
+                        +GuildDataType.LANGUAGE+" = '"+language+"'"
                         +" WHERE "+GuildDataType.GUILD_ID+" = "+guild.getId()
                 ).execute();
             } catch (SQLException e2){
                 e.printStackTrace();
+                e2.printStackTrace();
             }
             
         }
@@ -330,18 +331,21 @@ public class DatabaseManager {
             switch(name){
                 case"lg-admins":
                 case"lg-admin":
+                case"lg-adm":
                     if(chan.getType().isMessage()){
                         admins = (TextChannel) chan;
                     }
                     break;
                 case"lg-invites":
                 case"lg-parties":
+                case"lg-invs":
                     if(chan.getType().isMessage()){
                         invites = (TextChannel) chan;
                     }
                     break;
                 case"LG Waiting Room":
                 case"lg waiting room":
+                case"General":
                     if(chan.getType().isAudio()){
                         waiting = (VoiceChannel) chan;
                     }

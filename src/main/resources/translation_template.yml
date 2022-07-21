@@ -136,6 +136,11 @@ commands:
       waiting-vocal-created-success:
       #waiting-vocal-permission-error: "Can't create voice channel *%name%*, permission **Manage Channels** not granted"
       waiting-vocal-permission-error:
+    lang:
+      #success: "Server language is now set to **English**"
+      success:
+      #query: "Server language is set to **English**"
+      query:
   error-messages:
     #private-message-error: "This command does not work in private messages"
     private-message-error:

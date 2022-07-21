@@ -111,6 +111,9 @@ commands:
       waiting-vocal-existing-success: "Le Salon Vocal **Salle d'Attente** a été attribué au salon vocal ***%name%***"
       waiting-vocal-created-success: "Le Salon Vocal **Salle d'Attente** a été créé avec le nom ***%name%***"
       waiting-vocal-permission-error: "Erreur dans la création du salon vocal *%name%*, la permission **Manage Channels** n'est pas attribuée au bot (contactez l'administrateur de votre instance)"
+    lang:
+      success: "Le serveur est maintenant en **Français**"
+      query: "Le serveur est en **Français**"
   error-messages:
     private-message-error: "Cette commande ne fonctionne pas en messages privés"
     guild-message-error: "Cette commande ne fonctionne pas dans un Serveur, elle n'est utilisable qu'en messages privés"

@@ -138,7 +138,10 @@ public class DiscordCommandListener extends ListenerAdapter {
                         String lang = args[2];
                         if(TranslatableText.getLoadedLocales().contains(lang)){
                             DatabaseManager.setGuildLanguage(event.getGuild(), lang);
+                            event.getChannel().sendMessage(TranslatableText.get("commands.ww.lang.success", DatabaseManager.getGuildLanguage(event.getGuild()))).queue();
                         }
+                    } else {
+                        event.getMessage().reply(TranslatableText.get("commands.ww.lang.query", DatabaseManager.getGuildLanguage(event.getGuild()))).queue();
                     }
             }
         }
