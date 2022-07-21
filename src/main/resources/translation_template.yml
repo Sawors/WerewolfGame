@@ -91,13 +91,13 @@ forms:
 
 channels:
   voice:
-    #main: ":loud_sound: Vocal"
+    #main: "\uD83D\uDD0A Vocal"
     main:
   text:
   # for text channels Discord restrictions applies, no capital letter, spaces are replaced by "-"
-    #main: ":postal_horn:village-place"
+    #main: "\uD83D\uDCEFvillage-place"
     main:
-    #admin: ":wrench:admin"
+    #admin: "\uD83D\uDD27admin"
     admin:
 
 events:

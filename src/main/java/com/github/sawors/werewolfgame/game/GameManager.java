@@ -59,7 +59,7 @@ public class GameManager {
         this.joinkey = RandomStringUtils.randomNumeric(5);
         
         createRoles(
-                a0 -> guild.createCategory("[:wolf: WEREWOLF : "+id+"]")
+                a0 -> guild.createCategory("[\uD83D\uDC3A WEREWOLF : "+id+"]")
                         .addRolePermissionOverride(gamerole.getIdLong(), List.of(Permission.VIEW_CHANNEL), List.of(Permission.MANAGE_CHANNEL))
                         .addRolePermissionOverride(adminrole.getIdLong(),List.of(Permission.VIEW_CHANNEL), List.of())
                         .addRolePermissionOverride(guild.getPublicRole().getIdLong(),List.of(), List.of(Permission.VIEW_CHANNEL))
