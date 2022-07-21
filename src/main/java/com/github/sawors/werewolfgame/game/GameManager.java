@@ -229,9 +229,10 @@ public class GameManager {
     }
     
     public void clean(){
-        Main.logAdmin("Cleaning game "+id);
+        Main.logAdmin("Cleaning game ["+id+"]");
         clearInvites();
         DiscordManager.cleanCategory(category);
+        deleteCategory();
         gamerole.delete().queue();
         adminrole.delete().queue();
     }

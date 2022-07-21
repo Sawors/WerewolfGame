@@ -12,8 +12,7 @@ public class DiscordManager {
         if(category == null || !category.getName().contains("WEREWOLF : ")){
             return;
         }
-        String id = category.getName().replace("WEREWOLF : ", "");
-        Main.logAdmin("Cleaning game "+id);
+        String id = category.getName().replace("\uD83D\uDC3A WEREWOLF : ", "");
         List<GuildChannel> chans = category.getChannels();
         if(chans.size() > 0){
             for(int i = 0; i<chans.size(); i++){
