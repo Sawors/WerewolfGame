@@ -393,7 +393,8 @@ public class DatabaseManager {
                             +params
                             +")";
                 } else {
-                    query = "UPDATE Guilds SET "+datatype+"="+data+" WHERE "+GuildDataType.GUILD_ID+" = "+guild.getId();
+                    String textmark = datatype == GuildDataType.LANGUAGE || datatype == GuildDataType.GUILD_OPTIONS ? "'" : "";
+                    query = "UPDATE Guilds SET "+datatype+"="+textmark+data+textmark+" WHERE "+GuildDataType.GUILD_ID+" = "+guild.getId();
                 }
                 co.prepareStatement(query).execute();
             } catch (SQLException e){
@@ -407,7 +408,7 @@ public class DatabaseManager {
     }
     
     public static String getGuildLanguage(Guild guild){
-        String lang = getGuildData(guild.getId(), GuildDataType.ADMIN_TEXT_CHANNEL_ID);
+        String lang = getGuildData(guild.getId(), GuildDataType.LANGUAGE);
         if(lang != null && lang.length() == 5 && lang.contains("_")){
             return lang;
         }

@@ -30,35 +30,24 @@ public class YamlMapParser {
         }
     
         int level = 0;
-        //Main.logAdmin("Hlevel : "+hierarchy[level]);
-    
-        // CUSTOM YAML PARSER MADE FOR THE OCCASION, TODO : Reuse this and make its own method
         Object text = loadedyaml.get(hierarchy[level]);
-        //Main.logAdmin("text : "+text);
         do{
-            //Main.logAdmin("Type0 : "+text.getClass().getName());
             level++;
             String localkey = hierarchy[level];
             if(text instanceof Map){
-                //Main.logAdmin("Map : "+text);
-                //Main.logAdmin("Mapkey : "+key);
                 if(((Map<?, ?>) text).containsKey(localkey)){
                     text = ((Map<?, ?>) text).get(localkey);
-                    //Main.logAdmin("Newtext : "+text);
                 } else {
                     throw new ParseException("Parsing error at level : "+key,level);
                 }
             } else if (text instanceof List){
-                //Main.logAdmin("List : "+text);
                 if(((List<?>) text).contains(localkey)){
                     text = ((List<?>) text).get(((List<?>) text).indexOf(localkey));
                 } else {
                     throw new ParseException("Parsing error at level : "+key,level);
                 }
             }
-            //Main.logAdmin("Type1 : "+text.getClass().getName());
         } while (text instanceof Collection || text instanceof Map);
-        //Main.logAdmin("Type2 : "+text.getClass().getName());
         output = String.valueOf(text);
         if(output == null || output.equals("")){
             throw new InvalidKeyException("Key not found while parsing");

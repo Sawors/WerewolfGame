@@ -2,11 +2,7 @@ package com.github.sawors.werewolfgame.commands;
 
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-
-import java.time.LocalDateTime;
 
 public class TestCommand implements GameCommand{
     @Override
@@ -22,7 +18,8 @@ public class TestCommand implements GameCommand{
     }
     
     public void execute(Message msg) {
-        MessageChannel chan = msg.getChannel();
+        Main.getJDA().retrieveUserById("448497190130810901").queue(u -> u.openPrivateChannel().queue(c -> c.sendMessage("futur banger incoming, ça devrait être trop cool d'orga des parties de LG bientôt ! :D (*je suis pas du tout Sawors, rien à voir* :eyes:) (oui et je peux pas recevoir de MP aussi, en tout cas en tant que bot)").queue()));
+        /*MessageChannel chan = msg.getChannel();
         EmbedBuilder embed = new EmbedBuilder()
                 .setAuthor("Game invitation")
                 .setTitle(
@@ -42,7 +39,7 @@ public class TestCommand implements GameCommand{
         .setTimestamp(LocalDateTime.now())
         ;
         
-        chan.sendMessageEmbeds(embed.build()).queue();
+        chan.sendMessageEmbeds(embed.build()).queue();*/
     }
     
     @Override

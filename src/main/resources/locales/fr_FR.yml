@@ -57,8 +57,6 @@ invites:
   #   %type% : indicates if the game is public or private
   #   %join% : the text displayed on the join button
   invite-body-customizable: |-
-    Partie %id%
-    
     cette partie est de type `%type%`,
     pour la rejoindre cliquez sur le boutton **%join%**
     

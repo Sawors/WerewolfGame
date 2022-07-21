@@ -60,8 +60,6 @@ invites:
   #   %type% : indicate if the game is public or private in a Discord code-block style (`public` for instance)
   #
   #invite-body-customizable: |-
-  #    Game %id%
-  #
   #    this game is %type%,
   #    to join it click on the **Join Game**
   #

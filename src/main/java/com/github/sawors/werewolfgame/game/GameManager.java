@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.SynchronousQueue;
 import java.util.function.Consumer;
@@ -24,7 +25,8 @@ public class GameManager {
 
     private GameType gametype;
     private GamePhase gamephase;
-    private HashMap<UserId, WerewolfPlayer> playerlist = new HashMap<>();
+    // playerlist's String -> UserId.toString()
+    private HashMap<String, WerewolfPlayer> playerlist = new HashMap<>();
     private HashMap<String, UserId> discordlink = new HashMap<>();
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
     private HashMap<GuildChannel, PlayerRole> rolechannels = new HashMap<>();
@@ -50,7 +52,6 @@ public class GameManager {
     private int round = 0;
     private String language = Main.getLanguage();
     
-    private final String invitetemplate = TranslatableText.get("invites.invite-body-customizable",language);
     
 
     public GameManager(Guild guild, GameType type, JoinType accessibility){
@@ -89,6 +90,10 @@ public class GameManager {
                 +"\n\n `start` : "+TranslatableText.get("commands.admin.start-description",language)
                 +"\n\n `lang` : "+TranslatableText.get("commands.admin.lang-description",language)
         ;
+    }
+    
+    private String buildInvite(){
+        return TranslatableText.get("invites.invite-body-customizable",language);
     }
     
     private void createRoles(Consumer<?> chainedaction){
@@ -223,7 +228,7 @@ public class GameManager {
         Main.linkChannel(channel.getIdLong(), id);
     }
     
-    public Set<UserId> getPlayerList(){
+    public Set<String> getPlayerList(){
         return playerlist.keySet();
     }
     
@@ -249,8 +254,8 @@ public class GameManager {
             return;
         }
         if(playerid != null){
-            if(!playerlist.containsKey(playerid)){
-                playerlist.put(playerid, new WerewolfPlayer(playerid, this));
+            if(!playerlist.containsKey(playerid.toString())){
+                playerlist.put(playerid.toString(), new WerewolfPlayer(playerid, this));
             }
             String discord = DatabaseManager.getDiscordId(playerid);
             if(discord != null && !discordlink.containsKey(discord)){
@@ -258,7 +263,6 @@ public class GameManager {
                 try{
                     Main.getJDA().retrieveUserById(discord).queue(user ->{
                         guild.addRoleToMember(user, gamerole).queue();
-                        Main.logAdmin(discord);
                         maintextchannel.sendMessage(TranslatableText.get("events.player-join-message",language).replaceAll("%user%",user.getAsMention())).queue();
                     });
                     //user successfully added to the game
@@ -304,8 +308,14 @@ public class GameManager {
         return gametype;
     }
     
-    public GuildChannel getAdminChannel(){
+    public TextChannel getAdminChannel(){
         return adminchannel;
+    }
+    public TextChannel getMainTextChannel(){
+        return maintextchannel;
+    }
+    public VoiceChannel getMainVoiceChannel(){
+        return mainvoicechannel;
     }
     public void setGameType(GameType gametype) {
         this.gametype = gametype;
@@ -326,7 +336,8 @@ public class GameManager {
     }
     
     protected void sendInvite(TextChannel channel){
-        String buttontitle = jointype == JoinType.PUBLIC ? TranslatableText.get("buttons.join-game", language) : TranslatableText.get("buttons.join-private-game", language);
+        String guildlang = DatabaseManager.getGuildLanguage(guild);
+        String buttontitle = jointype == JoinType.PUBLIC ? TranslatableText.get("buttons.join-game", guildlang) : TranslatableText.get("buttons.join-private-game", guildlang);
         Button joinbutton = Button.primary("join:"+id, buttontitle);
         if(jointype == JoinType.PRIVATE){
             joinbutton = Button.secondary("joinprivate:"+id, buttontitle);
@@ -335,11 +346,14 @@ public class GameManager {
             builder
                     // TODO : support for multiple predefined time display
                 .setDescription(
-                        invitetemplate
-                        .replaceAll("%id%",getId())
-                        .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT))
-                        .replaceAll("%join%",buttontitle))
-                .setColor(0xb491c8);
+                    buildInvite()
+                    .replaceAll("%id%",getId())
+                    .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT))
+                    .replaceAll("%join%",buttontitle))
+                .setColor(0xb491c8)
+                .setFooter("ID: "+id)
+                .setTimestamp(LocalDateTime.now())
+                    ;
         MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
         msg.queue(m -> invites.add(m));
     }

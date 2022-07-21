@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class UserId {
     String discriminant;
-    static int iduniquelength = 8;
+    static final int iduniquelength = 8;
 
     @Override
     public String toString() {

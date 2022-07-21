@@ -56,8 +56,6 @@ invites:
   #   %message% : UNUSED at the moment, might be used in the future to allow users to append custom messages to their invites
   #   %type% : indicates if the game is public or private in a Discord code-block style (`public` for instance)
   invite-body-customizable: |-
-    Game %id%
-    
     this game is %type%,
     to join it click on the **Join Game** button
     
@@ -82,7 +80,7 @@ channels:
     main: "🔊 Vocal"
   text:
     # for text channels Discord restrictions applies : no capital letter, spaces are replaced by "-"
-    main: "📯place"
+    main: "📯village-place"
     admin: "🔧admin"
 
 events:

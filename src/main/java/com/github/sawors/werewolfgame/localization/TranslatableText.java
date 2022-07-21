@@ -67,57 +67,6 @@ public class TranslatableText {
         } catch (InvalidKeyException e) {
             return error;
         }
-    /*
-        String[] hierarchy = textkey.split("\\.");
-        if(hierarchy.length <= 0){
-            return "";
-        }
-        if(hierarchy[0].equals("plural-replacements")){
-            return "";
-        }
-        //Main.logAdmin("Hierarchy"+ Arrays.toString(hierarchy));
-        
-        String translated;
-        Map<String, Object> data = locales.get(locale);
-        if(data.containsKey(textkey) && !(data.get(textkey) instanceof Collection)){
-            return String.valueOf(data.get(textkey));
-        }
-
-        int level = 0;
-        //Main.logAdmin("Hlevel : "+hierarchy[level]);
-
-        // CUSTOM YAML PARSER MADE FOR THE OCCASION, TODO : Reuse this and make its own method
-        Object text = data.get(hierarchy[level]);
-        //Main.logAdmin("text : "+text);
-        do{
-            //Main.logAdmin("Type0 : "+text.getClass().getName());
-            level++;
-            String key = hierarchy[level];
-            if(text instanceof Map){
-                //Main.logAdmin("Map : "+text);
-                //Main.logAdmin("Mapkey : "+key);
-                if(((Map<?, ?>) text).containsKey(key)){
-                    text = ((Map<?, ?>) text).get(key);
-                    //Main.logAdmin("Newtext : "+text);
-                } else {
-                    return error+" (parsing error at level : "+key+")";
-                }
-            } else if (text instanceof List){
-                //Main.logAdmin("List : "+text);
-                if(((List<?>) text).contains(key)){
-                    text = ((List<?>) text).get(((List<?>) text).indexOf(key));
-                } else {
-                
-                }
-            }
-            //Main.logAdmin("Type1 : "+text.getClass().getName());
-        } while (text instanceof Collection || text instanceof Map);
-        //Main.logAdmin("Type2 : "+text.getClass().getName());
-        translated = String.valueOf(text);
-        if(translated == null || translated.equals("")){
-            return error;
-        }
-        return translated;*/
     }
 
     public static String getPluralForm(String word){
