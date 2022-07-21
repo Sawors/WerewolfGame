@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class DiscordCommandListener extends ListenerAdapter {
@@ -37,14 +38,14 @@ public class DiscordCommandListener extends ListenerAdapter {
                     if(event.isFromGuild()){
                         new RegisterGuildCommand().execute(event);
                     } else {
-                        event.getChannel().sendMessage(TranslatableText.get("commands.error-messages.private-message-error", Main.getLanguage())).queue();
+                        event.getChannel().sendMessage(TranslatableText.get("commands.error-messages.private-message-error", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())))).queue();
                     }
                     break;
                 case"set":
                     if(args.length >= 3 && event.isFromGuild()){
                         switch (args[2]){
                             case"admin":
-                                String adminsuccess = TranslatableText.get("commands.ww.set.admin-text-success", Main.getLanguage());
+                                String adminsuccess = TranslatableText.get("commands.ww.set.admin-text-success", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
                                 if(event.getMessage().getMentions().getChannels().size() > 0){
                                     DatabaseManager.setGuildAdminChannel((TextChannel) event.getMessage().getMentions().getChannels().get(0));
                                     event.getChannel().sendMessage(adminsuccess.replaceAll("%channel%", event.getMessage().getMentions().getChannels().get(0).getAsMention())).queue();
@@ -54,7 +55,7 @@ public class DiscordCommandListener extends ListenerAdapter {
                                 }
                                 return;
                             case"invites":
-                                String succesmsg = TranslatableText.get("commands.ww.set.invites-text-success", Main.getLanguage());
+                                String succesmsg = TranslatableText.get("commands.ww.set.invites-text-success", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
                                 if(event.getMessage().getMentions().getChannels().size() > 0){
                                     DatabaseManager.setGuildInvitesChannel((TextChannel) event.getMessage().getMentions().getChannels().get(0));
                                     event.getChannel().sendMessage(succesmsg.replaceAll("%channel%", event.getMessage().getMentions().getChannels().get(0).getAsMention())).queue();
@@ -75,7 +76,7 @@ public class DiscordCommandListener extends ListenerAdapter {
                                     for(VoiceChannel chan : event.getMessage().getGuild().getVoiceChannels()){
                                         if(chan.getName().equals(voicename.toString())){
                                             DatabaseManager.setGuildWaitingChannel(chan);
-                                            event.getChannel().sendMessage(TranslatableText.get("commands.ww.set.waiting-vocal-existing-success", Main.getLanguage()).replaceAll("%name%", voicename.toString())).queue();
+                                            event.getChannel().sendMessage(TranslatableText.get("commands.ww.set.waiting-vocal-existing-success", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))).replaceAll("%name%", voicename.toString())).queue();
                                             return;
                                         }
                                     }
@@ -83,10 +84,10 @@ public class DiscordCommandListener extends ListenerAdapter {
                                         ChannelAction<VoiceChannel> act = event.getGuild().createVoiceChannel(voicename.toString());
                                         Consumer<VoiceChannel> setchan = DatabaseManager::setGuildWaitingChannel;
                                         act.queue(setchan);
-                                        event.getChannel().sendMessage(TranslatableText.get("commands.ww.set.waiting-vocal-created-success", Main.getLanguage()).replaceAll("%name%", voicename.toString())).queue();
+                                        event.getChannel().sendMessage(TranslatableText.get("commands.ww.set.waiting-vocal-created-success", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))).replaceAll("%name%", voicename.toString())).queue();
                                         return;
                                     } catch (InsufficientPermissionException e){
-                                        event.getChannel().sendMessage(TranslatableText.get("commands.ww.set.waiting-vocal-permission-error", Main.getLanguage()).replaceAll("%name%", voicename.toString())).queue();
+                                        event.getChannel().sendMessage(TranslatableText.get("commands.ww.set.waiting-vocal-permission-error", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))).replaceAll("%name%", voicename.toString())).queue();
                                         return;
                                     }
                                 }
@@ -111,9 +112,9 @@ public class DiscordCommandListener extends ListenerAdapter {
                     GameManager gm = new GameManager(event.getGuild(), GameType.DISCORD, jointype);
                     gm.sendInvite();
                     gm.setOwner(event.getAuthor());
-                    event.getChannel().sendMessage(TranslatableText.get("commands.ww.create.success", Main.getLanguage()).replaceAll("%id%", gm.getId())).queue();
+                    event.getChannel().sendMessage(TranslatableText.get("commands.ww.create.success", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))).replaceAll("%id%", gm.getId())).queue();
                     if(jointype == JoinType.PRIVATE){
-                        event.getAuthor().openPrivateChannel().queue(chan -> chan.sendMessage(TranslatableText.get("commands.ww.create.private-game-code-message", Main.getLanguage()).replaceAll("%user%", event.getAuthor().getAsMention()).replaceAll("%key%", gm.getJoinKey())).queue());
+                        event.getAuthor().openPrivateChannel().queue(chan -> chan.sendMessage(TranslatableText.get("commands.ww.create.private-game-code-message", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))).replaceAll("%user%", event.getAuthor().getAsMention()).replaceAll("%key%", gm.getJoinKey())).queue());
                     }
                 case"clean":
                 case"clear":
@@ -132,6 +133,13 @@ public class DiscordCommandListener extends ListenerAdapter {
                         }
                     }
                     break;
+                case"lang":
+                    if(args.length >= 3){
+                        String lang = args[2];
+                        if(TranslatableText.getLoadedLocales().contains(lang)){
+                            DatabaseManager.setGuildLanguage(event.getGuild(), lang);
+                        }
+                    }
             }
         }
         
@@ -149,6 +157,7 @@ public class DiscordCommandListener extends ListenerAdapter {
                         case"start":
                             manager.startGame();
                             break;
+                        case"language":
                         case"lang":
                             if(commands.length >= 2){
                                 String lang = commands[1];

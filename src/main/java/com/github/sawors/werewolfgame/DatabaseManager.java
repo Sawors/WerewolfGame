@@ -1,10 +1,7 @@
 package com.github.sawors.werewolfgame;
 
-import com.github.sawors.werewolfgame.database.UserDataType;
-import com.github.sawors.werewolfgame.database.UserId;
-import com.github.sawors.werewolfgame.database.UserPreference;
-import com.github.sawors.werewolfgame.database.UserTag;
-import com.github.sawors.werewolfgame.discord.GuildDataType;
+import com.github.sawors.werewolfgame.database.*;
+import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -258,6 +255,7 @@ public class DatabaseManager {
                 + GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID+" integer,"
                 + GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID+" integer,"
                 + GuildDataType.ADMIN_TEXT_CHANNEL_ID+" integer,"
+                + GuildDataType.LANGUAGE+" text DEFAULT en_UK,"
                 + GuildDataType.GUILD_OPTIONS+" text DEFAULT '[]'"
                 + ");"
                 ;
@@ -270,6 +268,7 @@ public class DatabaseManager {
                     +0+", "
                     +0+", "
                     +0+", "
+                    +"en_UK,"
                     +"'[]'"
                     +")").execute();
         } catch (SQLException e){
@@ -278,7 +277,7 @@ public class DatabaseManager {
         }
     }
     
-    public static void registerGuild(Guild guild, @Nullable TextChannel admin, @Nullable TextChannel invites, @Nullable VoiceChannel waintingroom){
+    public static void registerGuild(Guild guild, @Nullable TextChannel admin, @Nullable TextChannel invites, @Nullable VoiceChannel waintingroom,@Nullable String language){
         long adminid = 0L;
         long invitesid = 0L;
         long waintingid = 0L;
@@ -291,12 +290,16 @@ public class DatabaseManager {
         if(waintingroom != null){
             waintingid = waintingroom.getIdLong();
         }
+        if(language == null || !TranslatableText.getLoadedLocales().contains(language)){
+            language = Main.getLanguage();
+        }
         try(Connection co = connect()){
             co.prepareStatement("INSERT INTO Guilds Values("
                     +guild.getId()+", "
                     +adminid+", "
                     +invitesid+", "
                     +waintingid+", "
+                    +language+", "
                     +"'[]'"
                     +")").execute();
         } catch (SQLException e){
@@ -305,7 +308,8 @@ public class DatabaseManager {
                 co.prepareStatement("UPDATE Guilds SET "
                         +GuildDataType.ADMIN_TEXT_CHANNEL_ID+" = "+adminid+", "
                         +GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID+" = "+invitesid+", "
-                        +GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID+" = "+waintingid
+                        +GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID+" = "+waintingid+", "
+                        +GuildDataType.LANGUAGE+" = "+language
                         +" WHERE "+GuildDataType.GUILD_ID+" = "+guild.getId()
                 ).execute();
             } catch (SQLException e2){
@@ -345,33 +349,47 @@ public class DatabaseManager {
             }
         }
     
-        DatabaseManager.registerGuild(guild,admins,invites,waiting);
+        DatabaseManager.registerGuild(guild,admins,invites,waiting,Main.getLanguage());
     }
     
-    protected static void setGuildData(GuildChannel channel, GuildDataType datatype){
-        if(datatype != GuildDataType.GUILD_ID && datatype != GuildDataType.GUILD_OPTIONS){
+    protected static void setGuildData(Guild guild, String data, GuildDataType datatype){
+        if(datatype != GuildDataType.GUILD_ID){
             try(Connection co = connect()){
-                ResultSet checkreg = co.prepareStatement("SELECT * FROM Guilds WHERE "+GuildDataType.GUILD_ID+"="+channel.getGuild().getId()).executeQuery();
+                ResultSet checkreg = co.prepareStatement("SELECT * FROM Guilds WHERE "+GuildDataType.GUILD_ID+"="+guild.getId()).executeQuery();
                 String query;
                 if(checkreg.isClosed()){
-                    long adminid = 0L;
-                    long invitesid = 0L;
-                    long waitingid = 0L;
+                    String adminid = checkreg.getString(GuildDataType.ADMIN_TEXT_CHANNEL_ID.toString());
+                    String invitesid = checkreg.getString(GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID.toString());
+                    String waitingid = checkreg.getString(GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID.toString());
+                    String language = checkreg.getString(GuildDataType.LANGUAGE.toString());
+                    String params = checkreg.getString(GuildDataType.GUILD_OPTIONS.toString());
                     switch(datatype){
                         case ADMIN_TEXT_CHANNEL_ID:
-                            adminid = channel.getIdLong();
+                            adminid = data;
+                            break;
                         case GAME_INVITES_TEXT_CHANNEL_ID:
+                            invitesid = data;
+                            break;
                         case WAITING_ROOM_VOICE_CHANNEL_ID:
+                            waitingid = data;
+                            break;
+                        case LANGUAGE:
+                            language = data;
+                            break;
+                        case GUILD_OPTIONS:
+                            params = data;
+                            break;
                     }
                     query = "INSERT INTO Guilds Values("
-                            +channel.getGuild().getId()+", "
+                            +guild.getId()+", "
                             +adminid+", "
                             +invitesid+", "
                             +waitingid+", "
-                            +"'[]'"
+                            +language+", "
+                            +params
                             +")";
                 } else {
-                    query = "UPDATE Guilds SET "+datatype+"="+channel.getId()+" WHERE "+GuildDataType.GUILD_ID+" = "+channel.getGuild().getId();
+                    query = "UPDATE Guilds SET "+datatype+"="+data+" WHERE "+GuildDataType.GUILD_ID+" = "+guild.getId();
                 }
                 co.prepareStatement(query).execute();
             } catch (SQLException e){
@@ -380,16 +398,28 @@ public class DatabaseManager {
         }
     }
     
+    public static void setGuildLanguage(Guild guild, String language){
+        setGuildData(guild,language,GuildDataType.LANGUAGE);
+    }
+    
+    public static String getGuildLanguage(Guild guild){
+        String lang = getGuildData(guild.getId(), GuildDataType.ADMIN_TEXT_CHANNEL_ID);
+        if(lang != null && lang.length() == 5 && lang.contains("_")){
+            return lang;
+        }
+        return Main.getLanguage();
+    }
+    
     public static void setGuildAdminChannel(TextChannel channel){
-        setGuildData(channel, GuildDataType.ADMIN_TEXT_CHANNEL_ID);
+        setGuildData(channel.getGuild(), channel.getId(), GuildDataType.ADMIN_TEXT_CHANNEL_ID);
     }
     
     public static void setGuildInvitesChannel(TextChannel channel){
-        setGuildData(channel, GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID);
+        setGuildData(channel.getGuild(), channel.getId(), GuildDataType.GAME_INVITES_TEXT_CHANNEL_ID);
     }
     
     public static void setGuildWaitingChannel(VoiceChannel channel){
-        setGuildData(channel, GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID);
+        setGuildData(channel.getGuild(), channel.getId(), GuildDataType.WAITING_ROOM_VOICE_CHANNEL_ID);
     }
     
     public static TextChannel getGuildAdminChannel(Guild guild){

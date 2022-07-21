@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame.discord;
 
+import com.github.sawors.werewolfgame.DatabaseManager;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.game.GameManager;
@@ -13,11 +14,13 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class DiscordInteractionsListener extends ListenerAdapter {
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         String buttonid = event.getInteraction().getButton().getId();
-        if(buttonid != null){
+        if(buttonid != null && event.isFromGuild()){
             if(buttonid.contains("join:")){
                 // button type = join
                 String gameid = buttonid.replace("join:", "");
@@ -32,7 +35,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     event.deferEdit().queue();
                 } else {
                     Main.logAdmin("Error : game "+gameid+" does not exist");
-                    GameManager.setInviteExpired(event.getMessage(), Main.getLanguage());
+                    GameManager.setInviteExpired(event.getMessage(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
                     event.deferEdit().queue();
                 }
             } else if(buttonid.contains("joinprivate:")){
@@ -41,19 +44,19 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
                     if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
-                        TextInput joincode = TextInput.create("codeinput",TranslatableText.get("forms.private-game-code.code-field-title"), TextInputStyle.SHORT)
-                                .setPlaceholder(TranslatableText.get("forms.private-game-code.text-placeholder"))
+                        TextInput joincode = TextInput.create("codeinput",TranslatableText.get("forms.private-game-code.code-field-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))), TextInputStyle.SHORT)
+                                .setPlaceholder(TranslatableText.get("forms.private-game-code.text-placeholder", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))))
                                 .setRequired(true)
                                 .setRequiredRange(4,6)
                                 .build();
-                        event.replyModal(Modal.create("codemodal:"+gm.getId(),TranslatableText.get("forms.private-game-code.title")).addActionRow(joincode).build()).queue();
+                        event.replyModal(Modal.create("codemodal:"+gm.getId(),TranslatableText.get("forms.private-game-code.title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())))).addActionRow(joincode).build()).queue();
                         Main.logAdmin("joined private game");
                     } else {
                         event.deferEdit().queue();
                     }
                 } else {
                     Main.logAdmin("Error : game "+gameid+" does not exist");
-                    GameManager.setInviteExpired(event.getMessage(), Main.getLanguage());
+                    GameManager.setInviteExpired(event.getMessage(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
                     event.deferEdit().queue();
                 }
                 

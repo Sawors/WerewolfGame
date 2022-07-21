@@ -59,6 +59,7 @@ public class GameManager {
         this.guild = guild;
         this.jointype = accessibility;
         this.joinkey = RandomStringUtils.randomNumeric(5);
+        this.language = DatabaseManager.getGuildLanguage(guild);
         
         createRoles(
                 a0 -> guild.createCategory("[\uD83D\uDC3A WEREWOLF : "+id+"]")
@@ -364,7 +365,7 @@ public class GameManager {
             act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel(TranslatableText.get("buttons.expired-game", language)).withStyle(ButtonStyle.SECONDARY)));
         }
         List<MessageEmbed> newembeds = new ArrayList<>();
-        invite.getEmbeds().forEach(em -> newembeds.add(new EmbedBuilder(em).setColor(0x40454c).setAuthor(TranslatableText.get("buttons.expired-game")).build()));
+        invite.getEmbeds().forEach(em -> newembeds.add(new EmbedBuilder(em).setColor(0x40454c).setAuthor(TranslatableText.get("buttons.expired-game", DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild())))).build()));
         
         invite.editMessageEmbeds(invite.getEmbeds()).setActionRow(disabled).queue();
         invite.editMessageEmbeds(invite.getEmbeds()).setEmbeds(newembeds).queue();
