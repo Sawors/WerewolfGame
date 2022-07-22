@@ -1,6 +1,7 @@
 discord-token:
 database-file: default
 instance-language: "en_UK"
-instance-admin-password:
+admin-users:
+  - "315237447065927691"
 
 regenerate: false

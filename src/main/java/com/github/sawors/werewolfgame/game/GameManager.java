@@ -1,6 +1,7 @@
 package com.github.sawors.werewolfgame.game;
 
 import com.github.sawors.werewolfgame.DatabaseManager;
+import com.github.sawors.werewolfgame.LoadedLocale;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.discord.ChannelType;
@@ -51,7 +52,7 @@ public class GameManager {
     private List<PlayerRole> roleset;
     private Queue<GamePhase> eventqueue = new SynchronousQueue<>();
     private int round = 0;
-    private String language;
+    private LoadedLocale language;
     private boolean locked = false;
     
     
@@ -101,7 +102,7 @@ public class GameManager {
         return TranslatableText.get("invites.invite-body-customizable",language);
     }
 
-    public String getLanguage(){
+    public LoadedLocale getLanguage(){
         return language;
     }
 
@@ -184,7 +185,7 @@ public class GameManager {
         }
     }
     
-    public void setLanguage(String locale){
+    public void setLanguage(LoadedLocale locale){
         this.language = locale;
         adminchannel.getManager().setName(TranslatableText.get("channels.text.admin", language)).queue();
         maintextchannel.getManager().setName(TranslatableText.get("channels.text.main", language)).queue();
@@ -417,7 +418,7 @@ public class GameManager {
     
     protected void sendInvite(TextChannel channel){
         if(!locked){
-            String guildlang = DatabaseManager.getGuildLanguage(guild);
+            LoadedLocale guildlang = DatabaseManager.getGuildLanguage(guild);
             String buttontitle = jointype == JoinType.PUBLIC ? TranslatableText.get("buttons.join-game", guildlang) : TranslatableText.get("buttons.join-private-game", guildlang);
             Button joinbutton = Button.primary("join:"+id, buttontitle);
             if(jointype == JoinType.PRIVATE){
@@ -453,17 +454,17 @@ public class GameManager {
         }
     }
     
-    public static void setInviteExpired(Message invite, String language) {
+    public static void setInviteExpired(Message invite, LoadedLocale language) {
         Main.logAdmin("marking invite " + invite.getId() + " as expired");
         setInviteState(invite, TranslatableText.get("invites.expired-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild()))), TranslatableText.get("buttons.expired-game", language), ButtonStyle.SECONDARY, 0x40454c, false);
     }
     
-    public static void setInviteLocked(Message invite, String language) {
+    public static void setInviteLocked(Message invite, LoadedLocale language) {
         Main.logAdmin("marking invite " + invite.getId() + " as locked");
         setInviteState(invite, TranslatableText.get("invites.locked-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild()))), TranslatableText.get("buttons.locked-game", language), ButtonStyle.PRIMARY, 0x553369, false);
     }
     
-    public static void setInviteOpen(Message invite, String language) {
+    public static void setInviteOpen(Message invite, LoadedLocale language) {
         Main.logAdmin("marking invite " + invite.getId() + " as open");
         setInviteState(invite, "", TranslatableText.get("buttons.join-game", language), ButtonStyle.PRIMARY, 0xb491c8, true);
     }

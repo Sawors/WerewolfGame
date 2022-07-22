@@ -13,7 +13,7 @@ public class UserId {
 
     @Override
     public String toString() {
-        return discriminant.toLowerCase(Locale.ENGLISH);
+        return discriminant.toLowerCase(Locale.ROOT);
     }
     @Override
     public boolean equals(Object o){

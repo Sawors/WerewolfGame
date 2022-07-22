@@ -9,6 +9,7 @@ import com.github.sawors.werewolfgame.localization.BundledLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.JDA;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -27,6 +28,7 @@ public class Main {
     private static JDA jda;
     private static File datalocation;
     private static File dbfile;
+    private static File configfile;
     private static boolean usecaching = true;
     private static HashMap<UserId, LinkedUser> cachedusers = new HashMap<>();
     // I use this linking map to avoid creating a new JDA Event Listener each time a new GameManager is created
@@ -36,8 +38,11 @@ public class Main {
     private static HashMap<Long, String> channellink = new HashMap<>();
     // Use this to get all loaded roles
     private static Set<PlayerRole> rolepool = new HashSet<>();
-    private static String instancelanguage;
+    private static LoadedLocale instancelanguage;
     private static Map<String, Object> configmap;
+    // String is the Discord User's ID
+    private static Set<String> sudoers = new HashSet<>();
+    private static String sudokey = "";
 
 
     public static void init(boolean standalone, String token, File datastorage){
@@ -50,6 +55,7 @@ public class Main {
         }catch (IOException e){
             e.printStackTrace();
         }
+        configfile = new File(datalocation+File.separator+"config.yml");
         //[=========================================================================]
         
         if((token == null || token.length() < 8) && getConfigData("discord-token") != null && getConfigData("discord-token").length() > 8){
@@ -102,38 +108,51 @@ public class Main {
         
         BundledLocale defloc = BundledLocale.en_UK;
         
-        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(defloc.getPath()), defloc.toString());
-        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.en_UK.getPath()), BundledLocale.en_UK.toString());
-        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.fr_FR.getPath()), BundledLocale.fr_FR.toString());
+        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(defloc.getPath()), new LoadedLocale("en_UK","English (United Kingdom)","english"));
+        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.fr_FR.getPath()), new LoadedLocale("fr_FR","Français (France)","french"));
         reloadLanguages();
-        Main.logAdmin("Default language set to",instancelanguage);
+        TranslatableText.printLoaded();
+        Main.logAdmin("Default language set to",instancelanguage.getName());
+    }
+    
+    public static boolean isInstanceAdmin(String discordid){
+        try(InputStream input = new FileInputStream(configfile)){
+            Map<String, Object> yamlconfig = new Yaml().load(input);
+            if(yamlconfig.containsKey("admin-users") && yamlconfig.get("admin-users") instanceof List){
+                Object adminlist = yamlconfig.get("admin-users");
+                return adminlist instanceof List<?> && ((List<?>) adminlist).contains(discordid);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static void reloadLanguages(){
-        BundledLocale defloc = BundledLocale.en_UK;
+        LoadedLocale defloc = new LoadedLocale("en_UK","English (United Kingdom)","english");
         File localespath = new File(datalocation+File.separator+"locales"+File.separator);
         localespath.mkdirs();
         File[] toload = localespath.listFiles();
         if(toload != null){
             for(File locale : toload){
                 if(locale.getName().toLowerCase(Locale.ENGLISH).endsWith(".yml") || locale.getName().toLowerCase(Locale.ENGLISH).endsWith(".yaml") ){
+                    Main.logAdmin("Loading locale",locale.getAbsolutePath());
                     TranslatableText.load(locale);
                 }
             }
         }
-        String defaultlocale = getConfigData("instance-language");
-        if(defaultlocale != null && TranslatableText.getLoadedLocales().contains(defaultlocale)){
+        LoadedLocale defaultlocale = new LoadedLocale(getConfigData("instance-language"));
+        if(TranslatableText.getLoadedLocales().contains(defaultlocale)){
             instancelanguage = defaultlocale;
         } else {
-            instancelanguage = defloc.toString();
+            instancelanguage = defloc;
         }
     }
     public static void reloadConfig(){
-        File createconf = new File(datalocation+File.separator+"config.yml");
         try{
-            createconf.createNewFile();
+            configfile.createNewFile();
             boolean overwrite = true;
-            try(InputStream loadold = new FileInputStream(createconf)){
+            try(InputStream loadold = new FileInputStream(configfile)){
                 Map<String, Object> oldconfig = new Yaml().load(loadold);
                 String regen = YamlMapParser.getString(oldconfig, "regenerate");
                 if(regen != null && regen.length() >= 2){
@@ -143,7 +162,7 @@ public class Main {
                 overwrite = true;
             }
             if(overwrite){
-                try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
+                try(OutputStream writer = new FileOutputStream(configfile); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
                     if(config != null){
                         Main.logAdmin("regenerating config.yml (replacing the old file if it existed)");
                         writer.write(config.readAllBytes());
@@ -152,7 +171,7 @@ public class Main {
             } else {
                 Main.logAdmin("config file found, loading it !");
             }
-            try(InputStream config = new FileInputStream(createconf)){
+            try(InputStream config = new FileInputStream(configfile)){
                 configmap = new Yaml().load(config);
             }
         }catch (IOException e){
@@ -160,7 +179,7 @@ public class Main {
         }
     }
     
-    public static String getLanguage(){
+    public static @NotNull LoadedLocale getLanguage(){
         return instancelanguage;
     }
     
@@ -263,6 +282,16 @@ public class Main {
     protected static LinkedUser getCachedUser(UserId id){
         return cachedusers.get(id);
     }
+    
+    //
+    //  Instance Commands
+    //
+    protected static void setInstanceLanguage(LoadedLocale language){
+        if(TranslatableText.getLoadedLocales().contains(language)){
+            instancelanguage = language;
+        }
+    }
+    // // // // // // // // // //
     
     private static Class<?> loadExtension(File file){
         URL pathtofile;

@@ -1,13 +1,13 @@
 package com.github.sawors.werewolfgame.discord;
 
 import com.github.sawors.werewolfgame.DatabaseManager;
+import com.github.sawors.werewolfgame.LoadedLocale;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.commands.RegisterGuildCommand;
 import com.github.sawors.werewolfgame.commands.TestCommand;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.GameType;
 import com.github.sawors.werewolfgame.game.JoinType;
-import com.github.sawors.werewolfgame.localization.BundledLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Member;
@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -30,7 +31,7 @@ public class DiscordCommandListener extends ListenerAdapter {
         String[] args = content.split(" ");
         if(event.isFromGuild() && args.length >= 2 && args[0].equals("!ww") && !Main.isLinked(event.getChannel().getIdLong())){
             
-            switch(args[1]){
+            switch(args[1].toLowerCase(Locale.ROOT)){
                 case"test":
                     new TestCommand().execute(event.getMessage());
                     break;
@@ -142,26 +143,26 @@ public class DiscordCommandListener extends ListenerAdapter {
                     }
                     break;
                 case"lang":
+                case"language":
                     if(args.length >= 3){
-                        String lang = args[2];
-                        if(TranslatableText.getLoadedLocales().contains(lang)){
-                            DatabaseManager.setGuildLanguage(event.getGuild(), lang);
-                            event.getChannel().sendMessage(TranslatableText.get("commands.ww.lang.success", DatabaseManager.getGuildLanguage(event.getGuild()))).queue();
-                        }
+                        
+                        DatabaseManager.setGuildLanguage(event.getGuild(), LoadedLocale.fromReference(args[2]));
+                        event.getChannel().sendMessage(TranslatableText.get("commands.ww.lang.success", DatabaseManager.getGuildLanguage(event.getGuild()))).queue();
                     } else {
                         event.getMessage().reply(TranslatableText.get("commands.ww.lang.query", DatabaseManager.getGuildLanguage(event.getGuild()))).queue();
                     }
+                    break;
             }
         }
         
         
-    // game admin commands
+        // game admin commands
         if(Main.isLinked(event.getChannel().getIdLong()) && event.isFromGuild() && !event.getAuthor().isSystem() && !event.getAuthor().isBot()){
             GameManager manager = Main.getManager(event.getChannel().getIdLong());
             if(manager != null && manager.getAdminChannel().getId().equals(event.getChannel().getId())){
                 String[] commands = event.getMessage().getContentDisplay().split(" ");
                 if(commands.length > 0){
-                    switch(commands[0]){
+                    switch(commands[0].toLowerCase(Locale.ROOT)){
                         case"clean":
                             manager.clean();
                             break;
@@ -170,22 +171,9 @@ public class DiscordCommandListener extends ListenerAdapter {
                             break;
                         case"language":
                         case"lang":
+                            Main.logAdmin("?");
                             if(commands.length >= 2){
-                                String lang = commands[1];
-                                if(lang.contains("_") && lang.length() == 5){
-                                    if(TranslatableText.getLoadedLocales().contains(lang)){
-                                        manager.setLanguage(lang);
-                                        break;
-                                    } else {
-                                        manager.setLanguage(Main.getLanguage());
-                                        break;
-                                    }
-                                } else {
-                                    switch (lang) {
-                                        case "english" -> manager.setLanguage(BundledLocale.en_UK.toString());
-                                        case "french" -> manager.setLanguage(BundledLocale.fr_FR.toString());
-                                    }
-                                }
+                                manager.setLanguage(LoadedLocale.fromReference(commands[1]));
                             }
                             break;
                         case"lock":

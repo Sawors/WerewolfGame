@@ -277,7 +277,7 @@ public class DatabaseManager {
         }
     }
     
-    public static void registerGuild(Guild guild, @Nullable TextChannel admin, @Nullable TextChannel invites, @Nullable VoiceChannel waintingroom,@Nullable String language){
+    public static void registerGuild(Guild guild, @Nullable TextChannel admin, @Nullable TextChannel invites, @Nullable VoiceChannel waintingroom,@Nullable LoadedLocale language){
         long adminid = 0L;
         long invitesid = 0L;
         long waintingid = 0L;
@@ -403,14 +403,14 @@ public class DatabaseManager {
         }
     }
     
-    public static void setGuildLanguage(Guild guild, String language){
-        setGuildData(guild,language,GuildDataType.LANGUAGE);
+    public static void setGuildLanguage(Guild guild, LoadedLocale language){
+        setGuildData(guild,language.toString(),GuildDataType.LANGUAGE);
     }
     
-    public static String getGuildLanguage(Guild guild){
-        String lang = getGuildData(guild.getId(), GuildDataType.LANGUAGE);
-        if(lang != null && lang.length() == 5 && lang.contains("_")){
-            return lang;
+    public static LoadedLocale getGuildLanguage(Guild guild){
+        String baselang = getGuildData(guild.getId(), GuildDataType.LANGUAGE);
+        if(baselang != null && baselang.length() == 5 && baselang.contains("_")){
+            return new LoadedLocale(baselang);
         }
         return Main.getLanguage();
     }

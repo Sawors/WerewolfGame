@@ -1,6 +1,6 @@
 # This file can be used as a translation template, original text (en_DEFAULT)
 # is added on top of each entry for you to know easily what to translate.
-#
+locale-name: "English (United Kingdom)"
 # Some entries use placeholders, when translating please DO NOT modify these (you can move them,
 # but in most case do not remove placeholders from the entry).
 # A placeholder looks like this : %data%
@@ -58,9 +58,7 @@ invites:
   #   %type% : indicates if the game is public or private (mind that the "type" is in english whatever the language, so I advise you to put it in Discord's code-block style : `%type%` to avoid creating an awkward looking text)
   #   %button% : the text on the "Join Game" button defined by buttons.join-game or buttons.join-private-game if the game is private
   invite-body-customizable: |-
-    this game is %type%,
-    
-    
+    this game is %type%
     
     to join it click on the **%button%** button
     

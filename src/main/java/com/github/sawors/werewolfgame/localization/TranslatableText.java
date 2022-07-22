@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame.localization;
 
+import com.github.sawors.werewolfgame.LoadedLocale;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.YamlMapParser;
 import org.jetbrains.annotations.NotNull;
@@ -13,53 +14,47 @@ import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class TranslatableText {
 
-    private static final Map<String, Map<String, Object>> locales = new HashMap<>();
+    private static final Map<LoadedLocale, Map<String, Object>> locales = new HashMap<>();
 
     public static void load(File @NotNull ... yamlfile){
         for(File locale : yamlfile){
             try(InputStream input = new FileInputStream(locale)){
-                locales.put(locale.getName().substring(0,locale.getName().indexOf(".")), new Yaml().load(input));
+                Map<String, Object> structure = new Yaml().load(input);
+                String code = locale.getName().substring(0,locale.getName().indexOf("."));
+                String name = structure.containsKey("locale-name") ? YamlMapParser.getString(structure,"locale-name") : code;
+                locales.put(new LoadedLocale(code,name), structure);
             }catch (IOException e){
                 e.printStackTrace();
             }
-
         }
     }
 
-    public static Set<String> getLoadedLocales(){
-        return Set.copyOf(locales.keySet());
+    public static List<LoadedLocale> getLoadedLocales(){
+        return List.copyOf(locales.keySet());
     }
 
-    public static void load(@WillClose InputStream localestream, String localename){
+    public static void load(@WillClose InputStream localestream, LoadedLocale locale){
         if(localestream == null){
             return;
         }
-        locales.put(localename, new Yaml().load(localestream));
+        locales.put(locale, new Yaml().load(localestream));
         try{
             localestream.close();
         }catch (IOException e){
             e.printStackTrace();
         }
     }
-    
-    public static String get(String textkey){
-        return get(textkey, Main.getLanguage());
-    }
 
-    public static String get(String textkey, @NotNull BundledLocale locale){
-        return get(textkey, locale.toString());
-    }
-
-    public static String get(@NotNull String textkey, @NotNull String locale){
+    public static String get(@NotNull String textkey, @NotNull LoadedLocale locale){
         if(!locales.containsKey(locale)){
             return "***locale "+locale+" not loaded, it usually indicate an error in locale name***";
         }
-        String error = "***key \""+textkey+"\" in locale "+locale+" (loaded from stream) not found, it probably indicate an inexistent or outdated locale, report this to the locale's Author or on*** https://github.com/Sawors/WerewolfGame/issues/new";
+        String error = "***key \""+textkey+"\" in locale "+locale+" not found, report this to the locale's author***";
         try{
             return YamlMapParser.getData(locales.get(locale), textkey);
         } catch (ParseException e) {
@@ -74,5 +69,11 @@ public class TranslatableText {
     }
     public static String getSingularForm(String word){
         return word+"s";
+    }
+    
+    public static void printLoaded(){
+        for(LoadedLocale locale : locales.keySet()){
+            Main.logAdmin("Locale",locale.getDisplay());
+        }
     }
 }
