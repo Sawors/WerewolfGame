@@ -20,6 +20,11 @@ public class UserId {
         return o.getClass() == this.getClass() && Objects.equals(this.toString(), o.toString());
     }
 
+    @Override
+    public int hashCode() {
+        return this.toString().hashCode();
+    }
+
     public String getDiscriminant(){
         return discriminant;
     }

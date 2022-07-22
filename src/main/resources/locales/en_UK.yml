@@ -68,6 +68,8 @@ buttons:
   join-game: "Join Game"
   join-private-game: "Join Private Game"
   expired-game: "Game Finished"
+  leave-game: "Leave Game"
+  leave-game-message: "Click on the **%button%** button to leave the game"
 
 forms:
   private-game-code:
@@ -84,7 +86,8 @@ channels:
     admin: "🔧admin"
 
 events:
-  player-join-message: ":arrow_right: **Player** %user% **Joined the Game !**"
+  player-join-message: ":arrow_right: %user% **joined the Game !**"
+  player-leave-message: ":arrow_left: %user% **has left the Game**"
 
 commands:
   admin:

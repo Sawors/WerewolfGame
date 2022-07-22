@@ -86,6 +86,8 @@ channels:
 
 events:
   player-join-message: ":arrow_right: %user% **a rejoint la partie !**"
+  player-leave-message: ":arrow_left: %user% **a quitté la partie**"
+  leave-game-message: "Clique sur le boutton **%button%** pour quitter la partie"
 
 commands:
   admin:
@@ -98,7 +100,7 @@ commands:
     lang-success: "langue changé avec succès en **Français**"
     #"give the mentioned user the administrator permission and access to this channel"
     #admin-description: "give the mentioned user the administrator permission and access to this channel"
-    admin-description: "donne aux utilisateurs mentionnés la permission d'administrateur de cette parte et l'accès à ce salon"
+    admin-description: "donne aux utilisateurs mentionnés la permission d'administrateur de cette partie et l'accès à ce salon"
     #admin-success: "Made %user% an administrator"
     admin-success: "%user% est maintenant un administrateur"
 

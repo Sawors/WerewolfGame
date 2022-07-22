@@ -31,11 +31,12 @@ public class GameManager {
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
     private HashMap<GuildChannel, PlayerRole> rolechannels = new HashMap<>();
     private ArrayList<PlayerRole> rolelist = new ArrayList<>();
-    //private GuildChannel admin;
     private final String id;
     private final Guild guild;
-    //private Server mcserver;
+
     private ArrayList<Message> invites = new ArrayList<>();
+    private Message leavemessage;
+
     private Category category;
     private JoinType jointype;
     private final String joinkey;
@@ -89,13 +90,18 @@ public class GameManager {
                 +"\n\n `clean` : "+TranslatableText.get("commands.admin.clean-description",language)
                 +"\n\n `start` : "+TranslatableText.get("commands.admin.start-description",language)
                 +"\n\n `lang` : "+TranslatableText.get("commands.admin.lang-description",language)
+                +"\n\n `admin` : "+TranslatableText.get("commands.admin.admin-description",language)
         ;
     }
     
     private String buildInvite(){
         return TranslatableText.get("invites.invite-body-customizable",language);
     }
-    
+
+    public String getLanguage(){
+        return language;
+    }
+
     private void createRoles(Consumer<?> chainedaction){
         guild.createRole().setName("WW:"+id+":ADMIN").setMentionable(false).queue(a -> {
                     this.adminrole = a;
@@ -223,13 +229,14 @@ public class GameManager {
                 break;
             case ANNOUNCEMENTS:
                 this.maintextchannel = (TextChannel) channel;
+                maintextchannel.sendMessage(TranslatableText.get("buttons.leave-game-message", language).replaceAll("%button%",TranslatableText.get("buttons.leave-game", language))).setActionRow(Button.danger("leave:"+id,TranslatableText.get("buttons.leave-game", language))).queue();
                 break;
         }
         Main.linkChannel(channel.getIdLong(), id);
     }
     
     public Set<UserId> getPlayerList(){
-        return playerlist.keySet();
+        return Set.copyOf(playerlist.keySet());
     }
     
     public void finish(){
@@ -296,9 +303,63 @@ public class GameManager {
         addPlayer(playerid, null);
     }
     
-    public void removePlayer(UserId playerid){
-            if(playerid != null && playerlist.containsKey(playerid)){
-                //playerlist.remove(playerid);
+    public void removePlayer(UserId player){
+            if(player != null && playerlist.containsKey(player)){
+                Main.logAdmin("del3");
+                // remove discord link
+                if(discordlink.containsValue(player)){
+                    for(Map.Entry<String, UserId> entry : discordlink.entrySet()){
+                        if(entry.getValue().equals(player)){
+                            discordlink.remove(entry.getKey());
+                        }
+                    }
+                }
+                // remove minecraft link
+                if(minecraftlink.containsValue(player)){
+                    for(Map.Entry<UUID, UserId> entry : minecraftlink.entrySet()){
+                        if(entry.getValue().equals(player)){
+                            minecraftlink.remove(entry.getKey());
+                        }
+                    }
+                }
+                UserSnowflake member = UserSnowflake.fromId(DatabaseManager.getDiscordId(player));
+                guild.retrieveMember(member).queue(mb ->{
+                    // remove its roles
+                    for(Role role : mb.getRoles()){
+                        if(role.getName().contains(id)){
+                            try{
+                                guild.removeRoleFromMember(member, role).queue();
+                            } catch (InsufficientPermissionException e){
+                                Main.logAdmin("Not enough permissions to do", "remove role from member");
+                            }
+                        }
+                    }
+                    // kick it out of game voice channel
+                    if(mb.getVoiceState() != null && mb.getVoiceState().inAudioChannel()){
+                        for(VoiceChannel chan : category.getVoiceChannels()){
+                            if(chan.getMembers().contains(mb)){
+                                try{
+                                    guild.kickVoiceMember(mb).queue();
+                                } catch (InsufficientPermissionException e){
+                                    Main.logAdmin("Not enough permissions to do", "kick member from voice");
+                                }
+                            }
+                        }
+                    }
+                    // remove channel perms, seems heavy doing nested for loops but in reality the second loop contains
+                    // only one or 2 elements, it is just to avoid missing one permission
+                    for(GuildChannel channel : category.getChannels()){
+                        for(PermissionOverride perm : channel.getPermissionContainer().getMemberPermissionOverrides()){
+                            if(perm.getMember() != null && perm.getMember().getId().equals(mb.getId())){
+                                channel.getPermissionContainer().getManager().removePermissionOverride(perm.getIdLong()).queue();
+                            }
+                        }
+                    }
+                    maintextchannel.sendMessage(TranslatableText.get("events.player-leave-message", language).replaceAll("%user%",member.getAsMention())).queue();
+                });
+                Main.logAdmin(playerlist);
+                playerlist.remove(player);
+                Main.logAdmin(playerlist);
             }
     }
 

@@ -31,7 +31,6 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
                     if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
-                        
                         // player validated, adding it to the game
                         gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
                     } else {
@@ -82,6 +81,23 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     event.deferEdit().queue();
                 }
                 
+            } else if(buttonid.contains("leave:")){
+                // button type = join
+                String gameid = buttonid.replace("leave:", "");
+                GameManager gm = GameManager.fromId(gameid);
+                if(gm != null){
+                    if(gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                        // player validated, removing it from the game
+                        Main.logAdmin("trydel1");
+                        gm.removePlayer(UserId.fromDiscordId(event.getUser().getId()));
+                    } else {
+                        Main.logAdmin("Attempt to remove Discord user "+event.getUser().getAsTag()+" from game "+gm.getId()+" via the leave button failed, user not in the game (THIS NEEDS TO BE INSPECTED !)");
+                    }
+                } else {
+                    Main.logAdmin("Error : game "+gameid+" does not exist");
+                    GameManager.setInviteExpired(event.getMessage(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
+                }
+                event.deferEdit().queue();
             }
         }
     }

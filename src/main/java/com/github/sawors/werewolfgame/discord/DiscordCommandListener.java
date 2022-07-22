@@ -191,7 +191,7 @@ public class DiscordCommandListener extends ListenerAdapter {
                         case"admin":
                             for(Member member : event.getMessage().getMentions().getMembers()){
                                 manager.setAdmin(member.getUser());
-                                event.getChannel().sendMessage(TranslatableText.get("commands.admin.admin-success",manager.getLanguage())).queue();
+                                event.getChannel().sendMessage(TranslatableText.get("commands.admin.admin-success",manager.getLanguage()).replaceAll("%user%",member.getAsMention())).queue();
                             }
                     }
                 }

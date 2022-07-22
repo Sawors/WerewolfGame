@@ -99,8 +99,10 @@ channels:
     admin:
 
 events:
-  #player-join-message: ":arrow_right: **Player** %user% **Joined the Game !**"
+  #player-join-message: ":arrow_right: %user% **joined the Game !**"
   player-join-message:
+  #player-leave-message: ":arrow_left: %user% **has left the game**"
+  player-leave-message:
 
 commands:
   admin:
