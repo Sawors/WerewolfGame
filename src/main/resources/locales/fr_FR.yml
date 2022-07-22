@@ -1,33 +1,35 @@
 # This file can be used as a translation template, original text (en_DEFAULT)
 # is added on top of each entry for you to know easily what to translate.
-locale-name: "Français (France)"
 #
-# Some entries use placeholders, when translating please DO NOT modify these (you can move them,
-# but in most case do not remove placeholders from the entry).
-# A placeholder looks like this : %data%
+locale-name: "Français (France)"
+  #
+  # Some entries use placeholders, when translating please DO NOT modify these (you can move them,
+  # but in most case do not remove placeholders from the entry).
+  # A placeholder looks like this : %data%
 
 
-# PLURAL CANNOT BE USED YET, PLEASE IGNORE THE FOLLOWING COMMENT BLOCK!
-# To make plurals you can use the additive plural format (friend -> friends) by appending %-p% at the end of your
-# word, to define this plural form use additive-plural-mark.
-# If your language uses more than just the additive plural form (most languages) you can use up to 8 plural replacements
-# defined in plural-replaces. This list is dynamically loaded, so you can define as many replacements as you want
-# to define a replacement use this method :
-#   singular: plural
-# Example :
-#   y: "ie"
-# to use them simply use the placeholder %y% and replace the "y" with the singular form of your replacement
-# Examples :
-#   friend%-p%
-#     singular : friend
-#     plural : friends
-#   quer%y%
-#     singular : query
-#     plural : queries
-# PLURAL CANNOT BE USED YET !
-#additive-plural-mark: "s"
-#plural-replacements:
+  # PLURAL CANNOT BE USED YET, PLEASE IGNORE THE FOLLOWING COMMENT BLOCK!
+  # To make plurals you can use the additive plural format (friend -> friends) by appending %-p% at the end of your
+  # word, to define this plural form use additive-plural-mark.
+  # If your language uses more than just the additive plural form (most languages) you can use up to 8 plural replacements
+  # defined in plural-replaces. This list is dynamically loaded, so you can define as many replacements as you want
+  # to define a replacement use this method :
+  #   singular: plural
+  # Example :
+  #   y: "ie"
+  # to use them simply use the placeholder %y% and replace the "y" with the singular form of your replacement
+  # Examples :
+  #   friend%-p%
+  #     singular : friend
+  #     plural : friends
+  #   quer%y%
+  #     singular : query
+  #     plural : queries
+  # PLURAL CANNOT BE USED YET !
+  #additive-plural-mark: "s"
+  #plural-replacements:
 #  y: "ie"
+# PLURAL CANNOT BE USED YET, PLEASE IGNORE THE PREVIOUS COMMENT BLOCK !
 
 invites:
   #
@@ -56,20 +58,26 @@ invites:
   #   %id% : the game unique ID, useless for most players
   #   %message% : UNUSED at the moment, might be used in the future to allow users to append custom messages to their invites
   #   %type% : indicates if the game is public or private
-  #   %join% : the text displayed on the join button
+  #   %button% : the text on the "Join Game" button defined by buttons.join-game or buttons.join-private-game if the game is private
   invite-body-customizable: |-
     cette partie est de type `%type%`,
-    pour la rejoindre cliquez sur le boutton **%join%**
     
-  #*Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*
+    pour la rejoindre cliquez sur le boutton **%button%**
+
   # leave blank to use the same format as invite-body-customizable, otherwise it will be used for private invites
   # in place of invite-body-customizable
   private-invite-override:
+  locked-title: "Partie Fermée"
+  already-started-title: "La Partie est déjà lancée"
+  expired-title: "Partie Terminée"
 
 buttons:
   join-game: "Rejoindre"
   join-private-game: "Rejoindre (privée)"
   expired-game: "Partie terminée"
+  locked-game: "Partie Fermée"
+  leave-game: "Quitter"
+  leave-game-message: "Clique sur le boutton **%button%** pour quitter la partie"
 
 forms:
   private-game-code:
@@ -88,29 +96,34 @@ channels:
 events:
   player-join-message: ":arrow_right: %user% **a rejoint la partie !**"
   player-leave-message: ":arrow_left: %user% **a quitté la partie**"
-  leave-game-message: "Clique sur le boutton **%button%** pour quitter la partie"
 
 commands:
   admin:
     title: "**Liste des Commandes :**"
-    clean-description: "supprime tout les salons créés pour cette partie (même celui-ci) ainsi que la catégorie"
-    start-description: "lance la partie de force"
-    #lang-description: "change the game language to the first argument (structure : lang <language>). \n Example : *language english* command sets the language to english. \n Registered languages : **english**, **french**. \n **Advanced Users** : you can directly set the language locale format (if loaded in the instance : xx_XX)"
-    lang-description: "change la langue de la partie selon le premier argument (structure : lang <language>). \n Exemple : la commande *language english* change la langue en anglais. \n Langues disponibles : **english**, **french**. \n **Utilisateurs Avancés** : vous pouvez directement définir la langue selon le format de sa localisation (si chargée dans l'instance : xx_XX)"
-    #lang-success: "language successfully set to **English**"
-    lang-success: "langue changé avec succès en **Français**"
-    #"give the mentioned user the administrator permission and access to this channel"
-    #admin-description: "give the mentioned user the administrator permission and access to this channel"
-    admin-description: "donne aux utilisateurs mentionnés la permission d'administrateur de cette partie et l'accès à ce salon"
-    #admin-success: "Made %user% an administrator"
-    admin-success: "%user% est maintenant un administrateur"
-
+    clean:
+      description: "supprime tout les salons créés pour cette partie (même celui-ci) ainsi que la catégorie"
+    start:
+      description: "force start the game"
+    lang:
+      description: "change la langue de la partie. \n Exemple : la commande *language english* change la langue en anglais. \n Langues disponibles : **english**, **french**. \n **Utilisateurs Avancés** : vous pouvez directement définir la langue selon le format de sa localisation (si chargée dans l'instance : xx_XX)"
+      success: "Langue changé avec succès en **Français**"
+    lock:
+      description: "verrouille la partie empêchant tout les autres membres du Discord de rejointre la partie grâce aux bouttons d'invitation"
+      success: "Partie verrouillée, les bouttons d'invitation pour rejoindre la partie ne sont plus utilisables"
+      error: "La partie est déjà verrouillée, rien n'a été changé"
+    unlock:
+      description: "déverrouille la partie, les nouveaux joueurs peuvent rejoindre en cliquant sur les bouttons d'invitation"
+      success: "Partie déverrouillée, les nouveaux joueurs peuvent maintenant rejoindre grâce aux bouttons d'invitation"
+      error: "La partie est déjà déverouillée, rien n'a été changé"
+    admin:
+      description: "donne aux utilisateurs mentionnés la permission d'administrateur de cette partie et l'accès à ce salon"
+      success: "%user% est maintenant un administrateur"
   ww:
     register:
       success: "Serveur *%name%:%id%* enregistré avec succès"
     create:
       success: "Partie créée ! ID : %id%"
-      private-game-code-message: "Coucou %user% ! \nPuisque tu as créé une partie de Loup-Garou en mode **Privé** tes joueurs doivent utiliser ce code pour rejoindre : **`%key%`**"
+      private-game-code-message: "Salut %user% ! \nPuisque tu as créé une partie de Loup-Garou en mode **Privé** tes joueurs doivent utiliser ce code pour rejoindre : **`%key%`**"
     set:
       admin-text-success: "Le **Salon Admin** est maintenant %channel% !"
       invites-text-success: "Le **Salon Invitations** est maintenant %channel% !"
@@ -123,6 +136,16 @@ commands:
   error-messages:
     private-message-error: "Cette commande ne fonctionne pas en messages privés"
     guild-message-error: "Cette commande ne fonctionne pas dans un Serveur, elle n'est utilisable qu'en messages privés"
+  aliases:
+    vider: "clean"
+    lancer: "start"
+    langue: "lang"
+    fermer: "lock"
+    ouvrir: "unlock"
+    enregistrer: "register"
+    partie: "create"
+    mettre: "set"
+
 
 
 

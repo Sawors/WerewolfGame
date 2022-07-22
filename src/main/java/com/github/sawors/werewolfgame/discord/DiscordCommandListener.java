@@ -30,7 +30,14 @@ public class DiscordCommandListener extends ListenerAdapter {
         String content = event.getMessage().getContentDisplay();
         String[] args = content.split(" ");
         if(event.isFromGuild() && args.length >= 2 && args[0].equals("!ww") && !Main.isLinked(event.getChannel().getIdLong())){
-            
+            // guild commands
+            if(!DatabaseManager.getGuildLanguage(event.getGuild()).toString().substring(0,2).equalsIgnoreCase("en")){
+                Main.logAdmin("uwu");
+                String alias = TranslatableText.get("commands.aliases."+args[1].toLowerCase(Locale.ROOT), DatabaseManager.getGuildLanguage(event.getGuild()), true);
+                Main.logAdmin(alias);
+                args[1] = alias != null ? alias : args[1];
+                Main.logAdmin(args[1]);
+            }
             switch(args[1].toLowerCase(Locale.ROOT)){
                 case"test":
                     new TestCommand().execute(event.getMessage());
@@ -107,6 +114,7 @@ public class DiscordCommandListener extends ListenerAdapter {
                     }
                     break;
                 case"create":
+                case"game":
                     JoinType jointype = JoinType.PUBLIC;
                     if(args.length >= 3 && args[2].equalsIgnoreCase("private")){
                         jointype = JoinType.PRIVATE;
@@ -161,6 +169,12 @@ public class DiscordCommandListener extends ListenerAdapter {
             GameManager manager = Main.getManager(event.getChannel().getIdLong());
             if(manager != null && manager.getAdminChannel().getId().equals(event.getChannel().getId())){
                 String[] commands = event.getMessage().getContentDisplay().split(" ");
+    
+                if(!DatabaseManager.getGuildLanguage(event.getGuild()).toString().substring(0,2).equalsIgnoreCase("en")){
+                    String alias = TranslatableText.get("commands.aliases."+commands[0].toLowerCase(Locale.ROOT), DatabaseManager.getGuildLanguage(event.getGuild()), true);
+                    commands[0] = alias != null ? alias : commands[0];
+                }
+                
                 if(commands.length > 0){
                     switch(commands[0].toLowerCase(Locale.ROOT)){
                         case"clean":

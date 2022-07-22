@@ -6,6 +6,7 @@ import com.github.sawors.werewolfgame.YamlMapParser;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
+import javax.annotation.Nullable;
 import javax.annotation.WillClose;
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,17 +51,22 @@ public class TranslatableText {
         }
     }
 
-    public static String get(@NotNull String textkey, @NotNull LoadedLocale locale){
+    public static @NotNull String get(@NotNull String textkey, @NotNull LoadedLocale locale){
+        String output = get(textkey,locale,false);
+        return output != null ? output : "how can this happen ?";
+    }
+    
+    public static @Nullable String get(@NotNull String textkey, @NotNull LoadedLocale locale, boolean suppreserrors){
         if(!locales.containsKey(locale)){
-            return "***locale "+locale+" not loaded, it usually indicate an error in locale name***";
+            return suppreserrors ? null : "***locale "+locale+" not loaded, it usually indicate an error in locale name***";
         }
         String error = "***key \""+textkey+"\" in locale "+locale+" not found, report this to the locale's author***";
         try{
             return YamlMapParser.getData(locales.get(locale), textkey);
         } catch (ParseException e) {
-            return error+" ***"+e.getMessage()+"***";
+            return suppreserrors ? null : error+" ***"+e.getMessage()+"***";
         } catch (InvalidKeyException e) {
-            return error;
+            return suppreserrors ? null : error;
         }
     }
 

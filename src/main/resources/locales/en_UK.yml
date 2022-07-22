@@ -1,6 +1,8 @@
 # This file can be used as a translation template, original text (en_DEFAULT)
 # is added on top of each entry for you to know easily what to translate.
+#
 locale-name: "English (United Kingdom)"
+#
 # Some entries use placeholders, when translating please DO NOT modify these (you can move them,
 # but in most case do not remove placeholders from the entry).
 # A placeholder looks like this : %data%
@@ -61,8 +63,7 @@ invites:
     this game is %type%
     
     to join it click on the **%button%** button
-    
-  #*Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*
+
   # leave blank to use the same format as invite-body-customizable, otherwise it will be used for private invites
   # in place of invite-body-customizable
   private-invite-override:
@@ -105,15 +106,15 @@ commands:
       description: "force start the game"
     lang:
       description: "change the game language \n Example : *language english* command sets the language to english. \n Registered languages : **english**, **french**. \n **Advanced Users** : you can directly set the language locale format (if loaded in the instance : xx_XX)"
-      success: "language successfully set to **English**"
+      success: "Language successfully set to **English**"
     lock:
-      description: "locks the game, preventing all users from joining it with invitation's buttons"
-      success: "game locked, players can no more use invitation's buttons to join"
-      error: "game already locked, nothing has been changed"
+      description: "locks the game,  preventing all users from joining it with invitation's buttons"
+      success: "Game locked, players can no more use invitation's buttons to join"
+      error: "Game already locked, nothing has been changed"
     unlock:
       description: "unlocks the game, allows user to join the game with invitation's buttons"
-      success: "game unlocked, players can now use invitation's buttons to join"
-      error: "game already unlocked, nothing has been changed"
+      success: "Game unlocked, players can now use invitation's buttons to join"
+      error: "Game already unlocked, nothing has been changed"
     admin:
       description: "give the mentioned user the administrator permission and access to this channel"
       success: "Made %user% an administrator"
@@ -135,6 +136,9 @@ commands:
   error-messages:
     private-message-error: "This command does not work in private messages"
     guild-message-error: "This command does not work in Discord servers, please use private messages"
+  aliases:
+    #this is just to show you that this category exists (used only in non-english localizations to assign language-specific aliases to commands):)
+    clean-but-not-english: "clean" #as the name of the command category on the "command" category of this file
 
 
 
