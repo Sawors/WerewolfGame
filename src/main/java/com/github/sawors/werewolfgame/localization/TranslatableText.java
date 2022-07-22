@@ -70,6 +70,8 @@ public class TranslatableText {
         }
     }
 
+
+
     public static String getPluralForm(String word){
         return word+"s";
     }

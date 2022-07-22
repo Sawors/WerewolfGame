@@ -111,7 +111,6 @@ public class Main {
         TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(defloc.getPath()), new LoadedLocale("en_UK","English (United Kingdom)","english"));
         TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.fr_FR.getPath()), new LoadedLocale("fr_FR","Français (France)","french"));
         reloadLanguages();
-        TranslatableText.printLoaded();
         Main.logAdmin("Default language set to",instancelanguage.getName());
     }
     

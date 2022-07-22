@@ -71,7 +71,6 @@ public class LoadedLocale {
     }
     
     public static LoadedLocale fromReference(String reference){
-        TranslatableText.printLoaded();
         if(reference.length() == 5 && reference.contains("_")){
             return new LoadedLocale(reference);
         }
