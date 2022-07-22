@@ -46,7 +46,7 @@ invites:
   #
   # DO NOT remove the little "|-" at the beginning, it allows you to write your invite with multiple lines.
   # Allowed PLACEHOLDERS in invite body :
-  #   %HH% : hour of when the invite has been sent with two digits in 24h format (01, 23, 13, 03, 00)
+  #   %HH% : hour when the invite has been sent with two digits in 24h format (01, 23, 13, 03, 00)
   #   %mm% : minutes, format like hour
   #   %ss% : seconds, format like hour
   #   %YYYY% : year, with 4 digits (2004, 2022, 2132, 1142)
@@ -54,10 +54,11 @@ invites:
   #   %dd% : day of month, with 2 digits (31, 01, 28)
   #   %id% : the game unique ID, useless for most players
   #   %message% : UNUSED at the moment, might be used in the future to allow users to append custom messages to their invites
-  #   %type% : indicates if the game is public or private in a Discord code-block style (`public` for instance)
+  #   %type% : indicates if the game is public or private (mind that the "type" is in english whatever the language, so I advise you to put it in Discord's code-block style : `%type%` to avoid creating an awkward looking text)
+  #   %button% : the text on the "Join Game" button defined by buttons.join-game
   invite-body-customizable: |-
     this game is %type%,
-    to join it click on the **Join Game** button
+    to join it click on the **%button%** button
     
   #*Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*
   # leave blank to use the same format as invite-body-customizable, otherwise it will be used for private invites

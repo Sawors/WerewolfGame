@@ -430,7 +430,7 @@ public class GameManager {
                             buildInvite()
                                     .replaceAll("%id%",getId())
                                     .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT))
-                                    .replaceAll("%join%",buttontitle))
+                                    .replaceAll("%button%",buttontitle))
                     .setColor(0xb491c8)
                     .setFooter("ID: "+id)
                     .setTimestamp(LocalDateTime.now())
