@@ -7,26 +7,27 @@
 
 
 # PLURAL CANNOT BE USED YET, PLEASE IGNORE THE FOLLOWING COMMENT BLOCK!
-# To make plurals you can use the additive plural format (friend -> friends) by appending %-p% at the end of your
-# word, to define this plural form use additive-plural-mark.
-# If your language uses more than just the additive plural form (most languages) you can use up to 8 plural replacements
-# defined in plural-replaces. This list is dynamically loaded, so you can define as many replacements as you want
-# to define a replacement use this method :
-#   singular: plural
-# Example :
-#   y: "ie"
-# to use them simply use the placeholder %y% and replace the "y" with the singular form of your replacement
-# Examples :
-#   friend%-p%
-#     singular : friend
-#     plural : friends
-#   quer%y%
-#     singular : query
-#     plural : queries
-# PLURAL CANNOT BE USED YET !
-#additive-plural-mark: "s"
-#plural-replacements:
-#  y: "ie"
+        # To make plurals you can use the additive plural format (friend -> friends) by appending %-p% at the end of your
+        # word, to define this plural form use additive-plural-mark.
+        # If your language uses more than just the additive plural form (most languages) you can use up to 8 plural replacements
+        # defined in plural-replaces. This list is dynamically loaded, so you can define as many replacements as you want
+        # to define a replacement use this method :
+        #   singular: plural
+        # Example :
+        #   y: "ie"
+        # to use them simply use the placeholder %y% and replace the "y" with the singular form of your replacement
+        # Examples :
+        #   friend%-p%
+        #     singular : friend
+        #     plural : friends
+        #   quer%y%
+        #     singular : query
+        #     plural : queries
+        # PLURAL CANNOT BE USED YET !
+        #additive-plural-mark: "s"
+        #plural-replacements:
+        #  y: "ie"
+# PLURAL CANNOT BE USED YET, PLEASE IGNORE THE PREVIOUS COMMENT BLOCK !
 
 invites:
   #
@@ -55,9 +56,12 @@ invites:
   #   %id% : the game unique ID, useless for most players
   #   %message% : UNUSED at the moment, might be used in the future to allow users to append custom messages to their invites
   #   %type% : indicates if the game is public or private (mind that the "type" is in english whatever the language, so I advise you to put it in Discord's code-block style : `%type%` to avoid creating an awkward looking text)
-  #   %button% : the text on the "Join Game" button defined by buttons.join-game
+  #   %button% : the text on the "Join Game" button defined by buttons.join-game or buttons.join-private-game if the game is private
   invite-body-customizable: |-
     this game is %type%,
+    
+    
+    
     to join it click on the **%button%** button
     
   #*Created the %dd%/%MM%/%YYYY% at %HH%h:%mm%*

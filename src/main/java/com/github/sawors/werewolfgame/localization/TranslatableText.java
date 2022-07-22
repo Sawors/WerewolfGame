@@ -23,7 +23,7 @@ public class TranslatableText {
     public static void load(File @NotNull ... yamlfile){
         for(File locale : yamlfile){
             try(InputStream input = new FileInputStream(locale)){
-                locales.put(locale.getName(), new Yaml().load(input));
+                locales.put(locale.getName().substring(0,locale.getName().indexOf(".")), new Yaml().load(input));
             }catch (IOException e){
                 e.printStackTrace();
             }
