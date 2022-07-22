@@ -26,7 +26,7 @@ public class GameManager {
     private GameType gametype;
     private GamePhase gamephase;
     // playerlist's String -> UserId.toString()
-    private HashMap<String, WerewolfPlayer> playerlist = new HashMap<>();
+    private HashMap<UserId, WerewolfPlayer> playerlist = new HashMap<>();
     private HashMap<String, UserId> discordlink = new HashMap<>();
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
     private HashMap<GuildChannel, PlayerRole> rolechannels = new HashMap<>();
@@ -228,7 +228,7 @@ public class GameManager {
         Main.linkChannel(channel.getIdLong(), id);
     }
     
-    public Set<String> getPlayerList(){
+    public Set<UserId> getPlayerList(){
         return playerlist.keySet();
     }
     
@@ -254,8 +254,8 @@ public class GameManager {
             return;
         }
         if(playerid != null){
-            if(!playerlist.containsKey(playerid.toString())){
-                playerlist.put(playerid.toString(), new WerewolfPlayer(playerid, this));
+            if(!playerlist.containsKey(playerid)){
+                playerlist.put(playerid, new WerewolfPlayer(playerid, this));
             }
             String discord = DatabaseManager.getDiscordId(playerid);
             if(discord != null && !discordlink.containsKey(discord)){
@@ -297,7 +297,9 @@ public class GameManager {
     }
     
     public void removePlayer(UserId playerid){
-    
+            if(playerid != null && playerlist.containsKey(playerid)){
+                //playerlist.remove(playerid);
+            }
     }
 
     public String getId(){

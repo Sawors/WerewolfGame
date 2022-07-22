@@ -4,6 +4,7 @@ import com.github.sawors.werewolfgame.DatabaseManager;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserId {
@@ -13,6 +14,10 @@ public class UserId {
     @Override
     public String toString() {
         return discriminant.toLowerCase(Locale.ENGLISH);
+    }
+    @Override
+    public boolean equals(Object o){
+        return o.getClass() == this.getClass() && Objects.equals(this.toString(), o.toString());
     }
 
     public String getDiscriminant(){

@@ -59,35 +59,7 @@ public class Main {
         minecraftenabled = !Main.standalone && PluginLauncher.getPlugin().isEnabled();
         
         if(standalone){
-            File createconf = new File(datalocation+File.separator+"config.yml");
-            try{
-                createconf.createNewFile();
-                boolean overwrite = true;
-                try(InputStream loadold = new FileInputStream(createconf)){
-                    Map<String, Object> oldconfig = new Yaml().load(loadold);
-                    String regen = YamlMapParser.getString(oldconfig, "regenerate");
-                    if(regen != null && regen.length() >= 2){
-                        overwrite = !regen.equalsIgnoreCase("false");
-                    }
-                } catch (FileNotFoundException e){
-                    overwrite = true;
-                }
-                if(overwrite){
-                    try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
-                        if(config != null){
-                            Main.logAdmin("regenerating config.yml (replacing the old file if it existed");
-                            writer.write(config.readAllBytes());
-                        }
-                    }
-                } else {
-                    Main.logAdmin("config file found, loading it !");
-                }
-                try(InputStream config = new FileInputStream(createconf)){
-                    configmap = new Yaml().load(config);
-                }
-            }catch (IOException e){
-                e.printStackTrace();
-            }
+            reloadConfig();
         }
         
         dbfile = new File(datalocation+File.separator+"database.db");
@@ -133,6 +105,12 @@ public class Main {
         TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(defloc.getPath()), defloc.toString());
         TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.en_UK.getPath()), BundledLocale.en_UK.toString());
         TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.fr_FR.getPath()), BundledLocale.fr_FR.toString());
+        reloadLanguages();
+        Main.logAdmin("Default language set to",instancelanguage);
+    }
+
+    public static void reloadLanguages(){
+        BundledLocale defloc = BundledLocale.en_UK;
         File localespath = new File(datalocation+File.separator+"locales"+File.separator);
         localespath.mkdirs();
         File[] toload = localespath.listFiles();
@@ -149,7 +127,37 @@ public class Main {
         } else {
             instancelanguage = defloc.toString();
         }
-        Main.logAdmin("Default language set to",instancelanguage);
+    }
+    public static void reloadConfig(){
+        File createconf = new File(datalocation+File.separator+"config.yml");
+        try{
+            createconf.createNewFile();
+            boolean overwrite = true;
+            try(InputStream loadold = new FileInputStream(createconf)){
+                Map<String, Object> oldconfig = new Yaml().load(loadold);
+                String regen = YamlMapParser.getString(oldconfig, "regenerate");
+                if(regen != null && regen.length() >= 2){
+                    overwrite = !regen.equalsIgnoreCase("false");
+                }
+            } catch (FileNotFoundException e){
+                overwrite = true;
+            }
+            if(overwrite){
+                try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
+                    if(config != null){
+                        Main.logAdmin("regenerating config.yml (replacing the old file if it existed");
+                        writer.write(config.readAllBytes());
+                    }
+                }
+            } else {
+                Main.logAdmin("config file found, loading it !");
+            }
+            try(InputStream config = new FileInputStream(createconf)){
+                configmap = new Yaml().load(config);
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
     
     public static String getLanguage(){

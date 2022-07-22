@@ -30,7 +30,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 String gameid = buttonid.replace("join:", "");
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
-                    if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()).toString())){
+                    if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
                         
                         // player validated, adding it to the game
                         gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
@@ -56,7 +56,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 String gameid = buttonid.replace("joinprivate:", "");
                 GameManager gm = GameManager.fromId(gameid);
                 if(gm != null){
-                    if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()).toString())){
+                    if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
                         TextInput joincode = TextInput.create("codeinput",TranslatableText.get("forms.private-game-code.code-field-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(guild))), TextInputStyle.SHORT)
                                 .setPlaceholder(TranslatableText.get("forms.private-game-code.text-placeholder", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))))
                                 .setRequired(true)

@@ -18,7 +18,6 @@ public class TestCommand implements GameCommand{
     }
     
     public void execute(Message msg) {
-        Main.getJDA().retrieveUserById("448497190130810901").queue(u -> u.openPrivateChannel().queue(c -> c.sendMessage("futur banger incoming, ça devrait être trop cool d'orga des parties de LG bientôt ! :D (*je suis pas du tout Sawors, rien à voir* :eyes:) (oui et je peux pas recevoir de MP aussi, en tout cas en tant que bot)").queue()));
         /*MessageChannel chan = msg.getChannel();
         EmbedBuilder embed = new EmbedBuilder()
                 .setAuthor("Game invitation")
