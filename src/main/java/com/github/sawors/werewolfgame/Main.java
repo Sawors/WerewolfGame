@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Main {
+    //TODO : Linking check
     private static HashMap<String, GameManager> activegames = new HashMap<>();
     private static boolean standalone;
     private static boolean discordenabled = false;
@@ -31,6 +32,7 @@ public class Main {
     // I use this linking map to avoid creating a new JDA Event Listener each time a new GameManager is created
     // Long : Channel ID
     // String : GameManager ID
+    //TODO : Linking check
     private static HashMap<Long, String> channellink = new HashMap<>();
     // Use this to get all loaded roles
     private static Set<PlayerRole> rolepool = new HashSet<>();

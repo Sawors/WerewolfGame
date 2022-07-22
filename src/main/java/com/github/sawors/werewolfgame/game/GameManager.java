@@ -295,6 +295,10 @@ public class GameManager {
     public void addplayer(UserId playerid){
         addPlayer(playerid, null);
     }
+    
+    public void removePlayer(UserId playerid){
+    
+    }
 
     public String getId(){
         return id;
