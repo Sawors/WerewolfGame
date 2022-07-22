@@ -10,6 +10,7 @@ import com.github.sawors.werewolfgame.game.JoinType;
 import com.github.sawors.werewolfgame.localization.BundledLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -187,6 +188,11 @@ public class DiscordCommandListener extends ListenerAdapter {
                                 }
                             }
                             break;
+                        case"admin":
+                            for(Member member : event.getMessage().getMentions().getMembers()){
+                                manager.setAdmin(member.getUser());
+                                event.getChannel().sendMessage(TranslatableText.get("commands.admin.admin-success",manager.getLanguage())).queue();
+                            }
                     }
                 }
             }

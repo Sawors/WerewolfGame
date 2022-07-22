@@ -114,6 +114,10 @@ commands:
     lang-description:
     #lang-success: "language successfully set to **English**"
     lang-success:
+    #admin-description: "give the mentioned user the administrator permission and access to this channel"
+    admin-description:
+    #admin-success: "Made %user% an administrator"
+    admin-success:
   ww:
     register:
       #success: "Server *%name%:%id%* successfully registered"

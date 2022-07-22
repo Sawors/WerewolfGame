@@ -96,6 +96,11 @@ commands:
     lang-description: "change la langue de la partie selon le premier argument (structure : lang <language>). \n Exemple : la commande *language english* change la langue en anglais. \n Langues disponibles : **english**, **french**. \n **Utilisateurs Avancés** : vous pouvez directement définir la langue selon le format de sa localisation (si chargée dans l'instance : xx_XX)"
     #lang-success: "language successfully set to **English**"
     lang-success: "langue changé avec succès en **Français**"
+    #"give the mentioned user the administrator permission and access to this channel"
+    #admin-description: "give the mentioned user the administrator permission and access to this channel"
+    admin-description: "donne aux utilisateurs mentionnés la permission d'administrateur de cette parte et l'accès à ce salon"
+    #admin-success: "Made %user% an administrator"
+    admin-success: "%user% est maintenant un administrateur"
 
   ww:
     register:
