@@ -188,11 +188,27 @@ public class DiscordCommandListener extends ListenerAdapter {
                                 }
                             }
                             break;
+                        case"lock":
+                            if(manager.isLocked() && manager.getAdminChannel() != null){
+                                manager.getAdminChannel().sendMessage(TranslatableText.get("commands.admin.lock.error", manager.getLanguage())).queue();
+                            } else {
+                                manager.lock();
+                            }
+                            break;
+                        case"unlock":
+                            Main.logAdmin(manager.isLocked());
+                            if(!manager.isLocked() && manager.getAdminChannel() != null){
+                                manager.getAdminChannel().sendMessage(TranslatableText.get("commands.admin.unlock.error", manager.getLanguage())).queue();
+                            } else {
+                                manager.unlock();
+                            }
+                            break;
                         case"admin":
                             for(Member member : event.getMessage().getMentions().getMembers()){
                                 manager.setAdmin(member.getUser());
-                                event.getChannel().sendMessage(TranslatableText.get("commands.admin.admin-success",manager.getLanguage()).replaceAll("%user%",member.getAsMention())).queue();
+                                event.getChannel().sendMessage(TranslatableText.get("commands.admin.admin.success",manager.getLanguage()).replaceAll("%user%",member.getAsMention())).queue();
                             }
+                            break;
                     }
                 }
             }

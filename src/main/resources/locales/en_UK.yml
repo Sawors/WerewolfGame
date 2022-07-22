@@ -63,11 +63,15 @@ invites:
   # leave blank to use the same format as invite-body-customizable, otherwise it will be used for private invites
   # in place of invite-body-customizable
   private-invite-override:
+  locked-title: "Game Locked"
+  already-started-title: "Game Locked (already started)"
+  expired-title: "Game Finished"
 
 buttons:
   join-game: "Join Game"
   join-private-game: "Join Private Game"
   expired-game: "Game Finished"
+  locked-game: "Game Locked"
   leave-game: "Leave Game"
   leave-game-message: "Click on the **%button%** button to leave the game"
 
@@ -92,12 +96,24 @@ events:
 commands:
   admin:
     title: "**Command List :**"
-    clean-description: "removes all channels created for this game (including this one) and deletes the category"
-    start-description: "force start the game"
-    lang-description: "change the game language to the first argument (structure : lang <language>). \n Example : *language english* command sets the language to english. \n Registered languages : **english**, **french**. \n **Advanced Users** : you can directly set the language locale format (if loaded in the instance : xx_XX)"
-    lang-success: "language successfully set to **English**"
-    admin-description: "give the mentioned user the administrator permission and access to this channel"
-    admin-success: "Made %user% an administrator"
+    clean:
+      description: "removes all channels created for this game (including this one) and deletes the category"
+    start:
+      description: "force start the game"
+    lang:
+      description: "change the game language \n Example : *language english* command sets the language to english. \n Registered languages : **english**, **french**. \n **Advanced Users** : you can directly set the language locale format (if loaded in the instance : xx_XX)"
+      success: "language successfully set to **English**"
+    lock:
+      description: "locks the game, preventing all users from joining it with invitation's buttons"
+      success: "game locked, players can no more use invitation's buttons to join"
+      error: "game already locked, nothing has been changed"
+    unlock:
+      description: "unlocks the game, allows user to join the game with invitation's buttons"
+      success: "game unlocked, players can now use invitation's buttons to join"
+      error: "game already unlocked, nothing has been changed"
+    admin:
+      description: "give the mentioned user the administrator permission and access to this channel"
+      success: "Made %user% an administrator"
   ww:
     register:
       success: "Server *%name%:%id%* successfully registered"

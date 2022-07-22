@@ -57,13 +57,13 @@ public class TranslatableText {
 
     public static String get(@NotNull String textkey, @NotNull String locale){
         if(!locales.containsKey(locale)){
-            return "locale "+locale+" not loaded, it usually indicate an error in locale name";
+            return "***locale "+locale+" not loaded, it usually indicate an error in locale name***";
         }
-        String error = "key \""+textkey+"\" in locale "+locale+" (loaded from stream) not found, it probably indicate an inexistent or outdated locale, report this to the locale's Author or on https://github.com/Sawors/WerewolfGame/issues/new";
+        String error = "***key \""+textkey+"\" in locale "+locale+" (loaded from stream) not found, it probably indicate an inexistent or outdated locale, report this to the locale's Author or on*** https://github.com/Sawors/WerewolfGame/issues/new";
         try{
             return YamlMapParser.getData(locales.get(locale), textkey);
         } catch (ParseException e) {
-            return error+" "+e.getMessage();
+            return error+" ***"+e.getMessage()+"***";
         } catch (InvalidKeyException e) {
             return error;
         }

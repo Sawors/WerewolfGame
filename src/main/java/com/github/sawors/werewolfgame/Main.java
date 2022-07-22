@@ -145,7 +145,7 @@ public class Main {
             if(overwrite){
                 try(OutputStream writer = new FileOutputStream(createconf); InputStream config = Main.class.getClassLoader().getResourceAsStream("config.yml")){
                     if(config != null){
-                        Main.logAdmin("regenerating config.yml (replacing the old file if it existed");
+                        Main.logAdmin("regenerating config.yml (replacing the old file if it existed)");
                         writer.write(config.readAllBytes());
                     }
                 }

@@ -88,7 +88,6 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                 if(gm != null){
                     if(gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
                         // player validated, removing it from the game
-                        Main.logAdmin("trydel1");
                         gm.removePlayer(UserId.fromDiscordId(event.getUser().getId()));
                     } else {
                         Main.logAdmin("Attempt to remove Discord user "+event.getUser().getAsTag()+" from game "+gm.getId()+" via the leave button failed, user not in the game (THIS NEEDS TO BE INSPECTED !)");

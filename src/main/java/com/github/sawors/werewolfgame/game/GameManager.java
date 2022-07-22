@@ -51,7 +51,8 @@ public class GameManager {
     private List<PlayerRole> roleset;
     private Queue<GamePhase> eventqueue = new SynchronousQueue<>();
     private int round = 0;
-    private String language = Main.getLanguage();
+    private String language;
+    private boolean locked = false;
     
     
 
@@ -87,10 +88,12 @@ public class GameManager {
     
     private String buildTutorial(){
         return TranslatableText.get("commands.admin.title",language)
-                +"\n\n `clean` : "+TranslatableText.get("commands.admin.clean-description",language)
-                +"\n\n `start` : "+TranslatableText.get("commands.admin.start-description",language)
-                +"\n\n `lang` : "+TranslatableText.get("commands.admin.lang-description",language)
-                +"\n\n `admin` : "+TranslatableText.get("commands.admin.admin-description",language)
+                +"\n\n `clean` : "+TranslatableText.get("commands.admin.clean.description",language)
+                +"\n\n `start` : "+TranslatableText.get("commands.admin.start.description",language)
+                +"\n\n `lang` : "+TranslatableText.get("commands.admin.lang.description",language)
+                +"\n\n `lock` : "+TranslatableText.get("commands.admin.lock.description",language)
+                +"\n\n `unlock` : "+TranslatableText.get("commands.admin.unlock.description",language)
+                +"\n\n `admin` : "+TranslatableText.get("commands.admin.admin.description",language)
         ;
     }
     
@@ -186,7 +189,7 @@ public class GameManager {
         adminchannel.getManager().setName(TranslatableText.get("channels.text.admin", language)).queue();
         maintextchannel.getManager().setName(TranslatableText.get("channels.text.main", language)).queue();
         mainvoicechannel.getManager().setName(TranslatableText.get("channels.voice.main", language)).queue();
-        adminchannel.sendMessage(TranslatableText.get("commands.admin.lang-success", language)).queue(m -> adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build()).queue());
+        adminchannel.sendMessage(TranslatableText.get("commands.admin.lang.success", language)).queue(m -> adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build()).queue());
     }
     
     private void createChannels(Category category){
@@ -260,7 +263,18 @@ public class GameManager {
             Main.logAdmin(playerid+" could not join game "+id+" reason : (private game) wrong key -> "+privatekey+"!="+joinkey);
             return;
         }
-        if(playerid != null){
+        if(playerid != null && !locked){
+            // remove the player from its ancient game if it is unlocked, otherwise prevent it to join this game
+            for(GameManager mng : Main.getGamesList().values()){
+                if(mng.getPlayerList().contains(playerid)){
+                    if(mng.isLocked()){
+                        Main.logAdmin("player could not have been moved from game "+mng.getId()+" to "+id+" because the source game is locked");
+                        return;
+                    } else {
+                        mng.removePlayer(playerid);
+                    }
+                }
+            }
             if(!playerlist.containsKey(playerid)){
                 playerlist.put(playerid, new WerewolfPlayer(playerid, this));
             }
@@ -276,7 +290,9 @@ public class GameManager {
                     guild.retrieveMember(UserSnowflake.fromId(discord)).queue(m ->{
                         if(m != null && maintextchannel != null){
                             try{
-                                guild.moveVoiceMember(m, mainvoicechannel).queue();
+                                if(m.getVoiceState() != null && m.getVoiceState().inAudioChannel()){
+                                    guild.moveVoiceMember(m, mainvoicechannel).queue();
+                                }
                             } catch (InsufficientPermissionException noperm){
                                 Main.logAdmin("Bot does not have enough permissions to move user "+discord+" in guild "+guild.getId());
                             } catch (IllegalStateException ignore){
@@ -305,7 +321,6 @@ public class GameManager {
     
     public void removePlayer(UserId player){
             if(player != null && playerlist.containsKey(player)){
-                Main.logAdmin("del3");
                 // remove discord link
                 if(discordlink.containsValue(player)){
                     for(Map.Entry<String, UserId> entry : discordlink.entrySet()){
@@ -357,9 +372,7 @@ public class GameManager {
                     }
                     maintextchannel.sendMessage(TranslatableText.get("events.player-leave-message", language).replaceAll("%user%",member.getAsMention())).queue();
                 });
-                Main.logAdmin(playerlist);
                 playerlist.remove(player);
-                Main.logAdmin(playerlist);
             }
     }
 
@@ -403,26 +416,28 @@ public class GameManager {
     }
     
     protected void sendInvite(TextChannel channel){
-        String guildlang = DatabaseManager.getGuildLanguage(guild);
-        String buttontitle = jointype == JoinType.PUBLIC ? TranslatableText.get("buttons.join-game", guildlang) : TranslatableText.get("buttons.join-private-game", guildlang);
-        Button joinbutton = Button.primary("join:"+id, buttontitle);
-        if(jointype == JoinType.PRIVATE){
-            joinbutton = Button.secondary("joinprivate:"+id, buttontitle);
-        }
-        EmbedBuilder builder = new EmbedBuilder();
+        if(!locked){
+            String guildlang = DatabaseManager.getGuildLanguage(guild);
+            String buttontitle = jointype == JoinType.PUBLIC ? TranslatableText.get("buttons.join-game", guildlang) : TranslatableText.get("buttons.join-private-game", guildlang);
+            Button joinbutton = Button.primary("join:"+id, buttontitle);
+            if(jointype == JoinType.PRIVATE){
+                joinbutton = Button.secondary("joinprivate:"+id, buttontitle);
+            }
+            EmbedBuilder builder = new EmbedBuilder();
             builder
                     // TODO : support for multiple predefined time display
-                .setDescription(
-                    buildInvite()
-                    .replaceAll("%id%",getId())
-                    .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT))
-                    .replaceAll("%join%",buttontitle))
-                .setColor(0xb491c8)
-                .setFooter("ID: "+id)
-                .setTimestamp(LocalDateTime.now())
-                    ;
-        MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
-        msg.queue(m -> invites.add(m));
+                    .setDescription(
+                            buildInvite()
+                                    .replaceAll("%id%",getId())
+                                    .replaceAll("%type%",jointype.toString().toLowerCase(Locale.ROOT))
+                                    .replaceAll("%join%",buttontitle))
+                    .setColor(0xb491c8)
+                    .setFooter("ID: "+id)
+                    .setTimestamp(LocalDateTime.now())
+            ;
+            MessageAction msg =channel.sendMessageEmbeds(builder.build()).setActionRow(joinbutton);
+            msg.queue(m -> invites.add(m));
+        }
     }
     
     private void logInvite(Message msg){
@@ -438,17 +453,70 @@ public class GameManager {
         }
     }
     
-    public static void setInviteExpired(Message invite, String language){
-        Main.logAdmin("marking invite "+invite.getId()+" as expired");
+    public static void setInviteExpired(Message invite, String language) {
+        Main.logAdmin("marking invite " + invite.getId() + " as expired");
+        setInviteState(invite, TranslatableText.get("invites.expired-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild()))), TranslatableText.get("buttons.expired-game", language), ButtonStyle.SECONDARY, 0x40454c, false);
+    }
+    
+    public static void setInviteLocked(Message invite, String language) {
+        Main.logAdmin("marking invite " + invite.getId() + " as locked");
+        setInviteState(invite, TranslatableText.get("invites.locked-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild()))), TranslatableText.get("buttons.locked-game", language), ButtonStyle.PRIMARY, 0x553369, false);
+    }
+    
+    public static void setInviteOpen(Message invite, String language) {
+        Main.logAdmin("marking invite " + invite.getId() + " as open");
+        setInviteState(invite, "", TranslatableText.get("buttons.join-game", language), ButtonStyle.PRIMARY, 0xb491c8, true);
+    }
+    
+    public void lock(){
+        lock(true);
+    }
+    
+    public void unlock(){
+        lock(false);
+        
+    }
+    
+    public void lock(boolean lock){
+        locked = lock;
+        if(lock){
+            if(adminchannel != null){
+                adminchannel.sendMessage(TranslatableText.get("commands.admin.lock.success",language)).queue();
+            }
+            for(Message msg : invites){
+                setInviteLocked(msg, language);
+            }
+        } else {
+            if(adminchannel != null){
+                adminchannel.sendMessage(TranslatableText.get("commands.admin.unlock.success",language)).queue();
+            }
+            for(Message msg : invites){
+                setInviteOpen(msg, language);
+            }
+        }
+    }
+    
+    public boolean isLocked(){
+        return locked;
+    }
+    
+    
+    private static void setInviteState(Message invite, String title, String buttonlabel, ButtonStyle style, int color, boolean open){
         List<ActionRow> rows = invite.getActionRows();
-        List<Button> disabled = new ArrayList<>();
-        for(ActionRow act : rows){
-            act.getButtons().forEach(bt -> disabled.add(bt.asDisabled().withLabel(TranslatableText.get("buttons.expired-game", language)).withStyle(ButtonStyle.SECONDARY)));
+        List<Button> modified = new ArrayList<>();
+        if(open){
+            for(ActionRow act : rows){
+                act.getButtons().forEach(bt -> modified.add(bt.withLabel(buttonlabel).withStyle(style).asEnabled()));
+            }
+        } else {
+            for(ActionRow act : rows){
+                act.getButtons().forEach(bt -> modified.add(bt.withLabel(buttonlabel).withStyle(style).asDisabled()));
+            }
         }
         List<MessageEmbed> newembeds = new ArrayList<>();
-        invite.getEmbeds().forEach(em -> newembeds.add(new EmbedBuilder(em).setColor(0x40454c).setAuthor(TranslatableText.get("buttons.expired-game", DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild())))).build()));
-        
-        invite.editMessageEmbeds(invite.getEmbeds()).setActionRow(disabled).queue();
+        invite.getEmbeds().forEach(em -> newembeds.add(new EmbedBuilder(em).setColor(color).setAuthor(title).build()));
+    
+        invite.editMessageEmbeds(invite.getEmbeds()).setActionRow(modified).queue();
         invite.editMessageEmbeds(invite.getEmbeds()).setEmbeds(newembeds).queue();
     }
     
