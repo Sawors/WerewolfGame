@@ -4,6 +4,7 @@ import com.github.sawors.werewolfgame.DatabaseManager;
 import com.github.sawors.werewolfgame.LinkedUser;
 import com.github.sawors.werewolfgame.LoadedLocale;
 import com.github.sawors.werewolfgame.Main;
+import com.github.sawors.werewolfgame.database.UserDataType;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
@@ -635,7 +636,7 @@ public class GameManager {
         fakenameslist.add("Arthurlute");
         fakenameslist.add("Marvanne");
         fakenameslist.add("7o");
-        fakenameslist.add("aaaa");
+        fakenameslist.add("BelloBito");
         fakenameslist.add("GuyDon");
         fakenameslist.add("Richard GoldenTrash");
         fakenameslist.add("Gabriel >");
@@ -652,7 +653,9 @@ public class GameManager {
             fakenames.addAll(fakenameslist);
         }
         Main.logAdmin("Name Pool", fakenames);
-        playerset.forEach(uid -> votepool.add(new LinkedUser(uid,uid != UserId.fromDiscordId("315237447065927691") ? fakenames.poll() : "Sawors",UUID.randomUUID(),"",null,null)));
+        Main.logAdmin(playerset);
+        Main.logAdmin(playerset.contains(UserId.fromDiscordId("315237447065927691")));
+        playerset.forEach(uid -> votepool.add(new LinkedUser(uid, DatabaseManager.getUserData(uid, UserDataType.NAME) != null ? DatabaseManager.getUserData(uid, UserDataType.NAME) : fakenames.poll(),UUID.randomUUID(),"",null,null)));
         return votepool;
     }
     
@@ -668,7 +671,7 @@ public class GameManager {
         return currentevent;
     }
     
-    protected void nextEvent(){
+    public void nextEvent(){
         if(eventqueue.isEmpty()){
             // TODO ???
         } else {
@@ -695,7 +698,7 @@ public class GameManager {
 
     private void buildFirstDayQueue(){
         //eventqueue.add(new Intro(this));
-        eventqueue.add(new MayorVote(this, defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691")), maintextchannel));
+        eventqueue.add(new MayorVote(this, defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691"), UserId.fromString("oxtyaevi")), maintextchannel));
         eventqueue.add(new NightFall(this));
     }
 

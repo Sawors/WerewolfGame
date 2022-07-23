@@ -224,11 +224,15 @@ public class DatabaseManager {
         }
     }
     
-    private static String getUserData(UserId user, UserDataType data){
+    public static @Nullable String getUserData(UserId user, UserDataType data){
         try(Connection co = connect()){
             ResultSet dataget = co.prepareStatement("SELECT "+data+" FROM Users WHERE "+UserDataType.USERID+"='"+user+"'").executeQuery();
             if(!dataget.isClosed()){
-                return dataget.getString(data.toString());
+                String sdata = dataget.getString(data.toString());
+                if(sdata == null || sdata.equals("null") || sdata.equals("")){
+                    return null;
+                }
+                return sdata;
             } else {
                 return null;
             }

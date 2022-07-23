@@ -47,7 +47,12 @@ public class LinkedUser {
         }
         return retrieveduser;
     }
-    
+
+    @Override
+    public String toString() {
+        return id+"(Name="+name+" DiscordId="+discordid+" MCUUID="+minecraftid+" Preferences"+preferences+" Tags"+tags+")";
+    }
+
     public UserId getId(){
         return id;
     }

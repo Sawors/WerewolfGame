@@ -93,7 +93,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                                 Main.logAdmin("Effectively vote");
                                 ((GenericVote) current).setVote(UserId.fromDiscordId(event.getUser().getId()),voted);
                                 Main.logAdmin(UserId.fromDiscordId(event.getUser().getId())+" -> "+voted);
-                                ((GenericVote) current).validate(false, true);
+                                ((GenericVote) current).validate(false, false);
                             }
                         }
                         event.deferEdit().queue();

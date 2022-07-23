@@ -1,6 +1,7 @@
 package com.github.sawors.werewolfgame.game.phases;
 
 import com.github.sawors.werewolfgame.LinkedUser;
+import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.game.GameManager;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -44,6 +45,7 @@ public abstract class GenericVote extends GameEvent {
 
     public void setVote(UserId voter, UserId voted){
         votemap.put(voter,voted);
+        Main.logAdmin(votemap);
     }
 
     public Map<UserId, UserId> getVoteMap(){

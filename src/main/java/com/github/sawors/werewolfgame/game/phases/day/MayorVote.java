@@ -10,9 +10,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MayorVote extends GenericVote {
 
@@ -26,8 +24,26 @@ public class MayorVote extends GenericVote {
 
     @Override
     public void validate(boolean force, boolean wait) {
+
+        wait = false;
+
         if((votemap.keySet().containsAll(voters) && !wait) || force){
-            Main.logAdmin("Votes", votemap);
+            Main.logAdmin("Votes Complete", votemap);
+            Map<UserId, Integer> occurences = new HashMap<>();
+            for(UserId voted : votemap.values()){
+                occurences.put(voted,Collections.frequency(votemap.values(),voted));
+            }
+            ArrayList<UserId> sortedvotes = new ArrayList<>(occurences.keySet());
+            //shuffle here to avoid predictable election behaviour
+            Collections.shuffle(sortedvotes);
+            sortedvotes.sort(Comparator.comparingInt(occurences::get));
+            Collections.reverse(sortedvotes);
+            Main.logAdmin("Vote Scores", occurences);
+            Main.logAdmin("Vote Ranks", sortedvotes);
+            Main.logAdmin("Selected",sortedvotes.get(0));
+
+            // always at the end of true validating methods
+            gm.nextEvent();
         }
     }
 
@@ -41,12 +57,16 @@ public class MayorVote extends GenericVote {
         List<ActionRow> votebuttons = new ArrayList<>();
         List<Button> tempbuttons = new ArrayList<>();
         for(LinkedUser user : votepool){
+            tempbuttons.add(Button.primary("vote:"+gm.getId()+"#"+user.getId(), user.getName()));
             if(tempbuttons.size() >= 3){
                 votebuttons.add(ActionRow.of(tempbuttons));
                 tempbuttons.clear();
-            } else {
-                tempbuttons.add(Button.primary("vote:"+gm.getId()+"#"+user.getId(), user.getName()));
             }
+        }
+        if(tempbuttons.size()>0){
+            //
+            votebuttons.add(ActionRow.of(tempbuttons));
+            tempbuttons.clear();
         }
 
 
