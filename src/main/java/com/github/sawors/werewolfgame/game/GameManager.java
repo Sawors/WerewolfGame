@@ -627,7 +627,32 @@ public class GameManager {
 
     private Set<LinkedUser> defaultVotePool(){
         Set<LinkedUser> votepool = new HashSet<>();
-        playerset.forEach(uid -> votepool.add(new LinkedUser(uid,RandomStringUtils.randomAlphabetic(6),UUID.randomUUID(),"",null,null)));
+        List<String> fakenameslist = new ArrayList<>();
+        fakenameslist.add("Pasawors");
+        fakenameslist.add("esprit-absent");
+        fakenameslist.add("MOLE1383");
+        fakenameslist.add("Dimitri Sussmaibouls");
+        fakenameslist.add("Arthurlute");
+        fakenameslist.add("Marvanne");
+        fakenameslist.add("7o");
+        fakenameslist.add("aaaa");
+        fakenameslist.add("GuyDon");
+        fakenameslist.add("Richard GoldenTrash");
+        fakenameslist.add("Gabriel >");
+        fakenameslist.add("UwU E-Girl#547");
+        fakenameslist.add("Xx_D4rkSl4y3r_xX");
+        fakenameslist.add("AlphacatCoolCat");
+        fakenameslist.add("l'Idiot");
+        fakenameslist.add("JimmyBois");
+        fakenameslist.add("aïecaillou");
+        Collections.shuffle(fakenameslist);
+        Queue<String> fakenames = new LinkedList<>(fakenameslist);
+        for(int i = 1; fakenames.size()*i <= playerset.size(); i++){
+            Collections.shuffle(fakenameslist);
+            fakenames.addAll(fakenameslist);
+        }
+        Main.logAdmin("Name Pool", fakenames);
+        playerset.forEach(uid -> votepool.add(new LinkedUser(uid,uid != UserId.fromDiscordId("315237447065927691") ? fakenames.poll() : "Sawors",UUID.randomUUID(),"",null,null)));
         return votepool;
     }
     
@@ -640,7 +665,7 @@ public class GameManager {
     }
 
     public GameEvent getCurrentEvent(){
-        return eventqueue.peek();
+        return currentevent;
     }
     
     protected void nextEvent(){
