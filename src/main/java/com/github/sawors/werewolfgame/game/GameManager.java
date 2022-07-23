@@ -596,8 +596,9 @@ public class GameManager {
 
     private void assignRoles(){
 
-        List<UserId> pendingusers = new ArrayList<>(List.copyOf(playerset));
-        Collections.shuffle(pendingusers);
+        List<UserId> shuffled = new ArrayList<>(List.copyOf(playerset));
+        Collections.shuffle(shuffled);
+        Queue<UserId> pendingusers = new LinkedList<>(shuffled);
 
         int playercount = pendingusers.size();
 
@@ -614,8 +615,15 @@ public class GameManager {
             throw new IndexOutOfBoundsException("too few players to start the game (must be > 4, got "+playercount);
         }
 
-        for(int i = 0; i < wolfamount; i++){
+        if(autowolf){
+            autowolfpercentage = Math.max(Math.min(autowolfpercentage, 0.75), 0.25);
+            // casting to int here does floor the amount as it is a positive number (if roof just do +1)
+            wolfamount = (int) (playercount*autowolfpercentage);
+        }
 
+        for(int i = 0; i < wolfamount; i++){
+            UserId user = pendingusers.poll();
+            playerlink.put(user, new WerewolfPlayer(user, this));
         }
     }
 }
