@@ -160,10 +160,10 @@ public class DatabaseManager {
             ResultSet data = co.prepareStatement("SELECT * FROM Users WHERE "+UserDataType.USERID+"='"+user+"'").executeQuery();
             if(!data.isClosed()){
                 name = data.getString(UserDataType.NAME.toString());
-                mcuuid = data.getString(UserDataType.NAME.toString());
-                discordid = data.getString(UserDataType.NAME.toString());
-                Set<String> sprefs = Set.of(data.getString(UserDataType.NAME.toString()).replaceAll("\\[", "").replaceAll("]","").replaceAll(",","").split(" "));
-                Set<String> stags  = Set.of(data.getString(UserDataType.NAME.toString()).replaceAll("\\[", "").replaceAll("]","").replaceAll(",","").split(" "));
+                mcuuid = data.getString(UserDataType.MCUUID.toString());
+                discordid = data.getString(UserDataType.DISCORDID.toString());
+                Set<String> sprefs = Set.of(data.getString(UserDataType.PREFERENCES.toString()).replaceAll("\\[", "").replaceAll("]","").replaceAll(",","").split(" "));
+                Set<String> stags  = Set.of(data.getString(UserDataType.TAGS.toString()).replaceAll("\\[", "").replaceAll("]","").replaceAll(",","").split(" "));
             
                 for(String str : sprefs){
                     try{

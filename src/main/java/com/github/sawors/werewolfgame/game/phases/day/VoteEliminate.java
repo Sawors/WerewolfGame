@@ -1,6 +1,7 @@
 package com.github.sawors.werewolfgame.game.phases.day;
 
 import com.github.sawors.werewolfgame.LinkedUser;
+import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.phases.GenericVote;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -8,8 +9,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import java.util.Set;
 
 public class VoteEliminate extends GenericVote {
-    public VoteEliminate(GameManager manager, Set<LinkedUser> votepool, TextChannel channel) {
-        super(manager, votepool, channel,"");
+    public VoteEliminate(GameManager manager, Set<LinkedUser> votepool, Set<UserId> voters, TextChannel channel) {
+        super(manager, votepool, voters, channel,"");
     }
 
     @Override
@@ -18,7 +19,7 @@ public class VoteEliminate extends GenericVote {
     }
 
     @Override
-    public void validate() {
+    public void validate(boolean force, boolean wait) {
 
     }
 }

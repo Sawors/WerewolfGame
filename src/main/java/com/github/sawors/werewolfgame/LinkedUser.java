@@ -3,6 +3,7 @@ package com.github.sawors.werewolfgame;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.database.UserPreference;
 import com.github.sawors.werewolfgame.database.UserTag;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -40,7 +41,11 @@ public class LinkedUser {
         if(Main.useUserCache()){
             return Main.getCachedUser(id);
         }
-        return DatabaseManager.retrieveUserData(id);
+        LinkedUser retrieveduser = DatabaseManager.retrieveUserData(id);
+        if(retrieveduser == null){
+            retrieveduser = new LinkedUser(new UserId(), RandomStringUtils.randomAlphabetic((int)(Math.random()*8)),UUID.randomUUID(),"",null,null);
+        }
+        return retrieveduser;
     }
     
     public UserId getId(){

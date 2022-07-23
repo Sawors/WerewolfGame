@@ -9,7 +9,6 @@ import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
 import com.github.sawors.werewolfgame.game.phases.GameEvent;
 import com.github.sawors.werewolfgame.game.phases.PhaseType;
-import com.github.sawors.werewolfgame.game.phases.day.Intro;
 import com.github.sawors.werewolfgame.game.phases.day.MayorVote;
 import com.github.sawors.werewolfgame.game.phases.day.NightFall;
 import com.github.sawors.werewolfgame.game.phases.night.SunRise;
@@ -64,6 +63,7 @@ public class GameManager {
     private Map<UserId, WerewolfPlayer> playerlink = new HashMap<>();
     private Queue<GameEvent> eventqueue = new LinkedList<>();
     private int round = 0;
+    private GameEvent currentevent;
 
     // GAME OPTIONS
     private boolean instantvote = true;
@@ -547,7 +547,7 @@ public class GameManager {
         }
         List<MessageEmbed> newembeds = new ArrayList<>();
         invite.getEmbeds().forEach(em -> newembeds.add(new EmbedBuilder(em).setColor(color).setAuthor(title).build()));
-    
+
         invite.editMessageEmbeds(invite.getEmbeds()).setActionRow(modified).queue();
         invite.editMessageEmbeds(invite.getEmbeds()).setEmbeds(newembeds).queue();
     }
@@ -627,7 +627,7 @@ public class GameManager {
 
     private Set<LinkedUser> defaultVotePool(){
         Set<LinkedUser> votepool = new HashSet<>();
-        playerset.forEach(uid -> votepool.add(LinkedUser.fromId(uid)));
+        playerset.forEach(uid -> votepool.add(new LinkedUser(uid,RandomStringUtils.randomAlphabetic(6),UUID.randomUUID(),"",null,null)));
         return votepool;
     }
     
@@ -638,12 +638,18 @@ public class GameManager {
             buildNightQueue();
         }
     }
+
+    public GameEvent getCurrentEvent(){
+        return eventqueue.peek();
+    }
     
     protected void nextEvent(){
         if(eventqueue.isEmpty()){
             // TODO ???
         } else {
-            eventqueue.poll().start();
+            GameEvent next = eventqueue.poll();
+            currentevent = next;
+            next.start();
         }
     }
 
@@ -663,8 +669,8 @@ public class GameManager {
     }
 
     private void buildFirstDayQueue(){
-        eventqueue.add(new Intro(this));
-        eventqueue.add(new MayorVote(this, defaultVotePool(), maintextchannel));
+        //eventqueue.add(new Intro(this));
+        eventqueue.add(new MayorVote(this, defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691")), maintextchannel));
         eventqueue.add(new NightFall(this));
     }
 

@@ -4,6 +4,8 @@ import com.github.sawors.werewolfgame.DatabaseManager;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.game.GameManager;
+import com.github.sawors.werewolfgame.game.phases.GameEvent;
+import com.github.sawors.werewolfgame.game.phases.GenericVote;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -25,7 +27,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
         String buttonid = event.getInteraction().getButton().getId();
         Guild guild = event.getGuild();
         if(buttonid != null && event.isFromGuild() && guild != null && buttonid.contains(":")){
-            String gameid = buttonid.substring(buttonid.indexOf(":")+1);
+            String gameid = buttonid.substring(buttonid.indexOf(":")+1,buttonid.indexOf(":")+1+8);
             String type = buttonid.substring(0,buttonid.indexOf(":"));
             GameManager gm = GameManager.fromId(gameid);
             if(gm != null){
@@ -76,9 +78,26 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                         } else {
                             Main.logAdmin("Attempt to remove Discord user "+event.getUser().getAsTag()+" from game "+gm.getId()+" via the leave button failed, user not in the game (THIS NEEDS TO BE INSPECTED !)");
                         }
+                        event.deferEdit().queue();
                         break;
                     case"start":
                         break;
+                    case"vote":
+                        String votedid = buttonid.substring(buttonid.indexOf("#")+1);
+                        Main.logAdmin("vote");
+                        if(votedid.length() > 4){
+                            Main.logAdmin("Voted",votedid);
+                            UserId voted = UserId.fromString(votedid);
+                            GameEvent current = gm.getCurrentEvent();
+                            if(current instanceof GenericVote){
+                                Main.logAdmin("Effectively vote");
+                                ((GenericVote) current).setVote(UserId.fromDiscordId(event.getUser().getId()),voted);
+                                Main.logAdmin(UserId.fromDiscordId(event.getUser().getId())+" -> "+voted);
+                                ((GenericVote) current).validate(false, true);
+                            }
+                        }
+                        event.deferEdit().queue();
+
                 }
             } else {
                 Main.logAdmin("Error : game "+gameid+" does not exist");
