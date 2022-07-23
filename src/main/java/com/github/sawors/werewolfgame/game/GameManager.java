@@ -1,6 +1,7 @@
 package com.github.sawors.werewolfgame.game;
 
 import com.github.sawors.werewolfgame.DatabaseManager;
+import com.github.sawors.werewolfgame.LinkedUser;
 import com.github.sawors.werewolfgame.LoadedLocale;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
@@ -8,6 +9,10 @@ import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
 import com.github.sawors.werewolfgame.game.phases.GameEvent;
 import com.github.sawors.werewolfgame.game.phases.PhaseType;
+import com.github.sawors.werewolfgame.game.phases.day.Intro;
+import com.github.sawors.werewolfgame.game.phases.day.MayorVote;
+import com.github.sawors.werewolfgame.game.phases.day.NightFall;
+import com.github.sawors.werewolfgame.game.phases.night.SunRise;
 import com.github.sawors.werewolfgame.game.roles.classic.Villager;
 import com.github.sawors.werewolfgame.game.roles.classic.Wolf;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
@@ -21,6 +26,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
@@ -29,7 +35,6 @@ public class GameManager {
 
     private GameType gametype;
     private GamePhase gamephase;
-    private Set<UserId> playerset = new HashSet<>();
     private HashMap<String, UserId> discordlink = new HashMap<>();
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
     private HashMap<GuildChannel, PlayerRole> rolechannels = new HashMap<>();
@@ -51,6 +56,7 @@ public class GameManager {
     private boolean locked = false;
 
     // GAME DATA
+    private Set<UserId> playerset = new HashSet<>();
     private Map<PlayerRole, Integer> rolepool = new HashMap<>();
     private Map<UserId, WerewolfPlayer> playerlink = new HashMap<>();
     private Queue<GameEvent> eventqueue = new LinkedList<>();
@@ -59,8 +65,15 @@ public class GameManager {
     // GAME OPTIONS
     private boolean instantvote = true;
     private boolean autowolf = true;
+    private boolean uselogchannel = false;
     private double autowolfpercentage = 0.25;
     private int wolfamount = 1;
+
+    // LOGGING OPTIONS
+    private TextChannel logchannel = null;
+    private boolean logtofile = false;
+    private boolean logtoconsole = true;
+    private StringBuilder logholder = new StringBuilder();
 
     
     
@@ -87,9 +100,7 @@ public class GameManager {
         
         for(PlayerRole role : Main.getRolePool()){
             Integer prio = role.priority();
-            if(prio != null){
-                rolepool.put(role, prio);
-            }
+            rolepool.put(role, prio);
         }
         
         Main.registerNewGame(this);
@@ -557,6 +568,35 @@ public class GameManager {
             }
         }
     }
+
+    private void logEvent(Object log){
+        if(logtofile){
+            logEvent(log, LogDestination.FILE);
+        }
+        if(logchannel != null && logchannel.getParentCategory() != null && logchannel.getParentCategory().equals(category)){
+            logEvent(log, LogDestination.CHANNEL);
+        }
+        if(logtoconsole){
+            logEvent(log, LogDestination.CONSOLE);
+        }
+    }
+
+    private void logEvent(Object log, LogDestination destination){
+        String timestamp = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        // log.toString() is a bit overkill, normally log is automatically converted to String type when summed with other Strings
+        switch (destination){
+            case CONSOLE:
+                System.out.println("Game "+id+" : ["+timestamp+"] "+log.toString());
+                break;
+            case CHANNEL:
+                logchannel.sendMessage("["+timestamp+"] "+log.toString()).queue();
+                break;
+            case DATABASE:
+                break;
+            case FILE:
+                break;
+        }
+    }
     
     
 /*
@@ -568,6 +608,18 @@ public class GameManager {
     
     public void startGame(){
         Main.logAdmin("Let's gooooooooooooooooooo");
+        for(int i = 0; i<8; i++){
+            UserId userid = new UserId();
+            logEvent("adding fake player "+userid, LogDestination.CONSOLE);
+            playerset.add(userid);
+        }
+        assignRoles();
+    }
+
+    private Set<LinkedUser> defaultVotePool(){
+        Set<LinkedUser> votepool = new HashSet<>();
+        playerset.forEach(uid -> votepool.add(LinkedUser.fromId(uid)));
+        return votepool;
     }
     
     public void buildQueue(PhaseType type){
@@ -588,13 +640,30 @@ public class GameManager {
 
     private void buildNightQueue(){
 
+
+
+        eventqueue.add(new SunRise(this));
     }
 
     private void buildDayQueue(){
+        round++;
 
+
+
+        eventqueue.add(new NightFall(this));
+    }
+
+    private void buildFirstDayQueue(){
+        eventqueue.add(new Intro(this));
+        eventqueue.add(new MayorVote(this, defaultVotePool()));
+        eventqueue.add(new NightFall(this));
     }
 
     private void assignRoles(){
+
+        logEvent("Assigning Roles", LogDestination.CONSOLE);
+        // using playerset
+        // using rolepool
 
         List<UserId> shuffled = new ArrayList<>(List.copyOf(playerset));
         Collections.shuffle(shuffled);
@@ -602,18 +671,21 @@ public class GameManager {
 
         int playercount = pendingusers.size();
 
+        logEvent("Player count : "+playercount, LogDestination.CONSOLE);
+        logEvent("Complete role pool : "+rolepool.keySet(), LogDestination.CONSOLE);
+
         List<PlayerRole> villageuniqueroles = new ArrayList<>(rolepool.keySet());
         villageuniqueroles.removeIf(role -> role instanceof Villager);
         villageuniqueroles.removeIf(role -> role instanceof Wolf);
         Collections.shuffle(villageuniqueroles);
+        Queue<PlayerRole> pendingroles = new LinkedList<>(villageuniqueroles);
+        logEvent("Pending roles : "+pendingroles, LogDestination.CONSOLE);
 
         List<PlayerRole> wolfroles = new ArrayList<>(rolepool.keySet());
         wolfroles.removeIf(role -> !(role instanceof Wolf));
         Collections.shuffle(wolfroles);
-
-        if(playercount < 4){
-            throw new IndexOutOfBoundsException("too few players to start the game (must be > 4, got "+playercount);
-        }
+        Queue<PlayerRole> pendingwolves = new LinkedList<>(wolfroles);
+        logEvent("Pending wolf roles : "+pendingwolves, LogDestination.CONSOLE);
 
         if(autowolf){
             autowolfpercentage = Math.max(Math.min(autowolfpercentage, 0.75), 0.25);
@@ -621,9 +693,35 @@ public class GameManager {
             wolfamount = (int) (playercount*autowolfpercentage);
         }
 
+        if(playercount < 4){
+            throw new IndexOutOfBoundsException("too few players to start the game (must be > 4, got "+playercount);
+        }
+
+        // assigning roles
+        if(autowolf){
+            logEvent("Using autowolf with wolves percentage set to "+(int)(autowolfpercentage*100)+"%", LogDestination.CONSOLE);
+        }
+        logEvent("Wolves amount : "+wolfamount, LogDestination.CONSOLE);
         for(int i = 0; i < wolfamount; i++){
             UserId user = pendingusers.poll();
-            playerlink.put(user, new WerewolfPlayer(user, this));
+            if(user == null){
+                throw new IndexOutOfBoundsException("too few players to start the game, could not give wolf roles, all players are wolves (???? Serious issue, please report it to https://github.com/Sawors/WerewolfGame/issues/new");
+            }
+            PlayerRole role = pendingwolves.poll();
+            if(role == null){
+                role = new Wolf();
+            }
+            logEvent("Giving role "+role+" to player "+user+" (Wolf Phase)", LogDestination.CONSOLE);
+            playerlink.put(user, new WerewolfPlayer(user, this, role));
         }
+        for(UserId user : pendingusers){
+            PlayerRole role = pendingroles.poll();
+            if(role == null){
+                role = new Villager();
+            }
+            logEvent("Giving role "+role+" to player "+user+" (Village Phase)", LogDestination.CONSOLE);
+            playerlink.put(user, new WerewolfPlayer(user, this, role));
+        }
+        logEvent(playerlink, LogDestination.CONSOLE);
     }
 }

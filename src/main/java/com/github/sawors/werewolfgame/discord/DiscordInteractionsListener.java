@@ -83,6 +83,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
             } else {
                 Main.logAdmin("Error : game "+gameid+" does not exist");
                 GameManager.setInviteExpired(event.getMessage(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
+                GameManager.forceClean(event.getGuild(), gameid);
                 event.deferEdit().queue();
             }
         }

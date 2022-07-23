@@ -13,18 +13,25 @@ public class WerewolfPlayer {
     UserId user;
     List<PlayerRole> roles = new ArrayList<>();
     boolean alive = true;
+    boolean awake = true;
     GameManager gm;
     WerewolfTeam team = new Village();
+
     
     public WerewolfPlayer(UserId parent, GameManager manager){
         this.user = parent;
         this.gm = manager;
     }
 
-    public WerewolfPlayer(UserId parent, GameManager manager, WerewolfTeam team){
+    public WerewolfPlayer(UserId parent, GameManager manager, PlayerRole role){
         this.user = parent;
         this.gm = manager;
-        this.team = team;
+        this.roles.add(role);
+    }
+
+    @Override
+    public String toString() {
+        return user+":"+roles+"@"+gm.getId();
     }
 
     public void setTeam(WerewolfTeam team){
@@ -60,6 +67,13 @@ public class WerewolfPlayer {
     
     public void resurrect(){
         alive = true;
+    }
+
+    public void wakeup(){
+        awake = true;
+    }
+    public void sleep(){
+        awake = false;
     }
     
     public boolean isAlive(){

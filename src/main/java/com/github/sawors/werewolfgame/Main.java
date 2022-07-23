@@ -104,9 +104,10 @@ public class Main {
         rolepool.add(new Hunter());
         rolepool.add(new LittleGirl());
         rolepool.add(new Seer());
-        rolepool.add(new Villager());
         rolepool.add(new Witch());
         rolepool.add(new Wolf());
+
+        Main.logAdmin("rolepool",rolepool);
 
         // load default locale
         
