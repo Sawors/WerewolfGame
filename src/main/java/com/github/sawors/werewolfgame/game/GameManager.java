@@ -29,6 +29,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class GameManager {
@@ -190,6 +193,10 @@ public class GameManager {
     
     public User getOwner(){
         return this.owner;
+    }
+
+    public Guild getGuild(){
+        return guild;
     }
     
     public void setAdmin(User user){
@@ -614,6 +621,8 @@ public class GameManager {
             playerset.add(userid);
         }
         assignRoles();
+        buildFirstDayQueue();
+        nextEvent();
     }
 
     private Set<LinkedUser> defaultVotePool(){
@@ -655,7 +664,7 @@ public class GameManager {
 
     private void buildFirstDayQueue(){
         eventqueue.add(new Intro(this));
-        eventqueue.add(new MayorVote(this, defaultVotePool()));
+        eventqueue.add(new MayorVote(this, defaultVotePool(), maintextchannel));
         eventqueue.add(new NightFall(this));
     }
 
@@ -679,7 +688,7 @@ public class GameManager {
         villageuniqueroles.removeIf(role -> role instanceof Wolf);
         Collections.shuffle(villageuniqueroles);
         Queue<PlayerRole> pendingroles = new LinkedList<>(villageuniqueroles);
-        logEvent("Pending roles : "+pendingroles, LogDestination.CONSOLE);
+        logEvent("Pending village roles : "+pendingroles, LogDestination.CONSOLE);
 
         List<PlayerRole> wolfroles = new ArrayList<>(rolepool.keySet());
         wolfroles.removeIf(role -> !(role instanceof Wolf));
@@ -723,5 +732,10 @@ public class GameManager {
             playerlink.put(user, new WerewolfPlayer(user, this, role));
         }
         logEvent(playerlink, LogDestination.CONSOLE);
+    }
+
+    public void setupTimedAction(int seconds, Runnable action){
+        final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.schedule(action,seconds,TimeUnit.SECONDS);
     }
 }
