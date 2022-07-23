@@ -8,6 +8,7 @@ import com.github.sawors.werewolfgame.game.roles.classic.*;
 import com.github.sawors.werewolfgame.localization.BundledLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.PrivateChannel;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
@@ -41,8 +42,8 @@ public class Main {
     private static LoadedLocale instancelanguage;
     private static Map<String, Object> configmap;
     // String is the Discord User's ID
-    private static Set<String> sudoers = new HashSet<>();
-    private static String sudokey = "";
+    private static String instancename = RandomStringUtils.randomNumeric(6);
+    private static List<PrivateChannel> logchannels = new ArrayList<>();
 
 
     public static void init(boolean standalone, String token, File datastorage){
@@ -92,6 +93,9 @@ public class Main {
                     "Minecraft by successfully starting the program as a plugin and/or Discord by providing an API token." +
                     "If launched in standalone mode, provide a Discord API token as the first argument when launching the Jar file (no interaction with Minecraft possible in this mode)");
         }
+
+        String configname = getConfigData("instance-name");
+        instancename = configname.equals("") ? instancename : configname+" : S"+instancename;
         
         //TODO : Extension loading
         
@@ -114,7 +118,7 @@ public class Main {
         Main.logAdmin("Default language set to",instancelanguage.getName());
     }
     
-    public static boolean isInstanceAdmin(String discordid){
+    protected static boolean isInstanceAdmin(String discordid){
         try(InputStream input = new FileInputStream(configfile)){
             Map<String, Object> yamlconfig = new Yaml().load(input);
             if(yamlconfig.containsKey("admin-users") && yamlconfig.get("admin-users") instanceof List){
@@ -125,6 +129,22 @@ public class Main {
             e.printStackTrace();
         }
         return false;
+    }
+
+    protected static String getInstanceName(){
+        return instancename;
+    }
+
+    protected static void addLogChannel(PrivateChannel chan){
+        logchannels.add(chan);
+    }
+    protected static void removeLogChannel(PrivateChannel chan){
+        logchannels.remove(chan);
+    }
+    protected static List<String> getLogChannels(){
+        List<String> ids = new ArrayList<>();
+        logchannels.forEach(chan -> ids.add(chan.getId()));
+        return ids;
     }
 
     public static void reloadLanguages(){
@@ -151,11 +171,39 @@ public class Main {
         try{
             configfile.createNewFile();
             boolean overwrite = true;
-            try(InputStream loadold = new FileInputStream(configfile)){
+            try(InputStream loadold = new FileInputStream(configfile); InputStream reference = Main.class.getClassLoader().getResourceAsStream("config.yml")){
                 Map<String, Object> oldconfig = new Yaml().load(loadold);
                 String regen = YamlMapParser.getString(oldconfig, "regenerate");
                 if(regen != null && regen.length() >= 2){
                     overwrite = !regen.equalsIgnoreCase("false");
+                }
+
+                if(!overwrite){
+                    Map<String, Object> refconfig = new Yaml().load(reference);
+                    String version = oldconfig.containsKey("config-version") ? YamlMapParser.getString(oldconfig, "config-version") : null;
+                    String refversion = YamlMapParser.getString(refconfig, "config-version");
+                    Main.logAdmin(version);
+                    Main.logAdmin(refversion);
+                    if(!(version != null && refversion != null && version.contains(".") && refversion.contains(".") && version.substring(0,version.indexOf(".")).equals(refversion.substring(0,version.indexOf("."))))){
+                        // version conflict detected, adding missing fields to the old config
+                        Set<String> oldfields = oldconfig.keySet();
+                        Set<String> newfields = refconfig.keySet();
+                        boolean outdated = false;
+                        for(String field : newfields){
+                            if(!oldfields.contains(field)){
+                                oldconfig.put(field, refconfig.get(field));
+                                outdated = true;
+                            }
+                        }
+                        if(outdated){
+                            try(OutputStream writer = new FileOutputStream(configfile)){
+                                writer.write(new Yaml().dump(oldconfig).getBytes());
+                            } catch (IOException e){
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
                 }
             } catch (FileNotFoundException e){
                 overwrite = true;
@@ -240,25 +288,22 @@ public class Main {
     }
 
     public static void logAdmin(Object text){
-        String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
-        time = "[WerewolfGame : "+time+"] ";
-
-        String message = time+text;
-        if(standalone){
-            System.out.println(message);
-        } else {
-            PluginLauncher.logToOp(message);
-        }
+        logAdmin("",text);
     }
 
     public static void logAdmin(Object title, Object text){
         String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
         time = "[WerewolfGame : "+time+"] ";
-        String message = time+title+" : "+text;
+        String message = title.equals("") ? time+text : time+title+" : "+text;
         if(standalone){
             System.out.println(message);
         } else {
             PluginLauncher.logToOp(message);
+        }
+        if(logchannels.size() > 0){
+            for(PrivateChannel channel : logchannels){
+                channel.sendMessage(message).queue();
+            }
         }
     }
 

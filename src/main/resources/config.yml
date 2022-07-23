@@ -1,7 +1,12 @@
 discord-token:
 database-file: default
 instance-language: "en_UK"
+instance-name: ""
+sample-field: "uwu"
 admin-users:
   - "315237447065927691"
 
+#DO NOT MODIFY THIS, IF AN OUTDATED CONFIG IS DETECTED IT WILL ONLY ADD THE MISSING FIELDS WITHOUT
+#AFFECTING YOUR DATA
+config-version: 0.1
 regenerate: false

@@ -32,11 +32,8 @@ public class DiscordCommandListener extends ListenerAdapter {
         if(event.isFromGuild() && args.length >= 2 && args[0].equals("!ww") && !Main.isLinked(event.getChannel().getIdLong())){
             // guild commands
             if(!DatabaseManager.getGuildLanguage(event.getGuild()).toString().substring(0,2).equalsIgnoreCase("en")){
-                Main.logAdmin("uwu");
                 String alias = TranslatableText.get("commands.aliases."+args[1].toLowerCase(Locale.ROOT), DatabaseManager.getGuildLanguage(event.getGuild()), true);
-                Main.logAdmin(alias);
                 args[1] = alias != null ? alias : args[1];
-                Main.logAdmin(args[1]);
             }
             switch(args[1].toLowerCase(Locale.ROOT)){
                 case"test":

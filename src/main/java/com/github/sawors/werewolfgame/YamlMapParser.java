@@ -31,23 +31,25 @@ public class YamlMapParser {
     
         int level = 0;
         Object text = loadedyaml.get(hierarchy[level]);
-        do{
-            level++;
-            String localkey = hierarchy[level];
-            if(text instanceof Map){
-                if(((Map<?, ?>) text).containsKey(localkey)){
-                    text = ((Map<?, ?>) text).get(localkey);
-                } else {
-                    throw new ParseException("Parsing error at level : "+key,level);
+        try{
+            do{
+                level++;
+                String localkey = hierarchy[level];
+                if(text instanceof Map){
+                    if(((Map<?, ?>) text).containsKey(localkey)){
+                        text = ((Map<?, ?>) text).get(localkey);
+                    } else {
+                        throw new ParseException("Parsing error at level : "+key,level);
+                    }
+                } else if (text instanceof List){
+                    if(((List<?>) text).contains(localkey)){
+                        text = ((List<?>) text).get(((List<?>) text).indexOf(localkey));
+                    } else {
+                        throw new ParseException("Parsing error at level : "+key,level);
+                    }
                 }
-            } else if (text instanceof List){
-                if(((List<?>) text).contains(localkey)){
-                    text = ((List<?>) text).get(((List<?>) text).indexOf(localkey));
-                } else {
-                    throw new ParseException("Parsing error at level : "+key,level);
-                }
-            }
-        } while (text instanceof Collection || text instanceof Map);
+            } while (text instanceof Collection || text instanceof Map);
+        } catch (IndexOutOfBoundsException ignored){} // ignoring because we still return "text" in the end
         output = String.valueOf(text);
         if(output == null || output.equals("")){
             throw new InvalidKeyException("Key not found while parsing");

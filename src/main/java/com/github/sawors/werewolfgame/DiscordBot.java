@@ -14,7 +14,7 @@ public class DiscordBot {
         builder
             .addEventListeners(new DiscordListeners())
             .addEventListeners(new DiscordCommandListener())
-            .addEventListeners(new InstanceCommandsListeners())
+            .addEventListeners(new InstanceCommandListeners())
             .addEventListeners(new DiscordInteractionsListener());
         
         try{
