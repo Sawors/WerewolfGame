@@ -16,4 +16,9 @@ public class VoteEliminate extends GenericVote {
     public void start() {
         // TODO vote
     }
+
+    @Override
+    public void validate() {
+
+    }
 }

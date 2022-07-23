@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame;
 
+import com.github.sawors.werewolfgame.commands.RegisterUserCommand;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -62,6 +63,12 @@ public class InstanceCommandListeners extends ListenerAdapter {
             switch(args[0]){
                 case"instance":
                     channel.sendMessage("Instance : `"+Main.getInstanceName()+"`").queue();
+                case"regme":
+                    if(args.length >= 3){
+                        new RegisterUserCommand(event.getAuthor(), args[2]).execute(event.getChannel());
+                    } else {
+                        new RegisterUserCommand(event.getAuthor()).execute(event.getChannel());
+                    }
             }
         
         

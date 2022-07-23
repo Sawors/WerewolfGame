@@ -14,9 +14,9 @@ public class MayorVote extends GenericVote {
         super(manager, votepool, channel, "yeah !!");
         this.type = PhaseType.DAY;
     }
-    
+
     @Override
-    public void start() {
-    
+    public void validate() {
+
     }
 }

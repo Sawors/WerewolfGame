@@ -4,16 +4,20 @@ import com.github.sawors.werewolfgame.LinkedUser;
 import com.github.sawors.werewolfgame.game.GameManager;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public abstract class GenericVote extends GameEvent {
-    
-    private Set<LinkedUser> votepool;
-    private MessageBuilder votemessage = new MessageBuilder();
-    private String messagebody;
-    private TextChannel votechannel;
-    
+
+    protected Set<LinkedUser> votepool;
+    protected MessageBuilder votemessage = new MessageBuilder();
+    protected String messagebody;
+    protected TextChannel votechannel;
+
     public GenericVote(GameManager manager, Set<LinkedUser> votepool, TextChannel votechannel){
         super(manager);
         this.votepool = votepool;
@@ -32,8 +36,16 @@ public abstract class GenericVote extends GameEvent {
 
     @Override
     public void start() {
-        votemessage.append("");
+        votemessage.append(messagebody);
+        List<Button> votebuttons = new ArrayList<>();
+        for(LinkedUser user : votepool){
+            votebuttons.add(Button.primary("vote:mayor#"+user.getId(), user.getName()));
+        }
+
+        votemessage.setActionRows(ActionRow.of(votebuttons));
 
         votechannel.sendMessage(votemessage.build()).queue();
     }
+
+    public abstract void validate();
 }

@@ -193,7 +193,10 @@ public class DatabaseManager {
         }
     }
     
-    public static UserId getUserId(UUID minecraftuuid){
+    public static UserId getUserId(@Nullable UUID minecraftuuid){
+        if(minecraftuuid == null){
+            return null;
+        }
         try(Connection co = connect()){
             ResultSet dataget = co.prepareStatement("SELECT "+UserDataType.USERID+" FROM Users WHERE "+UserDataType.MCUUID+"='"+minecraftuuid.toString()+"'").executeQuery();
             if(!dataget.isClosed()){

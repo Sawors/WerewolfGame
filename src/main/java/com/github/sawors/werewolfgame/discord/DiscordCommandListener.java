@@ -4,6 +4,7 @@ import com.github.sawors.werewolfgame.DatabaseManager;
 import com.github.sawors.werewolfgame.LoadedLocale;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.commands.RegisterGuildCommand;
+import com.github.sawors.werewolfgame.commands.RegisterUserCommand;
 import com.github.sawors.werewolfgame.commands.TestCommand;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.GameType;
@@ -163,6 +164,12 @@ public class DiscordCommandListener extends ListenerAdapter {
                         if(!Main.getGamesList().containsKey(id) && id.length() == 8){
                             GameManager.forceClean(event.getGuild(), id);
                         }
+                    }
+                case"regme":
+                    if(args.length >= 3){
+                        new RegisterUserCommand(event.getAuthor(), args[2]).execute(event.getChannel());
+                    } else {
+                        new RegisterUserCommand(event.getAuthor()).execute(event.getChannel());
                     }
             }
         }
