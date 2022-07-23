@@ -1,20 +1,16 @@
 package com.github.sawors.werewolfgame.game.roles.classic;
 
-import com.github.sawors.werewolfgame.game.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
+import com.github.sawors.werewolfgame.game.roles.WolfLike;
 
-public class LittleGirl extends PlayerRole {
+public class LittleGirl extends WolfLike {
     @Override
     public String toString() {
-        return RoleType.LITTLE_GIRL.toString();
+        return DefaultRoleType.LITTLE_GIRL.toString();
     }
 
     @Override
-    public Integer priority() {
-        return 0;
-    }
-
-    @Override
-    public void nightAction() {
+    public void wolfAction() {
         //TODO : Little Girl action
     }
 }

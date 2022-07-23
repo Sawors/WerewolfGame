@@ -1,12 +1,13 @@
 package com.github.sawors.werewolfgame.game.roles.classic;
 
 import com.github.sawors.werewolfgame.game.FirstNightRole;
+import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
 
 public class Lover extends FirstNightRole {
     
     @Override
     public String toString() {
-        return RoleType.LOVER.toString();
+        return DefaultRoleType.LOVER.toString();
     }
 
     @Override

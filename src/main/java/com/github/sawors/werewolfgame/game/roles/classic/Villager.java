@@ -1,15 +1,11 @@
 package com.github.sawors.werewolfgame.game.roles.classic;
 
-import com.github.sawors.werewolfgame.game.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
+import com.github.sawors.werewolfgame.game.roles.VillagerLike;
 
-public class Villager extends PlayerRole {
+public class Villager extends VillagerLike {
     @Override
     public String toString() {
-        return RoleType.VILLAGER.toString();
-    }
-
-    @Override
-    public Integer priority() {
-        return null;
+        return DefaultRoleType.VILLAGER.toString();
     }
 }

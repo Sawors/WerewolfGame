@@ -1,11 +1,11 @@
-package com.github.sawors.werewolfgame.game.roles.classic;
+package com.github.sawors.werewolfgame.game.roles;
 
 import com.github.sawors.werewolfgame.game.PlayerRole;
 
 public class Mayor extends PlayerRole {
     @Override
     public String toString() {
-        return RoleType.MAYOR.toString();
+        return DefaultRoleType.MAYOR.toString();
     }
 
     @Override

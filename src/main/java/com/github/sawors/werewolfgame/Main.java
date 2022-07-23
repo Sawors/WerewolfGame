@@ -95,7 +95,7 @@ public class Main {
         }
 
         String configname = getConfigData("instance-name");
-        instancename = configname.equals("") ? instancename : configname+" : S"+instancename;
+        instancename = configname.equals("") ? "I"+instancename : configname+" : I"+instancename;
         
         //TODO : Extension loading
         

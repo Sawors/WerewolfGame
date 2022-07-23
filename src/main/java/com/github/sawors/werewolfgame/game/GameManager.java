@@ -8,6 +8,8 @@ import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
 import com.github.sawors.werewolfgame.game.phases.GameEvent;
 import com.github.sawors.werewolfgame.game.phases.PhaseType;
+import com.github.sawors.werewolfgame.game.roles.classic.Villager;
+import com.github.sawors.werewolfgame.game.roles.classic.Wolf;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -27,34 +29,39 @@ public class GameManager {
 
     private GameType gametype;
     private GamePhase gamephase;
-    // playerlist's String -> UserId.toString()
-    private HashMap<UserId, WerewolfPlayer> playerlist = new HashMap<>();
+    private Set<UserId> playerset = new HashSet<>();
     private HashMap<String, UserId> discordlink = new HashMap<>();
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
     private HashMap<GuildChannel, PlayerRole> rolechannels = new HashMap<>();
-    private ArrayList<PlayerRole> rolelist = new ArrayList<>();
     private final String id;
     private final Guild guild;
-
     private ArrayList<Message> invites = new ArrayList<>();
     private Message leavemessage;
-
     private Category category;
     private JoinType jointype;
     private final String joinkey;
     private VoiceChannel mainvoicechannel;
     private TextChannel maintextchannel;
     private TextChannel adminchannel;
-    private Role gamerole;
+    private Role playerrole;
     private Role adminrole;
     private User owner;
     private int paramstringlength = 0;
-    private Map<PlayerRole, Integer> rolepool = new HashMap<>();
-    private List<PlayerRole> roleset;
-    private Queue<GameEvent> eventqueue = new LinkedList<>();
-    private int round = 0;
     private LoadedLocale language;
     private boolean locked = false;
+
+    // GAME DATA
+    private Map<PlayerRole, Integer> rolepool = new HashMap<>();
+    private Map<UserId, WerewolfPlayer> playerlink = new HashMap<>();
+    private Queue<GameEvent> eventqueue = new LinkedList<>();
+    private int round = 0;
+
+    // GAME OPTIONS
+    private boolean instantvote = true;
+    private boolean autowolf = true;
+    private double autowolfpercentage = 0.25;
+    private int wolfamount = 1;
+
     
     
 
@@ -68,7 +75,7 @@ public class GameManager {
         
         createRoles(
                 a0 -> guild.createCategory("[\uD83D\uDC3A WEREWOLF : "+id+"]")
-                        .addRolePermissionOverride(gamerole.getIdLong(), List.of(Permission.VIEW_CHANNEL), List.of(Permission.MANAGE_CHANNEL))
+                        .addRolePermissionOverride(playerrole.getIdLong(), List.of(Permission.VIEW_CHANNEL), List.of(Permission.MANAGE_CHANNEL))
                         .addRolePermissionOverride(adminrole.getIdLong(),List.of(Permission.VIEW_CHANNEL), List.of())
                         .addRolePermissionOverride(guild.getPublicRole().getIdLong(),List.of(), List.of(Permission.VIEW_CHANNEL))
                         .queue(a1 -> {
@@ -111,7 +118,7 @@ public class GameManager {
         guild.createRole().setName("WW:"+id+":ADMIN").setMentionable(false).queue(a -> {
                     this.adminrole = a;
                     guild.createRole().setName("WW:" + id).setMentionable(false).queue(b -> {
-                        this.gamerole = b;
+                        this.playerrole = b;
                         if(owner != null){
                             setAdmin(owner);
                         }
@@ -233,7 +240,7 @@ public class GameManager {
                 //adminchannel.sendMessage("Start Game").setActionRow(Button.success("start"+id, "Start Game")).queue();
                 adminchannel.getPermissionContainer().getManager()
                         .putRolePermissionOverride(adminrole.getIdLong(), Permission.VIEW_CHANNEL.getRawValue(),Permission.MANAGE_CHANNEL.getRawValue())
-                        .putRolePermissionOverride(gamerole.getIdLong(), Permission.UNKNOWN.getRawValue(),Permission.VIEW_CHANNEL.getRawValue())
+                        .putRolePermissionOverride(playerrole.getIdLong(), Permission.UNKNOWN.getRawValue(),Permission.VIEW_CHANNEL.getRawValue())
                         .queue();
                 
                 break;
@@ -245,8 +252,8 @@ public class GameManager {
         Main.linkChannel(channel.getIdLong(), id);
     }
     
-    public Set<UserId> getPlayerList(){
-        return Set.copyOf(playerlist.keySet());
+    public Set<UserId> getPlayerSet(){
+        return Set.copyOf(playerset);
     }
     
     public void finish(){
@@ -260,7 +267,7 @@ public class GameManager {
         Main.unlinkChannel(maintextchannel.getIdLong());
         Main.unlinkChannel(mainvoicechannel.getIdLong());
         DiscordManager.cleanCategory(category);
-        gamerole.delete().queue();
+        playerrole.delete().queue();
         adminrole.delete().queue();
         Main.removeGame(id);
     }
@@ -273,7 +280,7 @@ public class GameManager {
         if(playerid != null && !locked){
             // remove the player from its ancient game if it is unlocked, otherwise prevent it to join this game
             for(GameManager mng : Main.getGamesList().values()){
-                if(mng.getPlayerList().contains(playerid)){
+                if(mng.getPlayerSet().contains(playerid)){
                     if(mng.isLocked()){
                         Main.logAdmin("player could not have been moved from game "+mng.getId()+" to "+id+" because the source game is locked");
                         return;
@@ -282,15 +289,15 @@ public class GameManager {
                     }
                 }
             }
-            if(!playerlist.containsKey(playerid)){
-                playerlist.put(playerid, new WerewolfPlayer(playerid, this));
+            if(!playerset.contains(playerid)){
+                playerset.add(playerid);
             }
             String discord = DatabaseManager.getDiscordId(playerid);
             if(discord != null && !discordlink.containsKey(discord)){
                 discordlink.put(discord, playerid);
                 try{
                     Main.getJDA().retrieveUserById(discord).queue(user ->{
-                        guild.addRoleToMember(user, gamerole).queue();
+                        guild.addRoleToMember(user, playerrole).queue();
                         maintextchannel.sendMessage(TranslatableText.get("events.player-join-message",language).replaceAll("%user%",user.getAsMention())).queue();
                     });
                     //user successfully added to the game
@@ -327,7 +334,7 @@ public class GameManager {
     }
     
     public void removePlayer(UserId player){
-            if(player != null && playerlist.containsKey(player)){
+            if(player != null && playerset.contains(player)){
                 // remove discord link
                 if(discordlink.containsValue(player)){
                     for(Map.Entry<String, UserId> entry : discordlink.entrySet()){
@@ -379,7 +386,7 @@ public class GameManager {
                     }
                     maintextchannel.sendMessage(TranslatableText.get("events.player-leave-message", language).replaceAll("%user%",member.getAsMention())).queue();
                 });
-                playerlist.remove(player);
+                playerset.remove(player);
             }
     }
 
@@ -585,5 +592,30 @@ public class GameManager {
 
     private void buildDayQueue(){
 
+    }
+
+    private void assignRoles(){
+
+        List<UserId> pendingusers = new ArrayList<>(List.copyOf(playerset));
+        Collections.shuffle(pendingusers);
+
+        int playercount = pendingusers.size();
+
+        List<PlayerRole> villageuniqueroles = new ArrayList<>(rolepool.keySet());
+        villageuniqueroles.removeIf(role -> role instanceof Villager);
+        villageuniqueroles.removeIf(role -> role instanceof Wolf);
+        Collections.shuffle(villageuniqueroles);
+
+        List<PlayerRole> wolfroles = new ArrayList<>(rolepool.keySet());
+        wolfroles.removeIf(role -> !(role instanceof Wolf));
+        Collections.shuffle(wolfroles);
+
+        if(playercount < 4){
+            throw new IndexOutOfBoundsException("too few players to start the game (must be > 4, got "+playercount);
+        }
+
+        for(int i = 0; i < wolfamount; i++){
+
+        }
     }
 }

@@ -31,7 +31,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
             if(gm != null){
                 switch(type){
                     case"join":
-                        if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                        if(!gm.getPlayerSet().contains(UserId.fromDiscordId(event.getUser().getId()))){
                             // player validated, adding it to the game
                             gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
                         } else {
@@ -48,7 +48,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                         event.deferEdit().queue();
                         break;
                     case"joinprivate":
-                        if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                        if(!gm.getPlayerSet().contains(UserId.fromDiscordId(event.getUser().getId()))){
                             TextInput joincode = TextInput.create("codeinput",TranslatableText.get("forms.private-game-code.code-field-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(guild))), TextInputStyle.SHORT)
                                     .setPlaceholder(TranslatableText.get("forms.private-game-code.text-placeholder", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))))
                                     .setRequired(true)
@@ -70,7 +70,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                         }
                         break;
                     case"leave":
-                        if(gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                        if(gm.getPlayerSet().contains(UserId.fromDiscordId(event.getUser().getId()))){
                             // player validated, removing it from the game
                             gm.removePlayer(UserId.fromDiscordId(event.getUser().getId()));
                         } else {
