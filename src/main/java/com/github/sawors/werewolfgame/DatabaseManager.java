@@ -60,7 +60,7 @@ public class DatabaseManager {
     private static String linkingDatabaseInitQuery(){
         return "CREATE TABLE IF NOT EXISTS Users ("
                 + UserDataType.USERID+" text NOT NULL UNIQUE,"
-                + UserDataType.NAME+" text,"
+                + UserDataType.NAME+" text NOT NULL,"
                 + UserDataType.MCUUID+" text UNIQUE,"
                 + UserDataType.DISCORDID+" text UNIQUE,"
                 + UserDataType.PREFERENCES+" text DEFAULT '[]',"
