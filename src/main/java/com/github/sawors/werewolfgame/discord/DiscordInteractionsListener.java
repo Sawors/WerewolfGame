@@ -24,78 +24,65 @@ public class DiscordInteractionsListener extends ListenerAdapter {
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         String buttonid = event.getInteraction().getButton().getId();
         Guild guild = event.getGuild();
-        if(buttonid != null && event.isFromGuild() && guild != null){
-            if(buttonid.contains("join:")){
-                // button type = join
-                String gameid = buttonid.replace("join:", "");
-                GameManager gm = GameManager.fromId(gameid);
-                if(gm != null){
-                    if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
-                        // player validated, adding it to the game
-                        gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
-                    } else {
-                        Member mb = event.getMember();
-                        //TODO : remember to provide a blocking system when the game is started / locked (game players locking system ?)
-                        if(mb != null){
-                            try{
-                                guild.moveVoiceMember(event.getMember(),gm.getMainVoiceChannel()).queue();
-                            } catch (InsufficientPermissionException perm){
-                                Main.logAdmin("Not enough permissions to move members in guild "+guild.getName()+":"+guild.getId());
-                            } catch (IllegalStateException | IllegalArgumentException ignored){}
-                        }
-                    }
-                    event.deferEdit().queue();
-                } else {
-                    Main.logAdmin("Error : game "+gameid+" does not exist");
-                    GameManager.setInviteExpired(event.getMessage(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
-                    event.deferEdit().queue();
-                }
-            } else if(buttonid.contains("joinprivate:")){
-                // button type = join private game
-                String gameid = buttonid.replace("joinprivate:", "");
-                GameManager gm = GameManager.fromId(gameid);
-                if(gm != null){
-                    if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
-                        TextInput joincode = TextInput.create("codeinput",TranslatableText.get("forms.private-game-code.code-field-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(guild))), TextInputStyle.SHORT)
-                                .setPlaceholder(TranslatableText.get("forms.private-game-code.text-placeholder", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))))
-                                .setRequired(true)
-                                .setRequiredRange(4,6)
-                                .build();
-                        event.replyModal(Modal.create("codemodal:"+gm.getId(),TranslatableText.get("forms.private-game-code.title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(guild)))).addActionRow(joincode).build()).queue();
-                        Main.logAdmin("joined private game");
-                    } else {
-                        Member mb = event.getMember();
-                        //TODO : remember to provide a blocking system when the game is started / locked (game players locking system ?)
-                        if(mb != null){
-                            try{
-                                guild.moveVoiceMember(event.getMember(),gm.getMainVoiceChannel()).queue();
-                            } catch (InsufficientPermissionException perm){
-                                Main.logAdmin("Not enough permissions to move members in guild "+guild.getName()+":"+guild.getId());
-                            } catch (IllegalStateException | IllegalArgumentException ignored){}
+        if(buttonid != null && event.isFromGuild() && guild != null && buttonid.contains(":")){
+            String gameid = buttonid.substring(buttonid.indexOf(":")+1);
+            String type = buttonid.substring(0,buttonid.indexOf(":"));
+            GameManager gm = GameManager.fromId(gameid);
+            if(gm != null){
+                switch(type){
+                    case"join":
+                        if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                            // player validated, adding it to the game
+                            gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
+                        } else {
+                            Member mb = event.getMember();
+                            //TODO : remember to provide a blocking system when the game is started / locked (game players locking system ?)
+                            if(mb != null){
+                                try{
+                                    guild.moveVoiceMember(event.getMember(),gm.getMainVoiceChannel()).queue();
+                                } catch (InsufficientPermissionException perm){
+                                    Main.logAdmin("Not enough permissions to move members in guild "+guild.getName()+":"+guild.getId());
+                                } catch (IllegalStateException | IllegalArgumentException ignored){}
+                            }
                         }
                         event.deferEdit().queue();
-                    }
-                } else {
-                    Main.logAdmin("Error : game "+gameid+" does not exist");
-                    GameManager.setInviteExpired(event.getMessage(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(guild)));
-                    event.deferEdit().queue();
+                        break;
+                    case"joinprivate":
+                        if(!gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                            TextInput joincode = TextInput.create("codeinput",TranslatableText.get("forms.private-game-code.code-field-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(guild))), TextInputStyle.SHORT)
+                                    .setPlaceholder(TranslatableText.get("forms.private-game-code.text-placeholder", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))))
+                                    .setRequired(true)
+                                    .setRequiredRange(4,6)
+                                    .build();
+                            event.replyModal(Modal.create("codemodal:"+gm.getId(),TranslatableText.get("forms.private-game-code.title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(guild)))).addActionRow(joincode).build()).queue();
+                            Main.logAdmin("joined private game");
+                        } else {
+                            Member mb = event.getMember();
+                            //TODO : remember to provide a blocking system when the game is started / locked (game players locking system ?)
+                            if(mb != null){
+                                try{
+                                    guild.moveVoiceMember(event.getMember(),gm.getMainVoiceChannel()).queue();
+                                } catch (InsufficientPermissionException perm){
+                                    Main.logAdmin("Not enough permissions to move members in guild "+guild.getName()+":"+guild.getId());
+                                } catch (IllegalStateException | IllegalArgumentException ignored){}
+                            }
+                            event.deferEdit().queue();
+                        }
+                        break;
+                    case"leave":
+                        if(gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
+                            // player validated, removing it from the game
+                            gm.removePlayer(UserId.fromDiscordId(event.getUser().getId()));
+                        } else {
+                            Main.logAdmin("Attempt to remove Discord user "+event.getUser().getAsTag()+" from game "+gm.getId()+" via the leave button failed, user not in the game (THIS NEEDS TO BE INSPECTED !)");
+                        }
+                        break;
+                    case"start":
+                        break;
                 }
-                
-            } else if(buttonid.contains("leave:")){
-                // button type = join
-                String gameid = buttonid.replace("leave:", "");
-                GameManager gm = GameManager.fromId(gameid);
-                if(gm != null){
-                    if(gm.getPlayerList().contains(UserId.fromDiscordId(event.getUser().getId()))){
-                        // player validated, removing it from the game
-                        gm.removePlayer(UserId.fromDiscordId(event.getUser().getId()));
-                    } else {
-                        Main.logAdmin("Attempt to remove Discord user "+event.getUser().getAsTag()+" from game "+gm.getId()+" via the leave button failed, user not in the game (THIS NEEDS TO BE INSPECTED !)");
-                    }
-                } else {
-                    Main.logAdmin("Error : game "+gameid+" does not exist");
-                    GameManager.setInviteExpired(event.getMessage(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
-                }
+            } else {
+                Main.logAdmin("Error : game "+gameid+" does not exist");
+                GameManager.setInviteExpired(event.getMessage(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
                 event.deferEdit().queue();
             }
         }

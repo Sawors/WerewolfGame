@@ -5,7 +5,7 @@ import com.github.sawors.werewolfgame.game.GameManager;
 
 import java.util.Set;
 
-public abstract class GenericVote extends GamePhase{
+public abstract class GenericVote extends GameEvent {
     
     private Set<LinkedUser> votepool;
     

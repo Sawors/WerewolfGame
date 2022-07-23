@@ -4,7 +4,7 @@ import com.github.sawors.werewolfgame.game.WerewolfTeam;
 
 public class Wolves extends WerewolfTeam {
 
-    Wolves(){
+    public Wolves(){
         this.name = "Wolves";
         this.color = 0x913E40;
         this.setAlly(null);

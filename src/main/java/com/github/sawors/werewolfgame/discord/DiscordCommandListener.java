@@ -157,6 +157,13 @@ public class DiscordCommandListener extends ListenerAdapter {
                         event.getMessage().reply(TranslatableText.get("commands.ww.lang.query", DatabaseManager.getGuildLanguage(event.getGuild()))).queue();
                     }
                     break;
+                case"forceclean":
+                    if(args.length >= 3){
+                        String id = args[2];
+                        if(!Main.getGamesList().containsKey(id) && id.length() == 8){
+                            GameManager.forceClean(event.getGuild(), id);
+                        }
+                    }
             }
         }
         

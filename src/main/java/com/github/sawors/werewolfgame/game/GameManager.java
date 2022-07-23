@@ -6,6 +6,8 @@ import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
+import com.github.sawors.werewolfgame.game.phases.GameEvent;
+import com.github.sawors.werewolfgame.game.phases.PhaseType;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -19,7 +21,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.SynchronousQueue;
 import java.util.function.Consumer;
 
 public class GameManager {
@@ -50,7 +51,7 @@ public class GameManager {
     private int paramstringlength = 0;
     private Map<PlayerRole, Integer> rolepool = new HashMap<>();
     private List<PlayerRole> roleset;
-    private Queue<GamePhase> eventqueue = new SynchronousQueue<>();
+    private Queue<GameEvent> eventqueue = new LinkedList<>();
     private int round = 0;
     private LoadedLocale language;
     private boolean locked = false;
@@ -224,7 +225,12 @@ public class GameManager {
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.setColor(0x89CFF0);
                 embed.setDescription(buildTutorial());
-                adminchannel.sendMessageEmbeds(embed.build()).queue(a -> adminchannel.pinMessageById(a.getId()).queue());
+                adminchannel.sendMessageEmbeds(embed.build()).queue(a -> adminchannel.pinMessageById(a.getId()).queue(m -> adminchannel.getHistory().getRetrievedHistory().forEach(msg -> {
+                    if(msg.getAuthor().isSystem()){
+                        msg.delete().queue();
+                    }
+                })));
+                //adminchannel.sendMessage("Start Game").setActionRow(Button.success("start"+id, "Start Game")).queue();
                 adminchannel.getPermissionContainer().getManager()
                         .putRolePermissionOverride(adminrole.getIdLong(), Permission.VIEW_CHANNEL.getRawValue(),Permission.MANAGE_CHANNEL.getRawValue())
                         .putRolePermissionOverride(gamerole.getIdLong(), Permission.UNKNOWN.getRawValue(),Permission.VIEW_CHANNEL.getRawValue())
@@ -233,7 +239,7 @@ public class GameManager {
                 break;
             case ANNOUNCEMENTS:
                 this.maintextchannel = (TextChannel) channel;
-                maintextchannel.sendMessage(TranslatableText.get("buttons.leave-game-message", language).replaceAll("%button%",TranslatableText.get("buttons.leave-game", language))).setActionRow(Button.danger("leave:"+id,TranslatableText.get("buttons.leave-game", language))).queue();
+                maintextchannel.sendMessage(TranslatableText.get("buttons.leave-game-message", language).replaceAll("%button%",TranslatableText.get("buttons.leave-game", language))).setActionRow(Button.danger("leave:"+id,TranslatableText.get("buttons.leave-game", language))).queue(msg -> leavemessage = msg);
                 break;
         }
         Main.linkChannel(channel.getIdLong(), id);
@@ -520,6 +526,30 @@ public class GameManager {
         invite.editMessageEmbeds(invite.getEmbeds()).setActionRow(modified).queue();
         invite.editMessageEmbeds(invite.getEmbeds()).setEmbeds(newembeds).queue();
     }
+
+    public static void forceClean(Guild guild, String id){
+        for(Role role : guild.getRoles()){
+            if(role.getName().contains(id)){
+                role.delete().queue();
+            }
+        }
+        for(Category cat : guild.getCategories()){
+            if(cat.getName().contains(id)){
+                try{
+                    List<GuildChannel> channels = cat.getChannels();
+                    for(int i = 0; i<channels.size(); i++){
+                        if(i == channels.size()-1){
+                            channels.get(i).delete().queue(c -> cat.delete().queue());
+                        } else {
+                            channels.get(i).delete().queue();
+                        }
+                    }
+                } catch (InsufficientPermissionException e){
+                    Main.logAdmin("Permission Error in guild : "+guild.getId(),e.getMessage());
+                }
+            }
+        }
+    }
     
     
 /*
@@ -533,11 +563,27 @@ public class GameManager {
         Main.logAdmin("Let's gooooooooooooooooooo");
     }
     
-    private void buildQueue(){
-    
+    public void buildQueue(PhaseType type){
+        if(type == PhaseType.DAY){
+            buildDayQueue();
+        } else {
+            buildNightQueue();
+        }
     }
     
-    protected void nextPhase(){
-    
+    protected void nextEvent(){
+        if(eventqueue.isEmpty()){
+            // TODO ???
+        } else {
+            eventqueue.poll().start();
+        }
+    }
+
+    private void buildNightQueue(){
+
+    }
+
+    private void buildDayQueue(){
+
     }
 }
