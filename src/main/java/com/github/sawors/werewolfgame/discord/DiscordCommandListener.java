@@ -153,9 +153,9 @@ public class DiscordCommandListener extends ListenerAdapter {
                 case"language":
                     if(args.length >= 3){
                         DatabaseManager.setGuildLanguage(event.getGuild(), LoadedLocale.fromReference(args[2]));
-                        event.getChannel().sendMessage(texts.get("commands.ww.lang.success")).queue();
+                        event.getChannel().sendMessage(new TranslatableText(Main.getTranslator(),DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))).get("commands.ww.lang.success")).queue();
                     } else {
-                        event.getMessage().reply(texts.get("commands.ww.lang.query")).queue();
+                        event.getMessage().reply(new TranslatableText(Main.getTranslator(),DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))).get("commands.ww.lang.query")).queue();
                     }
                     break;
                 case"forceclean":
