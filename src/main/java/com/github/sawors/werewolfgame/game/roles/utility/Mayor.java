@@ -1,6 +1,7 @@
-package com.github.sawors.werewolfgame.game.roles;
+package com.github.sawors.werewolfgame.game.roles.utility;
 
-import com.github.sawors.werewolfgame.game.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
+import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 
 public class Mayor extends PlayerRole {
     @Override

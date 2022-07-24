@@ -1,7 +1,8 @@
 package com.github.sawors.werewolfgame.game;
 
 import com.github.sawors.werewolfgame.database.UserId;
-import com.github.sawors.werewolfgame.game.roles.Spectator;
+import com.github.sawors.werewolfgame.game.roles.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.utility.Spectator;
 import com.github.sawors.werewolfgame.game.teams.classic.Village;
 
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package com.github.sawors.werewolfgame.extensions;
 
-import com.github.sawors.werewolfgame.game.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 
 import java.util.Set;
 

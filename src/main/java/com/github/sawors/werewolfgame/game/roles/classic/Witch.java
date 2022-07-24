@@ -1,7 +1,7 @@
 package com.github.sawors.werewolfgame.game.roles.classic;
 
-import com.github.sawors.werewolfgame.game.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
+import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 
 public class Witch extends PlayerRole {
     @Override

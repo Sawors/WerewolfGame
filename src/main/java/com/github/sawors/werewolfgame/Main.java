@@ -3,7 +3,7 @@ package com.github.sawors.werewolfgame;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.extensions.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
-import com.github.sawors.werewolfgame.game.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.classic.*;
 import com.github.sawors.werewolfgame.localization.BundledLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;

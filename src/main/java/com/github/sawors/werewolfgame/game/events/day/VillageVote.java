@@ -6,11 +6,13 @@ import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.events.GenericVote;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
-public class VoteEliminate extends GenericVote {
-    public VoteEliminate(GameManager manager, Set<LinkedUser> votepool, Set<UserId> voters, TextChannel channel) {
-        super(manager, votepool, voters, channel,"");
+public class VillageVote extends GenericVote {
+    public VillageVote(GameManager manager, Set<LinkedUser> votepool, Set<UserId> voters, @Nullable TextChannel channel) {
+        //TODO : allow user to change vote time during game configuration
+        super(manager, votepool, voters, channel,"",60);
     }
 
     @Override

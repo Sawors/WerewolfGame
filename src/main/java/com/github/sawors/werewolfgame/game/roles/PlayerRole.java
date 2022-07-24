@@ -1,4 +1,4 @@
-package com.github.sawors.werewolfgame.game;
+package com.github.sawors.werewolfgame.game.roles;
 
 public abstract class PlayerRole {
         @Override
@@ -11,9 +11,9 @@ public abstract class PlayerRole {
          * By default, "classic" roles use an increment of 10 to let some space for other roles to be played
          * between without having to shift the entire role set.
         **/
-        protected abstract Integer priority();
+        public abstract Integer priority();
 
-        protected void onDeathAction(){};
+        public void onDeathAction(){};
 
-        protected void nightAction(){};
+        public void nightAction(){};
 }

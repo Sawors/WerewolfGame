@@ -8,4 +8,9 @@ public class Wolf extends WolfLike {
     public String toString() {
         return DefaultRoleType.WOLF.toString();
     }
+
+    @Override
+    public void wolfAction() {
+
+    }
 }

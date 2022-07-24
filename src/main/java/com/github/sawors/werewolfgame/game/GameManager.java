@@ -10,9 +10,10 @@ import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
 import com.github.sawors.werewolfgame.game.events.GameEvent;
 import com.github.sawors.werewolfgame.game.events.PhaseType;
-import com.github.sawors.werewolfgame.game.events.day.MayorVote;
-import com.github.sawors.werewolfgame.game.events.day.NightFall;
+import com.github.sawors.werewolfgame.game.events.day.MayorVoteEvent;
+import com.github.sawors.werewolfgame.game.events.day.NightfallEvent;
 import com.github.sawors.werewolfgame.game.events.night.SunRise;
+import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.classic.Villager;
 import com.github.sawors.werewolfgame.game.roles.classic.Wolf;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
@@ -693,13 +694,13 @@ public class GameManager {
 
 
 
-        eventqueue.add(new NightFall(this));
+        eventqueue.add(new NightfallEvent(this));
     }
 
     private void buildFirstDayQueue(){
         //eventqueue.add(new Intro(this));
-        eventqueue.add(new MayorVote(this, defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691"), UserId.fromString("oxtyaevi")), maintextchannel));
-        eventqueue.add(new NightFall(this));
+        eventqueue.add(new MayorVoteEvent(this, defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691"), UserId.fromString("oxtyaevi")), maintextchannel));
+        eventqueue.add(new NightfallEvent(this));
     }
 
     private void assignRoles(){
