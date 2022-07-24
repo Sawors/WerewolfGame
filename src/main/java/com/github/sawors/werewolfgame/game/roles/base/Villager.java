@@ -1,4 +1,4 @@
-package com.github.sawors.werewolfgame.game.roles.classic;
+package com.github.sawors.werewolfgame.game.roles.base;
 
 import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
 import com.github.sawors.werewolfgame.game.roles.VillagerLike;

@@ -1,10 +1,16 @@
 package com.github.sawors.werewolfgame;
 
+import com.github.sawors.werewolfgame.bundledextensions.classic.roles.cupid.Cupid;
+import com.github.sawors.werewolfgame.bundledextensions.classic.roles.hunter.Hunter;
+import com.github.sawors.werewolfgame.bundledextensions.classic.roles.littlegirl.LittleGirl;
+import com.github.sawors.werewolfgame.bundledextensions.classic.roles.seer.Seer;
+import com.github.sawors.werewolfgame.bundledextensions.classic.roles.witch.Witch;
 import com.github.sawors.werewolfgame.database.UserId;
-import com.github.sawors.werewolfgame.extensions.WerewolfExtension;
+import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
-import com.github.sawors.werewolfgame.game.roles.classic.*;
+import com.github.sawors.werewolfgame.game.roles.PrimaryRole;
+import com.github.sawors.werewolfgame.game.roles.base.Wolf;
 import com.github.sawors.werewolfgame.localization.BundledLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.JDA;
@@ -38,12 +44,14 @@ public class Main {
     //TODO : Linking check
     private static HashMap<Long, String> channellink = new HashMap<>();
     // Use this to get all loaded roles
-    private static Set<PlayerRole> rolepool = new HashSet<>();
     private static LoadedLocale instancelanguage;
     private static Map<String, Object> configmap;
     // String is the Discord User's ID
     private static String instancename = RandomStringUtils.randomNumeric(6);
     private static List<PrivateChannel> logchannels = new ArrayList<>();
+    //
+    // Role Loading Data
+    private static Set<PlayerRole> rolepool = new HashSet<>();
 
 
     public static void init(boolean standalone, String token, File datastorage){
@@ -99,7 +107,7 @@ public class Main {
         
         //TODO : Extension loading
         
-        // add classic extension (by hand method)
+        // add base extension (by hand method)
         rolepool.add(new Cupid());
         rolepool.add(new Hunter());
         rolepool.add(new LittleGirl());
@@ -224,6 +232,16 @@ public class Main {
             }
         }catch (IOException e){
             e.printStackTrace();
+        }
+    }
+    
+    private void loadExtensions(){
+    
+    }
+    private void loadRoles(Set<PrimaryRole> toload){
+        for(PrimaryRole role : toload){
+            role.onLoad();
+            role.getEvents();
         }
     }
     

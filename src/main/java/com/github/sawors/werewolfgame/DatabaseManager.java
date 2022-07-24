@@ -360,7 +360,7 @@ public class DatabaseManager {
             }
         }
     
-        DatabaseManager.registerGuild(guild,admins,invites,waiting,Main.getLanguage());
+        DatabaseManager.registerGuild(guild,admins,invites,waiting, Main.getLanguage());
     }
     
     protected static void setGuildData(Guild guild, String data, GuildDataType datatype){

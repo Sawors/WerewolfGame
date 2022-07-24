@@ -4,14 +4,17 @@ import com.github.sawors.werewolfgame.LinkedUser;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.game.GameManager;
+import com.github.sawors.werewolfgame.game.GamePhase;
 import com.github.sawors.werewolfgame.game.events.GenericVote;
-import com.github.sawors.werewolfgame.game.events.PhaseType;
+import com.github.sawors.werewolfgame.game.events.RoleEvent;
+import com.github.sawors.werewolfgame.game.roles.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.base.Mayor;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.Map;
 import java.util.Set;
 
-public class MayorVoteEvent extends GenericVote {
+public class MayorVoteEvent extends GenericVote implements RoleEvent {
 
     
     public MayorVoteEvent(GameManager manager, Set<LinkedUser> votepool, Set<UserId> voters , TextChannel channel) {
@@ -19,7 +22,6 @@ public class MayorVoteEvent extends GenericVote {
         super(manager, votepool, voters, channel, "Vote for the best Mayor !",30);
         Main.logAdmin("Voters",voters);
         Main.logAdmin("Votepool",votepool);
-        this.type = PhaseType.DAY;
     }
 
     @Override
@@ -52,5 +54,15 @@ public class MayorVoteEvent extends GenericVote {
         votemessage.addField("Role","The mayor will decide who should die if a tie happens when the Village decides which player to eliminate. \nWhen the Mayor dies a new Mayor is designated by the old one just before passing away",false);
 
         start(votemessage);
+    }
+    
+    @Override
+    public GamePhase getPhase() {
+        return GamePhase.FIRST_DAY;
+    }
+    
+    @Override
+    public PlayerRole getRole() {
+        return new Mayor();
     }
 }

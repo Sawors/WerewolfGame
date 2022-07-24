@@ -62,7 +62,7 @@ public class InstanceCommandListeners extends ListenerAdapter {
             }
             switch(args[0]){
                 case"instance":
-                    channel.sendMessage("Instance : `"+Main.getInstanceName()+"`").queue();
+                    channel.sendMessage("Instance : `"+ Main.getInstanceName()+"`").queue();
                 case"regme":
                     if(args.length >= 3){
                         new RegisterUserCommand(event.getAuthor(), args[2]).execute(event.getChannel());

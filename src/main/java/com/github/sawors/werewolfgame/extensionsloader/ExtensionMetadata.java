@@ -1,4 +1,4 @@
-package com.github.sawors.werewolfgame.extensions;
+package com.github.sawors.werewolfgame.extensionsloader;
 
 import java.net.URL;
 

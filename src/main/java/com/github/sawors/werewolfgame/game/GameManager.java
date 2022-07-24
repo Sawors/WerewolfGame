@@ -12,10 +12,10 @@ import com.github.sawors.werewolfgame.game.events.GameEvent;
 import com.github.sawors.werewolfgame.game.events.PhaseType;
 import com.github.sawors.werewolfgame.game.events.day.MayorVoteEvent;
 import com.github.sawors.werewolfgame.game.events.day.NightfallEvent;
-import com.github.sawors.werewolfgame.game.events.night.SunRise;
+import com.github.sawors.werewolfgame.game.events.night.SunriseEvent;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
-import com.github.sawors.werewolfgame.game.roles.classic.Villager;
-import com.github.sawors.werewolfgame.game.roles.classic.Wolf;
+import com.github.sawors.werewolfgame.game.roles.base.Villager;
+import com.github.sawors.werewolfgame.game.roles.base.Wolf;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -63,6 +63,7 @@ public class GameManager {
     private Set<UserId> playerset = new HashSet<>();
     private Map<PlayerRole, Integer> rolepool = new HashMap<>();
     private Map<UserId, WerewolfPlayer> playerlink = new HashMap<>();
+    List<GameEvent> addedevents = new ArrayList<>();
     private Queue<GameEvent> eventqueue = new LinkedList<>();
     private int round = 0;
     private GameEvent currentevent;
@@ -109,6 +110,10 @@ public class GameManager {
         }
         
         Main.registerNewGame(this);
+    }
+    
+    public void addRoleEvent(GameEvent... events){
+    
     }
     
     private String buildTutorial(){
@@ -686,7 +691,7 @@ public class GameManager {
 
 
 
-        eventqueue.add(new SunRise(this));
+        eventqueue.add(new SunriseEvent(this));
     }
 
     private void buildDayQueue(){

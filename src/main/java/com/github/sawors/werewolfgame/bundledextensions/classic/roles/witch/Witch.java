@@ -1,9 +1,10 @@
-package com.github.sawors.werewolfgame.game.roles.classic;
+package com.github.sawors.werewolfgame.bundledextensions.classic.roles.witch;
 
 import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.PrimaryRole;
 
-public class Witch extends PlayerRole {
+public class Witch extends PlayerRole implements PrimaryRole {
     @Override
     public String toString() {
         return DefaultRoleType.WITCH.toString();
@@ -17,5 +18,10 @@ public class Witch extends PlayerRole {
     @Override
     public void nightAction() {
         //TODO : Witch action
+    }
+    
+    @Override
+    public void onLoad() {
+    
     }
 }

@@ -1,21 +1,21 @@
-package com.github.sawors.werewolfgame.game.roles.classic;
+package com.github.sawors.werewolfgame.game.roles.base;
 
 import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 
-public class Seer extends PlayerRole {
+public class Mayor extends PlayerRole {
     @Override
     public String toString() {
-        return DefaultRoleType.SEER.toString();
+        return DefaultRoleType.MAYOR.toString();
     }
 
     @Override
     public Integer priority() {
-        return -10;
+        return null;
     }
 
     @Override
-    public void nightAction() {
-        //TODO : Seer action
+    public void onDeathAction() {
+        //TODO : Transmit role
     }
 }

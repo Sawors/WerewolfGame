@@ -8,12 +8,12 @@ public abstract class PlayerRole {
          *
          * When not active during the night set this value to null.
          *
-         * By default, "classic" roles use an increment of 10 to let some space for other roles to be played
+         * By default, "base" roles use an increment of 10 to let some space for other roles to be played
          * between without having to shift the entire role set.
         **/
         public abstract Integer priority();
 
-        public void onDeathAction(){};
+        public void onDeathAction(){}
 
-        public void nightAction(){};
+        public void nightAction(){}
 }

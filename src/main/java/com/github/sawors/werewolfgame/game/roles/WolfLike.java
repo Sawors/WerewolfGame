@@ -1,6 +1,6 @@
 package com.github.sawors.werewolfgame.game.roles;
 
-public abstract class WolfLike extends PlayerRole {
+public abstract class WolfLike extends PrimaryRole {
     @Override
     public Integer priority() {
         return 0;
