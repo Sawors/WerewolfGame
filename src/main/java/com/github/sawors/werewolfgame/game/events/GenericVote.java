@@ -6,6 +6,8 @@ import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.game.GameManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -83,7 +85,7 @@ public abstract class GenericVote extends GameEvent {
 //            Main.logAdmin("Selected",sortedvotes.get(0));
 
             // always at the end of true validating methods
-            onWin(sortedvotes.get(0));
+            onWin(sortedvotes.get(0), Map.copyOf(occurences));
         } else {
             onValidationFail();
         }
@@ -105,16 +107,39 @@ public abstract class GenericVote extends GameEvent {
         return Map.copyOf(votemap);
     }
 
+    public void start(EmbedBuilder embed){
+
+        List<ActionRow> votebuttons = new ArrayList<>();
+        List<Button> tempbuttons = new ArrayList<>();
+        for(LinkedUser user : votepool){
+            tempbuttons.add(Button.primary("vote:"+gm.getId()+"#"+user.getId(), user.getName()));
+            if(tempbuttons.size() >= 3){
+                votebuttons.add(ActionRow.of(tempbuttons));
+                tempbuttons.clear();
+            }
+        }
+        if(tempbuttons.size()>0){
+            //
+            votebuttons.add(ActionRow.of(tempbuttons));
+            tempbuttons.clear();
+        }
+
+        votechannel.sendMessageEmbeds(embed.build()).setActionRows(votebuttons).queue();
+    }
 
     // events
-
-    public void onWin(UserId winner){}
-    public void onTie(Set<UserId> tied){}
+    //  Validation events
     public void onValidationFail(){}
     public void onValidationSuccess(boolean forced){}
     public void onValidationAttempt(boolean force, boolean wait){}
+    //  Vote Events
     public void onVote(UserId voter, UserId voted){}
     public void onVoteNew(UserId voter, UserId voted){}
     public void onVoteChanged(UserId voter, UserId voted){}
+    // Vote result Events
+    public void onWin(UserId winner, Map<UserId, Integer> results){}
+    public void onTie(Set<UserId> tied){}
+    // Vote time events
     public void onTimeOut(Integer basetime){}
+    public void onTimeHalf(Integer basetime, Integer elapsedtime){};
 }

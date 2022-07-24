@@ -7,11 +7,8 @@ import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.events.GenericVote;
 import com.github.sawors.werewolfgame.game.events.PhaseType;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class MayorVoteEvent extends GenericVote {
@@ -26,13 +23,15 @@ public class MayorVoteEvent extends GenericVote {
     }
 
     @Override
-    public void onWin(UserId winner) {
-
+    public void onWin(UserId winner, Map<UserId, Integer> results) {
+        Main.logAdmin(winner);
+        gm.nextEvent();
     }
 
     @Override
     public void onTie(Set<UserId> tieset) {
-
+        Main.logAdmin("Ignoring Tie",tieset);
+        gm.nextEvent();
     }
 
     @Override
@@ -52,22 +51,6 @@ public class MayorVoteEvent extends GenericVote {
         votemessage.addField("Supplementary Role","This role does not replace your original role",false);
         votemessage.addField("Role","The mayor will decide who should die if a tie happens when the Village decides which player to eliminate. \nWhen the Mayor dies a new Mayor is designated by the old one just before passing away",false);
 
-        List<ActionRow> votebuttons = new ArrayList<>();
-        List<Button> tempbuttons = new ArrayList<>();
-        for(LinkedUser user : votepool){
-            tempbuttons.add(Button.primary("vote:"+gm.getId()+"#"+user.getId(), user.getName()));
-            if(tempbuttons.size() >= 3){
-                votebuttons.add(ActionRow.of(tempbuttons));
-                tempbuttons.clear();
-            }
-        }
-        if(tempbuttons.size()>0){
-            //
-            votebuttons.add(ActionRow.of(tempbuttons));
-            tempbuttons.clear();
-        }
-
-
-        votechannel.sendMessageEmbeds(votemessage.build()).setActionRows(votebuttons).queue();
+        start(votemessage);
     }
 }
