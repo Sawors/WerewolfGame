@@ -13,11 +13,11 @@ import java.util.Set;
 public class VillageVoteEvent extends GenericVote {
     public VillageVoteEvent(GameManager manager, Set<LinkedUser> votepool, Set<UserId> voters, @Nullable TextChannel channel) {
         //TODO : allow user to change vote time during game configuration
-        super(manager, votepool, voters, channel,"",60);
+        super(votepool, voters, channel,"",60);
     }
 
     @Override
-    public void start() {
+    public void start(GameManager manager) {
         // TODO vote
     }
     

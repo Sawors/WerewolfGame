@@ -7,12 +7,9 @@ import com.github.sawors.werewolfgame.game.events.RoleEvent;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 
 public class WitchPotionEvent extends GameEvent implements RoleEvent {
-    public WitchPotionEvent(GameManager manager) {
-        super(manager);
-    }
     
     @Override
-    public void start() {
+    public void start(GameManager manager) {
     
     }
     

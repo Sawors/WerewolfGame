@@ -1,16 +1,11 @@
 package com.github.sawors.werewolfgame;
 
-import com.github.sawors.werewolfgame.bundledextensions.classic.roles.cupid.Cupid;
-import com.github.sawors.werewolfgame.bundledextensions.classic.roles.hunter.Hunter;
-import com.github.sawors.werewolfgame.bundledextensions.classic.roles.littlegirl.LittleGirl;
-import com.github.sawors.werewolfgame.bundledextensions.classic.roles.seer.Seer;
-import com.github.sawors.werewolfgame.bundledextensions.classic.roles.witch.Witch;
+import com.github.sawors.werewolfgame.bundledextensions.classic.ClassicExtensionLoader;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.PrimaryRole;
-import com.github.sawors.werewolfgame.game.roles.base.Wolf;
 import com.github.sawors.werewolfgame.localization.BundledLocale;
 import com.github.sawors.werewolfgame.localization.LoadedLocale;
 import com.github.sawors.werewolfgame.localization.Translator;
@@ -34,9 +29,6 @@ public class Main {
     private static boolean discordenabled = false;
     private static boolean minecraftenabled = false;
     private static JDA jda;
-    private static File datalocation;
-    private static File dbfile;
-    private static File configfile;
     private static boolean usecaching = true;
     private static HashMap<UserId, LinkedUser> cachedusers = new HashMap<>();
     // I use this linking map to avoid creating a new JDA Event Listener each time a new GameManager is created
@@ -49,6 +41,13 @@ public class Main {
     private static String instancename = RandomStringUtils.randomNumeric(6);
     private static List<PrivateChannel> logchannels = new ArrayList<>();
     //
+    // Data Storage
+    private static File datalocation;
+    private static File dbfile;
+    private static File configfile;
+    private static File languageslocation;
+    private static File extensionslocation;
+    //
     // Role Loading Data
     private static Set<PlayerRole> rolepool = new HashSet<>();
     //
@@ -60,6 +59,10 @@ public class Main {
         //[=======================Do Not Put Init Code Here=========================]
         datastorage.mkdirs();
         datalocation = datastorage;
+        languageslocation = new File(datalocation+File.separator+"languages");
+        languageslocation.mkdir();
+        extensionslocation = new File(datalocation+File.separator+"extensions");
+        extensionslocation.mkdir();
         Main.standalone = standalone;
         try{
             Main.logAdmin("Data stored under "+datalocation.getCanonicalPath());
@@ -107,20 +110,19 @@ public class Main {
         String configname = getConfigData("instance-name");
         instancename = configname.equals("") ? "I"+instancename : configname+" : I"+instancename;
         
-        //TODO : Extension loading
-        
-        // add base extension (by hand method)
-        rolepool.add(new Cupid());
-        rolepool.add(new Hunter());
-        rolepool.add(new LittleGirl());
-        rolepool.add(new Seer());
-        rolepool.add(new Witch());
-        rolepool.add(new Wolf());
-
-        Main.logAdmin("rolepool",rolepool);
-        
         reloadLanguages();
         Main.logAdmin("Default language set to",getTranslator().getDefaultLocale().getName());
+    
+    
+    
+    
+        //TODO : Extension loading
+    
+        // add base extension
+        WerewolfExtension classicextension = new ClassicExtensionLoader();
+        rolepool.addAll(classicextension.getRoles());
+    
+        Main.logAdmin("rolepool",rolepool);
     }
     
     protected static boolean isInstanceAdmin(String discordid){
@@ -151,6 +153,16 @@ public class Main {
         logchannels.forEach(chan -> ids.add(chan.getId()));
         return ids;
     }
+    
+    public static File getDataLocation(){
+        return datalocation;
+    }
+    public static File getLocalesLocation(){
+        return languageslocation;
+    }
+    public static File getExtensionsLocation(){
+        return extensionslocation;
+    }
 
     public static void reloadLanguages(){
     
@@ -161,9 +173,7 @@ public class Main {
         instancetranslator.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.en_UK.getPath()), BundledLocale.en_UK.getLocale());
         instancetranslator.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.fr_FR.getPath()), BundledLocale.fr_FR.getLocale());
         
-        File localespath = new File(datalocation+File.separator+"locales"+File.separator);
-        localespath.mkdirs();
-        File[] toload = localespath.listFiles();
+        File[] toload = languageslocation.listFiles();
         if(toload != null){
             for(File locale : toload){
                 if(locale.getName().toLowerCase(Locale.ROOT).endsWith(".yml") || locale.getName().toLowerCase(Locale.ROOT).endsWith(".yaml") ){

@@ -6,12 +6,8 @@ import com.github.sawors.werewolfgame.game.events.GameEvent;
 
 public class IntroEvent extends GameEvent {
     
-    public IntroEvent(GameManager manager){
-        super(manager);
-    }
-    
     @Override
-    public void start() {
+    public void start(GameManager manager) {
     
     }
     

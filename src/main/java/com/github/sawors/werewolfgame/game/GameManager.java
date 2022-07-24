@@ -9,10 +9,12 @@ import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
 import com.github.sawors.werewolfgame.game.events.GameEvent;
 import com.github.sawors.werewolfgame.game.events.PhaseType;
+import com.github.sawors.werewolfgame.game.events.RoleEvent;
 import com.github.sawors.werewolfgame.game.events.day.MayorVoteEvent;
 import com.github.sawors.werewolfgame.game.events.day.NightfallEvent;
 import com.github.sawors.werewolfgame.game.events.night.SunriseEvent;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
+import com.github.sawors.werewolfgame.game.roles.PrimaryRole;
 import com.github.sawors.werewolfgame.game.roles.base.Villager;
 import com.github.sawors.werewolfgame.game.roles.base.Wolf;
 import com.github.sawors.werewolfgame.localization.LoadedLocale;
@@ -59,15 +61,6 @@ public class GameManager {
     private LoadedLocale language;
     private boolean locked = false;
 
-    // GAME DATA
-    private Set<UserId> playerset = new HashSet<>();
-    private Map<PlayerRole, Integer> rolepool = new HashMap<>();
-    private Map<UserId, WerewolfPlayer> playerlink = new HashMap<>();
-    List<GameEvent> addedevents = new ArrayList<>();
-    private Queue<GameEvent> eventqueue = new LinkedList<>();
-    private int round = 0;
-    private GameEvent currentevent;
-
     // GAME OPTIONS
     private boolean instantvote = true;
     private boolean autowolf = true;
@@ -80,6 +73,15 @@ public class GameManager {
     private boolean logtofile = false;
     private boolean logtoconsole = true;
     private StringBuilder logholder = new StringBuilder();
+    
+    // GAME DATA
+    private Set<UserId> playerset = new HashSet<>();
+    private Map<PlayerRole, Integer> rolepool = new HashMap<>();
+    private Map<UserId, WerewolfPlayer> playerlink = new HashMap<>();
+    List<GameEvent> addedevents = new ArrayList<>();
+    private Queue<GameEvent> eventqueue = new LinkedList<>();
+    private int round = 0;
+    private GameEvent currentevent;
 
     
     
@@ -107,13 +109,22 @@ public class GameManager {
         for(PlayerRole role : Main.getRolePool()){
             Integer prio = role.priority();
             rolepool.put(role, prio);
+            if(role instanceof PrimaryRole){
+                addRoleEvent(((PrimaryRole) role).getEvents());
+            }
         }
+        
+        Main.logAdmin("Loaded events", addedevents);
         
         Main.registerNewGame(this);
     }
     
-    public void addRoleEvent(GameEvent... events){
-    
+    public void addRoleEvent(Collection<GameEvent> events){
+        for(GameEvent event : events){
+            if(event instanceof RoleEvent){
+                addedevents.add(event);
+            }
+        }
     }
     
     private String buildTutorial(){
@@ -691,7 +702,7 @@ public class GameManager {
         } else {
             GameEvent next = eventqueue.poll();
             currentevent = next;
-            next.start();
+            next.start(this);
         }
     }
 
@@ -699,7 +710,7 @@ public class GameManager {
 
 
 
-        eventqueue.add(new SunriseEvent(this));
+        eventqueue.add(new SunriseEvent());
     }
 
     private void buildDayQueue(){
@@ -707,13 +718,13 @@ public class GameManager {
 
 
 
-        eventqueue.add(new NightfallEvent(this));
+        eventqueue.add(new NightfallEvent());
     }
 
     private void buildFirstDayQueue(){
         //eventqueue.add(new Intro(this));
-        eventqueue.add(new MayorVoteEvent(this, defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691"), UserId.fromString("oxtyaevi")), maintextchannel));
-        eventqueue.add(new NightfallEvent(this));
+        eventqueue.add(new MayorVoteEvent(defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691"), UserId.fromString("oxtyaevi")), maintextchannel));
+        eventqueue.add(new NightfallEvent());
     }
 
     private void assignRoles(){

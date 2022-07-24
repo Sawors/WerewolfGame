@@ -23,12 +23,12 @@ public abstract class GenericVote extends GameEvent {
     protected Map<UserId,               UserId> votemap = new HashMap<>();
     protected Set<UserId> voters;
     protected Set<UserId> votewinnertie = new HashSet<>();
+    public GameManager manager;
 
-    public GenericVote(GameManager manager, Set<LinkedUser> votepool, Set<UserId> voters,@Nullable TextChannel votechannel, @Nullable String votemessagebody, @Nullable Integer votetime){
-        super(manager);
+    public GenericVote(Set<LinkedUser> votepool, Set<UserId> voters,@Nullable TextChannel votechannel, @Nullable String votemessagebody, @Nullable Integer votetime){
         this.votepool = votepool;
         this.voters = voters;
-        this.votechannel = votechannel != null ? votechannel : gm.getMainTextChannel();
+        this.votechannel = votechannel;
         this.messagebody = votemessagebody != null ? votemessagebody : "";
         this.votetime = votetime != null && votetime > 0 ? votetime : 30;
     };
@@ -107,12 +107,17 @@ public abstract class GenericVote extends GameEvent {
         return Map.copyOf(votemap);
     }
 
-    public void start(EmbedBuilder embed){
+    public void start(GameManager manager, EmbedBuilder embed){
 
+        this.manager = manager;
+        if(votechannel == null){
+            votechannel = manager.getMainTextChannel();
+        }
+        
         List<ActionRow> votebuttons = new ArrayList<>();
         List<Button> tempbuttons = new ArrayList<>();
         for(LinkedUser user : votepool){
-            tempbuttons.add(Button.primary("vote:"+gm.getId()+"#"+user.getId(), user.getName()));
+            tempbuttons.add(Button.primary("vote:"+manager.getId()+"#"+user.getId(), user.getName()));
             if(tempbuttons.size() >= 3){
                 votebuttons.add(ActionRow.of(tempbuttons));
                 tempbuttons.clear();

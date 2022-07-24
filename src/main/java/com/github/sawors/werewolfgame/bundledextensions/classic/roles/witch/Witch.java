@@ -29,6 +29,8 @@ public class Witch extends PrimaryRole {
     
     @Override
     public Set<GameEvent> getEvents() {
-        return Set.of();
+        return Set.of(
+                new WitchPotionEvent()
+        );
     }
 }

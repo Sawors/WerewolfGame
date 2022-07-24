@@ -12,7 +12,7 @@ public class SeerPeekEvent extends GameEvent implements RoleEvent {
     }
     
     @Override
-    public void start() {
+    public void start(GameManager manager) {
     
     }
     

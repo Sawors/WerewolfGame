@@ -1,6 +1,5 @@
 package com.github.sawors.werewolfgame.bundledextensions.classic;
 
-import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.bundledextensions.classic.roles.cupid.Cupid;
 import com.github.sawors.werewolfgame.bundledextensions.classic.roles.hunter.Hunter;
 import com.github.sawors.werewolfgame.bundledextensions.classic.roles.littlegirl.LittleGirl;
@@ -9,13 +8,12 @@ import com.github.sawors.werewolfgame.bundledextensions.classic.roles.seer.Seer;
 import com.github.sawors.werewolfgame.bundledextensions.classic.roles.witch.Witch;
 import com.github.sawors.werewolfgame.extensionsloader.ExtensionMetadata;
 import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
+import com.github.sawors.werewolfgame.localization.BundledLocale;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ClassicExtensionLoader extends WerewolfExtension {
-    
-    
-    public ClassicExtensionLoader(Main loader) {
-        super(loader);
-    }
     
     @Override
     public void onLoad() {
@@ -27,6 +25,12 @@ public class ClassicExtensionLoader extends WerewolfExtension {
                 new Seer(),
                 new Witch()
         );
+        
+        // manually load locales only for bundled extensions
+        try(InputStream input = this.getClass().getModule().getResourceAsStream("bundledextensions.classic.locales.en_UK.yml")){
+            getTranslator().load(input, BundledLocale.en_UK.getLocale());
+            getTranslator().printLoaded();
+        } catch (IOException e){e.printStackTrace();}
     }
     
     @Override

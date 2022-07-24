@@ -6,13 +6,10 @@ import com.github.sawors.werewolfgame.game.events.GameEvent;
 import com.github.sawors.werewolfgame.game.events.PhaseType;
 
 public class SunriseEvent extends GameEvent {
-    public SunriseEvent(GameManager manager) {
-        super(manager);
-    }
 
     @Override
-    public void start() {
-        this.gm.buildQueue(PhaseType.DAY);
+    public void start(GameManager manager) {
+        manager.buildQueue(PhaseType.DAY);
     }
     
     @Override

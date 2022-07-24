@@ -7,13 +7,9 @@ import com.github.sawors.werewolfgame.game.events.PhaseType;
 
 public class NightfallEvent extends GameEvent {
 
-    public NightfallEvent(GameManager manager) {
-        super(manager);
-    }
-
     @Override
-    public void start() {
-        this.gm.buildQueue(PhaseType.NIGHT);
+    public void start(GameManager manager) {
+        manager.buildQueue(PhaseType.NIGHT);
     }
     
     @Override
