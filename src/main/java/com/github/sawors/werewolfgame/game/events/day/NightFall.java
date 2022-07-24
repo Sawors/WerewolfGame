@@ -1,8 +1,8 @@
-package com.github.sawors.werewolfgame.game.phases.day;
+package com.github.sawors.werewolfgame.game.events.day;
 
 import com.github.sawors.werewolfgame.game.GameManager;
-import com.github.sawors.werewolfgame.game.phases.GameEvent;
-import com.github.sawors.werewolfgame.game.phases.PhaseType;
+import com.github.sawors.werewolfgame.game.events.GameEvent;
+import com.github.sawors.werewolfgame.game.events.PhaseType;
 
 public class NightFall extends GameEvent {
 

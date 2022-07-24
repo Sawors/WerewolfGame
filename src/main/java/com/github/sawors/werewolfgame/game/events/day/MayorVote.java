@@ -1,11 +1,11 @@
-package com.github.sawors.werewolfgame.game.phases.day;
+package com.github.sawors.werewolfgame.game.events.day;
 
 import com.github.sawors.werewolfgame.LinkedUser;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.game.GameManager;
-import com.github.sawors.werewolfgame.game.phases.GenericVote;
-import com.github.sawors.werewolfgame.game.phases.PhaseType;
+import com.github.sawors.werewolfgame.game.events.GenericVote;
+import com.github.sawors.werewolfgame.game.events.PhaseType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;

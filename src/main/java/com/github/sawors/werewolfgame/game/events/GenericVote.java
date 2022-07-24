@@ -1,4 +1,4 @@
-package com.github.sawors.werewolfgame.game.phases;
+package com.github.sawors.werewolfgame.game.events;
 
 import com.github.sawors.werewolfgame.LinkedUser;
 import com.github.sawors.werewolfgame.Main;
@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,9 +17,9 @@ public abstract class GenericVote extends GameEvent {
     protected EmbedBuilder votemessage = new EmbedBuilder();
     protected String messagebody;
     protected TextChannel votechannel;
-    //          has voted for
+    //       |            has voted for
     protected Map<UserId,               UserId> votemap = new HashMap<>();
-    protected Set<UserId> voters = new HashSet<>();
+    protected Set<UserId> voters;
 
     public GenericVote(GameManager manager, Set<LinkedUser> votepool, Set<UserId> voters, TextChannel votechannel){
         super(manager);
@@ -38,6 +37,16 @@ public abstract class GenericVote extends GameEvent {
     
     public void setVotePool(Set<LinkedUser> votepool){
         this.votepool = votepool;
+    }
+    public Set<LinkedUser> getVotePool( ){
+        return Set.copyOf(this.votepool);
+    }
+    public Set<UserId> getVoters(){return Set.copyOf(this.voters);}
+    public boolean canVote(UserId user){
+        return voters.contains(user);
+    }
+    public boolean canVote(LinkedUser user){
+        return voters.contains(user.getId());
     }
 
     public abstract void validate(boolean force, boolean wait);

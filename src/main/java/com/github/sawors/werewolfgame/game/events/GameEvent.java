@@ -1,10 +1,9 @@
-package com.github.sawors.werewolfgame.game.phases;
+package com.github.sawors.werewolfgame.game.events;
 
 import com.github.sawors.werewolfgame.game.GameManager;
 
 public abstract class GameEvent {
-    
-    private boolean interrupted = false;
+
     protected GameManager gm;
     protected PhaseType type;
     
@@ -13,9 +12,6 @@ public abstract class GameEvent {
     }
     
     public abstract void start();
-    public void stop(){
-        boolean interrupted = true;
-    };
 
     public PhaseType getType() {
         return type;

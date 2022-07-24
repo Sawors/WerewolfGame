@@ -1,8 +1,8 @@
-package com.github.sawors.werewolfgame.game.phases.night;
+package com.github.sawors.werewolfgame.game.events.night;
 
 import com.github.sawors.werewolfgame.game.GameManager;
-import com.github.sawors.werewolfgame.game.phases.GameEvent;
-import com.github.sawors.werewolfgame.game.phases.PhaseType;
+import com.github.sawors.werewolfgame.game.events.GameEvent;
+import com.github.sawors.werewolfgame.game.events.PhaseType;
 
 public class SunRise extends GameEvent {
     public SunRise(GameManager manager) {
