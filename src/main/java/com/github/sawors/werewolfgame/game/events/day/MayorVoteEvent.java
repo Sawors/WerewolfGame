@@ -3,6 +3,7 @@ package com.github.sawors.werewolfgame.game.events.day;
 import com.github.sawors.werewolfgame.LinkedUser;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
+import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.GamePhase;
 import com.github.sawors.werewolfgame.game.events.GenericVote;
@@ -11,29 +12,31 @@ import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.base.Mayor;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class MayorVoteEvent extends GenericVote implements RoleEvent {
 
     
-    public MayorVoteEvent(Set<LinkedUser> votepool, Set<UserId> voters , TextChannel channel) {
+    public MayorVoteEvent(WerewolfExtension extension, Set<LinkedUser> votepool, Set<UserId> voters , TextChannel channel) {
         // TODO : user-defined vote time
-        super(votepool, voters, channel, "Vote for the best Mayor !",30);
+        super(extension, votepool, voters, channel, "Vote for the best Mayor !",30);
         Main.logAdmin("Voters",voters);
         Main.logAdmin("Votepool",votepool);
     }
 
     @Override
     public void onWin(UserId winner, Map<UserId, Integer> results) {
-        Main.logAdmin(winner);
+        Main.logAdmin("Winner",winner);
+        closeVote();
         manager.nextEvent();
     }
 
     @Override
-    public void onTie(Set<UserId> tieset) {
-        Main.logAdmin("Ignoring Tie",tieset);
-        manager.nextEvent();
+    public void onTie(List<UserId> tielist, Map<UserId, Integer> results) {
+        Main.logAdmin("Ignoring Tie",tielist);
+        onWin(tielist.get(0), results);
     }
 
     @Override
@@ -63,6 +66,6 @@ public class MayorVoteEvent extends GenericVote implements RoleEvent {
     
     @Override
     public PlayerRole getRole() {
-        return new Mayor();
+        return new Mayor(this.extension);
     }
 }

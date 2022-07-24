@@ -1,8 +1,22 @@
 package com.github.sawors.werewolfgame.game.roles;
 
+import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
+import org.apache.commons.lang3.RandomStringUtils;
+
+import java.util.Objects;
+
 public abstract class PlayerRole {
+        
+        WerewolfExtension extension;
+        String uniqueid = RandomStringUtils.randomAlphabetic(6);
+        
+        public PlayerRole(WerewolfExtension extension){
+                this.extension = extension;
+        }
         @Override
-        public abstract String toString();
+        public String toString(){
+                return this.getClass().getName();
+        }
         /**
          * Everything before wolves is <0, everything after >0.
          *
@@ -16,4 +30,18 @@ public abstract class PlayerRole {
         public void onDeathAction(){}
 
         public void nightAction(){}
+        
+        public WerewolfExtension getExtension(){
+                return  extension;
+        }
+        
+        @Override
+        public boolean equals(Object obj){
+                return obj.getClass() == this.getClass() && Objects.equals(((PlayerRole) obj).getExtension().getId(), this.getExtension().getId());
+        }
+        
+        @Override
+        public int hashCode() {
+                return this.getClass().getCanonicalName().hashCode();
+        }
 }

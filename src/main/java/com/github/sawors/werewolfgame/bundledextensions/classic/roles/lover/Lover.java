@@ -1,10 +1,15 @@
 package com.github.sawors.werewolfgame.bundledextensions.classic.roles.lover;
 
+import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
 import com.github.sawors.werewolfgame.game.roles.FirstNightRole;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 
 public class Lover extends PlayerRole implements FirstNightRole {
+    
+    public Lover(WerewolfExtension extension) {
+        super(extension);
+    }
     
     @Override
     public String toString() {

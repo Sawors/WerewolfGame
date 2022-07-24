@@ -15,6 +15,7 @@ import com.github.sawors.werewolfgame.game.events.day.NightfallEvent;
 import com.github.sawors.werewolfgame.game.events.night.SunriseEvent;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.PrimaryRole;
+import com.github.sawors.werewolfgame.game.roles.TextRole;
 import com.github.sawors.werewolfgame.game.roles.base.Villager;
 import com.github.sawors.werewolfgame.game.roles.base.Wolf;
 import com.github.sawors.werewolfgame.localization.LoadedLocale;
@@ -26,6 +27,7 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -43,7 +45,7 @@ public class GameManager {
     private GamePhase gamephase;
     private HashMap<String, UserId> discordlink = new HashMap<>();
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
-    private HashMap<GuildChannel, PlayerRole> rolechannels = new HashMap<>();
+    private HashMap<GuildChannel, TextRole> rolechannels = new HashMap<>();
     private final String id;
     private final Guild guild;
     private ArrayList<Message> invites = new ArrayList<>();
@@ -81,6 +83,7 @@ public class GameManager {
     List<GameEvent> addedevents = new ArrayList<>();
     private Queue<GameEvent> eventqueue = new LinkedList<>();
     private int round = 0;
+    private Set<PlayerRole> usedroles = new HashSet<>();
     private GameEvent currentevent;
 
     
@@ -237,6 +240,21 @@ public class GameManager {
         maintextchannel.getManager().setName(texts.get("channels.text.main")).queue();
         mainvoicechannel.getManager().setName(texts.get("channels.voice.main")).queue();
         adminchannel.sendMessage(texts.get("commands.admin.lang.success")).queue(m -> adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build()).queue());
+        for(Map.Entry<GuildChannel, TextRole> entry : rolechannels.entrySet()){
+            GuildChannel channel = entry.getKey();
+            entry.getKey().getManager().setName(entry.getValue().getChannelName(language)).queue();
+            if(channel instanceof TextChannel tchan){
+                MessageEmbed helpmsg = entry.getValue().getHelpMessageEmbed();
+                String welcomemsg = entry.getValue().getIntroMessage();
+                if(helpmsg != null){
+                    tchan.sendMessageEmbeds(helpmsg).queue();
+                }
+                if(welcomemsg != null && welcomemsg.length() > 0){
+                    tchan.sendMessage(welcomemsg).queue();
+                }
+            }
+            
+        }
     }
     
     private void createChannels(Category category){
@@ -646,9 +664,54 @@ public class GameManager {
             logEvent("adding fake player "+userid, LogDestination.CONSOLE);
             playerset.add(userid);
         }
+        lock();
+        
         assignRoles();
+        
+        //create role channels
+        // TODO : OPTIMISE THE SEARCH
+        Main.logAdmin("Used Roles",usedroles);
+        for(PlayerRole role : usedroles){
+            if(role instanceof TextRole chanrole && ((TextRole) role).getChannelName(language) != null && ((TextRole) role).getChannelName(language).length() > 0){
+                ChannelAction<TextChannel> createaction = category.createTextChannel(((TextRole) role).getChannelName(language));
+                List<UserId> playerswithrole = new ArrayList<>();
+                for(Map.Entry<UserId, WerewolfPlayer> entry : playerlink.entrySet()){
+                    if(entry.getValue().getRoles().contains(chanrole)){
+                        playerswithrole.add(entry.getKey());
+                    }
+                }
+                createaction = createaction.addRolePermissionOverride(playerrole.getIdLong(), List.of(Permission.UNKNOWN), List.of(Permission.VIEW_CHANNEL));
+                createaction = createaction.addRolePermissionOverride(adminrole.getIdLong(), List.of(Permission.VIEW_CHANNEL), List.of(Permission.MESSAGE_SEND, Permission.MANAGE_CHANNEL, Permission.MESSAGE_ADD_REACTION));
+                for(UserId id : playerswithrole){
+                    String discordid = DatabaseManager.getDiscordId(id);
+                    if(discordid != null){
+                        createaction = createaction.addMemberPermissionOverride(UserSnowflake.fromId(discordid).getIdLong(), chanrole.getChannelAllow(),chanrole.getChannelDeny());
+                    }
+                }
+                createaction.queue(chan -> {
+                    this.rolechannels.put(chan, chanrole);
+                    if(chanrole.getHelpMessageEmbed() != null){
+                        chan.sendMessageEmbeds(chanrole.getHelpMessageEmbed()).queue();
+                    }
+                    if(chanrole.getIntroMessage() != null && chanrole.getIntroMessage().length() > 0){
+                        chan.sendMessage(chanrole.getIntroMessage()).queue();
+                    }
+                });
+                
+            }
+        }
+        
         buildFirstDayQueue();
         nextEvent();
+    }
+    public void nextEvent(){
+        if(eventqueue.isEmpty()){
+            // TODO ???
+        } else {
+            GameEvent next = eventqueue.poll();
+            currentevent = next;
+            next.start(this);
+        }
     }
 
     private Set<LinkedUser> defaultVotePool(){
@@ -696,21 +759,13 @@ public class GameManager {
         return currentevent;
     }
     
-    public void nextEvent(){
-        if(eventqueue.isEmpty()){
-            // TODO ???
-        } else {
-            GameEvent next = eventqueue.poll();
-            currentevent = next;
-            next.start(this);
-        }
-    }
+    
 
     private void buildNightQueue(){
 
 
 
-        eventqueue.add(new SunriseEvent());
+        eventqueue.add(new SunriseEvent(Main.getRootExtensionn()));
     }
 
     private void buildDayQueue(){
@@ -718,13 +773,13 @@ public class GameManager {
 
 
 
-        eventqueue.add(new NightfallEvent());
+        eventqueue.add(new NightfallEvent(Main.getRootExtensionn()));
     }
 
     private void buildFirstDayQueue(){
         //eventqueue.add(new Intro(this));
-        eventqueue.add(new MayorVoteEvent(defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691"), UserId.fromString("oxtyaevi")), maintextchannel));
-        eventqueue.add(new NightfallEvent());
+        eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn(), defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691"), UserId.fromDiscordId("695610762286334002")), maintextchannel));
+        eventqueue.add(new NightfallEvent(Main.getRootExtensionn()));
     }
 
     private void assignRoles(){
@@ -777,17 +832,19 @@ public class GameManager {
             }
             PlayerRole role = pendingwolves.poll();
             if(role == null){
-                role = new Wolf();
+                role = new Wolf(Main.getRootExtensionn());
             }
             logEvent("Giving role "+role+" to player "+user+" (Wolf Phase)", LogDestination.CONSOLE);
+            usedroles.add(role);
             playerlink.put(user, new WerewolfPlayer(user, this, role));
         }
         for(UserId user : pendingusers){
             PlayerRole role = pendingroles.poll();
             if(role == null){
-                role = new Villager();
+                role = new Villager(Main.getRootExtensionn());
             }
             logEvent("Giving role "+role+" to player "+user+" (Village Phase)", LogDestination.CONSOLE);
+            usedroles.add(role);
             playerlink.put(user, new WerewolfPlayer(user, this, role));
         }
         logEvent(playerlink, LogDestination.CONSOLE);

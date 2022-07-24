@@ -85,7 +85,6 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                         break;
                     case"vote":
                         String votedid = buttonid.substring(buttonid.indexOf("#")+1);
-                        Main.logAdmin("vote");
                         if(votedid.length() > 4){
                             Main.logAdmin("Voted",votedid);
                             UserId voted = UserId.fromString(votedid);

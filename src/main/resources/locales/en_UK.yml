@@ -140,7 +140,52 @@ commands:
     #this is just to show you that this category exists (used only in non-english localizations to assign language-specific aliases to commands):)
     clean-but-not-english: "clean" #as the name of the command category on the "command" category of this file
 
-
+roles:
+  witch:
+    channel: "🐀witch"
+    intro:
+    embed:
+      title:
+      text:
+      role-description:
+      action-description:
+      thumbnail-url:
+  seer:
+    channel: "🔮seer"
+    intro:
+    embed:
+      title:
+      text:
+      role-description:
+      action-description:
+      thumbnail-url:
+  littlegirl:
+    channel: "🌒little-girl"
+    intro:
+    embed:
+      title:
+      text:
+      role-description:
+      action-description:
+      thumbnail-url:
+  cupid:
+    channel: "💘cupid"
+    intro:
+    embed:
+      title:
+      text:
+      role-description:
+      action-description:
+      thumbnail-url:
+  wolf:
+    channel: "🐺wolves"
+    intro:
+    embed:
+      title:
+      text:
+      role-description:
+      action-description:
+      thumbnail-url:
 
 
 

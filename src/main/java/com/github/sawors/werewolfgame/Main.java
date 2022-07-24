@@ -50,6 +50,7 @@ public class Main {
     //
     // Role Loading Data
     private static Set<PlayerRole> rolepool = new HashSet<>();
+    private static WerewolfExtension rootextension = new RootExtension(null, null);
     //
     // Language Data
     private static Translator instancetranslator = new Translator();
@@ -118,7 +119,10 @@ public class Main {
     
         //TODO : Extension loading
     
-        // add base extension
+        // add root extension
+        rootextension = new RootExtension(instancetranslator, datalocation);
+    
+        // add classic extension
         WerewolfExtension classicextension = new ClassicExtensionLoader();
         rolepool.addAll(classicextension.getRoles());
     
@@ -184,9 +188,13 @@ public class Main {
         }
         LoadedLocale defaultlocale = new LoadedLocale(getConfigData("instance-language"));
         instancetranslator.setDefaultLocale(instancetranslator.getLoadedLocales().contains(defaultlocale) ? defaultlocale : defloc);
+        rootextension.setTranslator(instancetranslator);
     }
     public static @NotNull Translator getTranslator(){
         return instancetranslator;
+    }
+    public static WerewolfExtension getRootExtensionn(){
+        return rootextension;
     }
     public static void reloadConfig(){
         try{

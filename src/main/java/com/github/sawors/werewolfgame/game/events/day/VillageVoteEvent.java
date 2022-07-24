@@ -2,6 +2,7 @@ package com.github.sawors.werewolfgame.game.events.day;
 
 import com.github.sawors.werewolfgame.LinkedUser;
 import com.github.sawors.werewolfgame.database.UserId;
+import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.GamePhase;
 import com.github.sawors.werewolfgame.game.events.GenericVote;
@@ -11,9 +12,9 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 public class VillageVoteEvent extends GenericVote {
-    public VillageVoteEvent(GameManager manager, Set<LinkedUser> votepool, Set<UserId> voters, @Nullable TextChannel channel) {
+    public VillageVoteEvent(WerewolfExtension extension, Set<LinkedUser> votepool, Set<UserId> voters, @Nullable TextChannel channel) {
         //TODO : allow user to change vote time during game configuration
-        super(votepool, voters, channel,"",60);
+        super(extension, votepool, voters, channel,"",60);
     }
 
     @Override
@@ -24,10 +25,5 @@ public class VillageVoteEvent extends GenericVote {
     @Override
     public GamePhase getPhase() {
         return GamePhase.VILLAGE_VOTE;
-    }
-    
-    @Override
-    public void validate(boolean force, boolean wait) {
-
     }
 }

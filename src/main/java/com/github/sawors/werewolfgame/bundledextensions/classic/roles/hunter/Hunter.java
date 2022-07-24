@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame.bundledextensions.classic.roles.hunter;
 
+import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.events.GameEvent;
 import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
 import com.github.sawors.werewolfgame.game.roles.PrimaryRole;
@@ -7,6 +8,10 @@ import com.github.sawors.werewolfgame.game.roles.PrimaryRole;
 import java.util.Set;
 
 public class Hunter extends PrimaryRole  {
+    public Hunter(WerewolfExtension extension) {
+        super(extension);
+    }
+    
     @Override
     public String toString() {
         return DefaultRoleType.HUNTER.toString();

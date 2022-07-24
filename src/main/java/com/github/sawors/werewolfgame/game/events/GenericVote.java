@@ -3,11 +3,14 @@ package com.github.sawors.werewolfgame.game.events;
 import com.github.sawors.werewolfgame.LinkedUser;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserId;
+import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -24,8 +27,10 @@ public abstract class GenericVote extends GameEvent {
     protected Set<UserId> voters;
     protected Set<UserId> votewinnertie = new HashSet<>();
     public GameManager manager;
+    protected Message buttonmessage = null;
 
-    public GenericVote(Set<LinkedUser> votepool, Set<UserId> voters,@Nullable TextChannel votechannel, @Nullable String votemessagebody, @Nullable Integer votetime){
+    public GenericVote(WerewolfExtension extension, Set<LinkedUser> votepool, Set<UserId> voters, @Nullable TextChannel votechannel, @Nullable String votemessagebody, @Nullable Integer votetime){
+        super(extension);
         this.votepool = votepool;
         this.voters = voters;
         this.votechannel = votechannel;
@@ -50,12 +55,17 @@ public abstract class GenericVote extends GameEvent {
     public void validate(boolean force, boolean wait){
 
         onValidationAttempt(force,true);
+        Main.logAdmin(votemap.keySet());
+        Main.logAdmin(voters);
+        Main.logAdmin("contains",(votemap.keySet().containsAll(voters)));
+        Main.logAdmin("wait",wait);
+        Main.logAdmin("force",force);
 
         if((votemap.keySet().containsAll(voters) && !wait) || force){
 
             onValidationSuccess(force);
 
-            //Main.logAdmin("Votes Complete", votemap);
+            Main.logAdmin("Votes Complete", votemap);
             Map<UserId, Integer> occurences = new HashMap<>();
             for(UserId voted : votemap.values()){
                 occurences.put(voted, Collections.frequency(votemap.values(),voted));
@@ -76,13 +86,13 @@ public abstract class GenericVote extends GameEvent {
                         break;
                     }
                 }
-                onTie(Set.copyOf(votewinnertie));
+                onTie(List.copyOf(votewinnertie), occurences);
                 return;
             }
 
-//            Main.logAdmin("Vote Scores", occurences);
-//            Main.logAdmin("Vote Ranks", sortedvotes);
-//            Main.logAdmin("Selected",sortedvotes.get(0));
+            Main.logAdmin("Vote Scores", occurences);
+            Main.logAdmin("Vote Ranks", sortedvotes);
+            Main.logAdmin("Selected",sortedvotes.get(0));
 
             // always at the end of true validating methods
             onWin(sortedvotes.get(0), Map.copyOf(occurences));
@@ -129,7 +139,20 @@ public abstract class GenericVote extends GameEvent {
             tempbuttons.clear();
         }
 
-        votechannel.sendMessageEmbeds(embed.build()).setActionRows(votebuttons).queue();
+        votechannel.sendMessageEmbeds(embed.build()).setActionRows(votebuttons).queue(msg -> this.buttonmessage = msg);
+    }
+    
+    public void closeVote(){
+        List<ActionRow> rows = new ArrayList<>();
+        for(ActionRow row : buttonmessage.getActionRows()){
+            List<Button> disabled = new ArrayList<>();
+            for(Button button : row.getButtons()){
+                disabled.add(button.asDisabled().withStyle(ButtonStyle.SECONDARY));
+            }
+            rows.add(ActionRow.of(disabled));
+        }
+        
+        buttonmessage.editMessageEmbeds(new EmbedBuilder(votemessage).build()).setActionRows(rows).queue();
     }
 
     // events
@@ -143,7 +166,7 @@ public abstract class GenericVote extends GameEvent {
     public void onVoteChanged(UserId voter, UserId voted){}
     // Vote result Events
     public void onWin(UserId winner, Map<UserId, Integer> results){}
-    public void onTie(Set<UserId> tied){}
+    public void onTie(List<UserId> tied, Map<UserId, Integer> results){}
     // Vote time events
     public void onTimeOut(Integer basetime){}
     public void onTimeHalf(Integer basetime, Integer elapsedtime){};

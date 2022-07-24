@@ -1,5 +1,6 @@
 package com.github.sawors.werewolfgame.bundledextensions.classic.roles.witch;
 
+import com.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import com.github.sawors.werewolfgame.game.GameManager;
 import com.github.sawors.werewolfgame.game.GamePhase;
 import com.github.sawors.werewolfgame.game.events.GameEvent;
@@ -7,6 +8,10 @@ import com.github.sawors.werewolfgame.game.events.RoleEvent;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 
 public class WitchPotionEvent extends GameEvent implements RoleEvent {
+    
+    public WitchPotionEvent(WerewolfExtension extension) {
+        super(extension);
+    }
     
     @Override
     public void start(GameManager manager) {
@@ -20,6 +25,6 @@ public class WitchPotionEvent extends GameEvent implements RoleEvent {
     
     @Override
     public PlayerRole getRole() {
-        return new Witch();
+        return new Witch(extension);
     }
 }

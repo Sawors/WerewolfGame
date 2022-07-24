@@ -1,0 +1,12 @@
+locale-name: "Test Language"
+
+
+roles:
+  witch:
+    channel: "Witch"
+  seer:
+    channel: "Seer"
+  littlegirl:
+    channel: "Little Girl"
+  cupid:
+    channel: "Cupid"

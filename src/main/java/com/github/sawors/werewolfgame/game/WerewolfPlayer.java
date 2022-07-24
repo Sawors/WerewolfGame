@@ -2,7 +2,6 @@ package com.github.sawors.werewolfgame.game;
 
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
-import com.github.sawors.werewolfgame.game.roles.base.Spectator;
 import com.github.sawors.werewolfgame.game.teams.classic.Village;
 
 import java.util.ArrayList;
@@ -56,10 +55,6 @@ public class WerewolfPlayer {
     
     public void removeRole(PlayerRole role){
         roles.remove(role);
-    }
-    
-    public void setSpectator(){
-        roles.add(new Spectator());
     }
     
     public void kill(){
