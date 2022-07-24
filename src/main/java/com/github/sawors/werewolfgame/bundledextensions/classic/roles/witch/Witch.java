@@ -1,10 +1,12 @@
 package com.github.sawors.werewolfgame.bundledextensions.classic.roles.witch;
 
+import com.github.sawors.werewolfgame.game.events.GameEvent;
 import com.github.sawors.werewolfgame.game.roles.DefaultRoleType;
-import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.PrimaryRole;
 
-public class Witch extends PlayerRole implements PrimaryRole {
+import java.util.Set;
+
+public class Witch extends PrimaryRole {
     @Override
     public String toString() {
         return DefaultRoleType.WITCH.toString();
@@ -23,5 +25,10 @@ public class Witch extends PlayerRole implements PrimaryRole {
     @Override
     public void onLoad() {
     
+    }
+    
+    @Override
+    public Set<GameEvent> getEvents() {
+        return Set.of();
     }
 }

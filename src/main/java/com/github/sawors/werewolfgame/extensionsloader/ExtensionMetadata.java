@@ -1,15 +1,13 @@
 package com.github.sawors.werewolfgame.extensionsloader;
 
-import java.net.URL;
-
 public class ExtensionMetadata {
     String name;
     String version;
     String author;
-    URL source;
+    String source;
     String description;
 
-    ExtensionMetadata(String name, String version, String author, URL source, String description){
+    public ExtensionMetadata(String name, String version, String author, String source, String description){
         this.name = name;
         this.version = version;
         this.author = author;
@@ -41,11 +39,11 @@ public class ExtensionMetadata {
         this.author = author;
     }
 
-    public URL getSource() {
+    public String getSource() {
         return source;
     }
 
-    public void setSource(URL source) {
+    public void setSource(String source) {
         this.source = source;
     }
 

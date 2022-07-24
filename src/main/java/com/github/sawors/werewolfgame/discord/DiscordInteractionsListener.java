@@ -51,12 +51,13 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                         break;
                     case"joinprivate":
                         if(!gm.getPlayerSet().contains(UserId.fromDiscordId(event.getUser().getId()))){
-                            TextInput joincode = TextInput.create("codeinput",TranslatableText.get("forms.private-game-code.code-field-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(guild))), TextInputStyle.SHORT)
-                                    .setPlaceholder(TranslatableText.get("forms.private-game-code.text-placeholder", DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild()))))
+                            TranslatableText texts = new TranslatableText(Main.getTranslator(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
+                            TextInput joincode = TextInput.create("codeinput",texts.get("forms.private-game-code.code-field-title"), TextInputStyle.SHORT)
+                                    .setPlaceholder(texts.get("forms.private-game-code.text-placeholder"))
                                     .setRequired(true)
                                     .setRequiredRange(4,6)
                                     .build();
-                            event.replyModal(Modal.create("codemodal:"+gm.getId(),TranslatableText.get("forms.private-game-code.title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(guild)))).addActionRow(joincode).build()).queue();
+                            event.replyModal(Modal.create("codemodal:"+gm.getId(),texts.get("forms.private-game-code.title")).addActionRow(joincode).build()).queue();
                             Main.logAdmin("joined private game");
                         } else {
                             Member mb = event.getMember();
@@ -102,9 +103,9 @@ public class DiscordInteractionsListener extends ListenerAdapter {
             } else {
                 Main.logAdmin("Error : game "+gameid+" does not exist");
                 if(type.contains("join")){
-                    GameManager.setInviteExpired(event.getMessage(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(event.getGuild())));
+                    GameManager.setInviteExpired(event.getMessage());
                 }
-                GameManager.forceClean(event.getGuild(), gameid);
+                GameManager.forceClean(Objects.requireNonNull(event.getGuild()), gameid);
                 event.deferEdit().queue();
             }
         }

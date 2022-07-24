@@ -1,6 +1,6 @@
-package com.github.sawors.werewolfgame;
+package com.github.sawors.werewolfgame.localization;
 
-import com.github.sawors.werewolfgame.localization.TranslatableText;
+import com.github.sawors.werewolfgame.Main;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -26,14 +26,14 @@ public class LoadedLocale {
         this.code = code;
         this.name = code;
         
-        if(TranslatableText.getLoadedLocales().contains(this)){
-            this.name = List.copyOf(TranslatableText.getLoadedLocales()).get(TranslatableText.getLoadedLocales().indexOf(this)).getName();
+        if(Main.getTranslator().getLoadedLocales().contains(this)){
+            this.name = List.copyOf(Main.getTranslator().getLoadedLocales()).get(Main.getTranslator().getLoadedLocales().indexOf(this)).getName();
         }
         this.identifier = "";
     }
     
     // Load only from Main
-    protected LoadedLocale(@NotNull String code, @Nullable String name, @NotNull String referenceidentifier){
+    public LoadedLocale(@NotNull String code, @Nullable String name, @NotNull String referenceidentifier){
         if(name == null || name.equalsIgnoreCase("null")){
             this.name = code;
         } else {
@@ -71,30 +71,34 @@ public class LoadedLocale {
     }
     
     public static LoadedLocale fromReference(String reference){
+        Main.logAdmin("Loaded locales",Main.getTranslator().getLoadedLocales());
         if(reference.length() == 5 && reference.contains("_")){
+            Main.logAdmin("Locale code found for locale "+reference+", using it for generation");
             return new LoadedLocale(reference);
         }
         if(reference.length() == 2){
-            for(LoadedLocale loc : TranslatableText.getLoadedLocales()){
+            for(LoadedLocale loc : Main.getTranslator().getLoadedLocales()){
                 if(loc.toString().substring(0,2).equalsIgnoreCase(reference)){
+                    Main.logAdmin("Locale code language indicator found, "+reference+" -> "+loc.getDisplay());
                     return loc;
                 }
             }
         }
-        for(LoadedLocale loc : TranslatableText.getLoadedLocales()){
-            Main.logAdmin("checking perfect",loc.getDisplay());
+        for(LoadedLocale loc : Main.getTranslator().getLoadedLocales()){
+            Main.logAdmin("checking perfect match (identifier)",loc.getDisplay());
             if(loc.getIdentifier().equalsIgnoreCase(reference)){
-                Main.logAdmin("found matching perfect",loc.getDisplay());
+                Main.logAdmin("Found matching perfect, using ",loc.getDisplay());
                 return loc;
             }
         }
-        for(LoadedLocale loc : TranslatableText.getLoadedLocales()){
-            Main.logAdmin("checking names",loc);
+        for(LoadedLocale loc : Main.getTranslator().getLoadedLocales()){
+            Main.logAdmin("checking name",loc);
             if(loc.getName().toLowerCase(Locale.ROOT).contains(reference)){
-                Main.logAdmin("found matching and using name "+loc.getName(),loc.getDisplay());
+                Main.logAdmin("Found matching and using name "+loc.getName(),loc.getDisplay());
                 return loc;
             }
         }
-        return Main.getLanguage();
+        Main.logAdmin("Found no locale matching "+reference+", using instance locale instead ("+Main.getTranslator().getDefaultLocale().getDisplay()+")");
+        return Main.getTranslator().getDefaultLocale();
     }
 }

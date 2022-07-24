@@ -1,6 +1,7 @@
 package com.github.sawors.werewolfgame;
 
 import com.github.sawors.werewolfgame.commands.RegisterUserCommand;
+import com.github.sawors.werewolfgame.localization.LoadedLocale;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -25,9 +26,9 @@ public class InstanceCommandListeners extends ListenerAdapter {
                     case"lang":
                         if(args.length >= 2){
                             Main.setInstanceLanguage(LoadedLocale.fromReference(args[1]));
-                            channel.sendMessage("Instance language set to **" + Main.getLanguage()+"**").queue();
+                            channel.sendMessage("Instance language set to **" + Main.getTranslator().getDefaultLocale()+"**").queue();
                         } else {
-                            channel.sendMessage("Instance language set to **" + Main.getLanguage()+"**").queue();
+                            channel.sendMessage("Instance language set to **" + Main.getTranslator().getDefaultLocale()+"**").queue();
                         }
                         break;
                     case"reload":

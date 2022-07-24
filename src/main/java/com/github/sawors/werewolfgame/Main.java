@@ -12,7 +12,8 @@ import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.PrimaryRole;
 import com.github.sawors.werewolfgame.game.roles.base.Wolf;
 import com.github.sawors.werewolfgame.localization.BundledLocale;
-import com.github.sawors.werewolfgame.localization.TranslatableText;
+import com.github.sawors.werewolfgame.localization.LoadedLocale;
+import com.github.sawors.werewolfgame.localization.Translator;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -43,8 +44,6 @@ public class Main {
     // String : GameManager ID
     //TODO : Linking check
     private static HashMap<Long, String> channellink = new HashMap<>();
-    // Use this to get all loaded roles
-    private static LoadedLocale instancelanguage;
     private static Map<String, Object> configmap;
     // String is the Discord User's ID
     private static String instancename = RandomStringUtils.randomNumeric(6);
@@ -52,6 +51,9 @@ public class Main {
     //
     // Role Loading Data
     private static Set<PlayerRole> rolepool = new HashSet<>();
+    //
+    // Language Data
+    private static Translator instancetranslator = new Translator();
 
 
     public static void init(boolean standalone, String token, File datastorage){
@@ -116,15 +118,9 @@ public class Main {
         rolepool.add(new Wolf());
 
         Main.logAdmin("rolepool",rolepool);
-
-        // load default locale
         
-        BundledLocale defloc = BundledLocale.en_UK;
-        
-        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(defloc.getPath()), new LoadedLocale("en_UK","English (United Kingdom)","english"));
-        TranslatableText.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.fr_FR.getPath()), new LoadedLocale("fr_FR","Français (France)","french"));
         reloadLanguages();
-        Main.logAdmin("Default language set to",instancelanguage.getName());
+        Main.logAdmin("Default language set to",getTranslator().getDefaultLocale().getName());
     }
     
     protected static boolean isInstanceAdmin(String discordid){
@@ -157,24 +153,30 @@ public class Main {
     }
 
     public static void reloadLanguages(){
-        LoadedLocale defloc = new LoadedLocale("en_UK","English (United Kingdom)","english");
+    
+        // DEFAULT FALLBACK LOCALE (DO NOT CHANGE)
+        LoadedLocale defloc = BundledLocale.en_UK.getLocale();
+        
+        instancetranslator.clearLoadedLocales();
+        instancetranslator.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.en_UK.getPath()), BundledLocale.en_UK.getLocale());
+        instancetranslator.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.fr_FR.getPath()), BundledLocale.fr_FR.getLocale());
+        
         File localespath = new File(datalocation+File.separator+"locales"+File.separator);
         localespath.mkdirs();
         File[] toload = localespath.listFiles();
         if(toload != null){
             for(File locale : toload){
-                if(locale.getName().toLowerCase(Locale.ENGLISH).endsWith(".yml") || locale.getName().toLowerCase(Locale.ENGLISH).endsWith(".yaml") ){
+                if(locale.getName().toLowerCase(Locale.ROOT).endsWith(".yml") || locale.getName().toLowerCase(Locale.ROOT).endsWith(".yaml") ){
                     Main.logAdmin("Loading locale",locale.getAbsolutePath());
-                    TranslatableText.load(locale);
+                    instancetranslator.load(locale);
                 }
             }
         }
         LoadedLocale defaultlocale = new LoadedLocale(getConfigData("instance-language"));
-        if(TranslatableText.getLoadedLocales().contains(defaultlocale)){
-            instancelanguage = defaultlocale;
-        } else {
-            instancelanguage = defloc;
-        }
+        instancetranslator.setDefaultLocale(instancetranslator.getLoadedLocales().contains(defaultlocale) ? defaultlocale : defloc);
+    }
+    public static @NotNull Translator getTranslator(){
+        return instancetranslator;
     }
     public static void reloadConfig(){
         try{
@@ -243,10 +245,6 @@ public class Main {
             role.onLoad();
             role.getEvents();
         }
-    }
-    
-    public static @NotNull LoadedLocale getLanguage(){
-        return instancelanguage;
     }
     
     //TODO : handle config without bukkit methods
@@ -350,8 +348,8 @@ public class Main {
     //  Instance Commands
     //
     protected static void setInstanceLanguage(LoadedLocale language){
-        if(TranslatableText.getLoadedLocales().contains(language)){
-            instancelanguage = language;
+        if(instancetranslator.getLoadedLocales().contains(language)){
+            instancetranslator.setDefaultLocale(language);
         }
     }
     // // // // // // // // // //

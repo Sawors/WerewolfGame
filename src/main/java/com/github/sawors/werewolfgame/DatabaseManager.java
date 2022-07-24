@@ -1,7 +1,7 @@
 package com.github.sawors.werewolfgame;
 
 import com.github.sawors.werewolfgame.database.*;
-import com.github.sawors.werewolfgame.localization.TranslatableText;
+import com.github.sawors.werewolfgame.localization.LoadedLocale;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -297,8 +297,8 @@ public class DatabaseManager {
         if(waintingroom != null){
             waintingid = waintingroom.getIdLong();
         }
-        if(language == null || !TranslatableText.getLoadedLocales().contains(language)){
-            language = Main.getLanguage();
+        if(language == null || !Main.getTranslator().getLoadedLocales().contains(language)){
+            language = Main.getTranslator().getDefaultLocale();
         }
         try(Connection co = connect()){
             co.prepareStatement("INSERT INTO Guilds Values("
@@ -360,7 +360,7 @@ public class DatabaseManager {
             }
         }
     
-        DatabaseManager.registerGuild(guild,admins,invites,waiting, Main.getLanguage());
+        DatabaseManager.registerGuild(guild,admins,invites,waiting, Main.getTranslator().getDefaultLocale());
     }
     
     protected static void setGuildData(Guild guild, String data, GuildDataType datatype){
@@ -419,7 +419,7 @@ public class DatabaseManager {
         if(baselang != null && baselang.length() == 5 && baselang.contains("_")){
             return new LoadedLocale(baselang);
         }
-        return Main.getLanguage();
+        return Main.getTranslator().getDefaultLocale();
     }
     
     public static void setGuildAdminChannel(TextChannel channel){

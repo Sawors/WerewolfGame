@@ -2,7 +2,6 @@ package com.github.sawors.werewolfgame.game;
 
 import com.github.sawors.werewolfgame.DatabaseManager;
 import com.github.sawors.werewolfgame.LinkedUser;
-import com.github.sawors.werewolfgame.LoadedLocale;
 import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.database.UserDataType;
 import com.github.sawors.werewolfgame.database.UserId;
@@ -16,6 +15,7 @@ import com.github.sawors.werewolfgame.game.events.night.SunriseEvent;
 import com.github.sawors.werewolfgame.game.roles.PlayerRole;
 import com.github.sawors.werewolfgame.game.roles.base.Villager;
 import com.github.sawors.werewolfgame.game.roles.base.Wolf;
+import com.github.sawors.werewolfgame.localization.LoadedLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -117,18 +117,19 @@ public class GameManager {
     }
     
     private String buildTutorial(){
-        return TranslatableText.get("commands.admin.title",language)
-                +"\n\n `clean` : "+TranslatableText.get("commands.admin.clean.description",language)
-                +"\n\n `start` : "+TranslatableText.get("commands.admin.start.description",language)
-                +"\n\n `lang` : "+TranslatableText.get("commands.admin.lang.description",language)
-                +"\n\n `lock` : "+TranslatableText.get("commands.admin.lock.description",language)
-                +"\n\n `unlock` : "+TranslatableText.get("commands.admin.unlock.description",language)
-                +"\n\n `admin` : "+TranslatableText.get("commands.admin.admin.description",language)
+        TranslatableText texts = new TranslatableText(Main.getTranslator(), language);
+        return  texts.get("commands.admin.title")
+                +"\n\n `clean` : "+texts.get("commands.admin.clean.description")
+                +"\n\n `start` : "+texts.get("commands.admin.start.description")
+                +"\n\n `lang` : "+texts.get("commands.admin.lang.description")
+                +"\n\n `lock` : "+texts.get("commands.admin.lock.description")
+                +"\n\n `unlock` : "+texts.get("commands.admin.unlock.description")
+                +"\n\n `admin` : "+texts.get("commands.admin.admin.description")
         ;
     }
     
     private String buildInvite(){
-        return TranslatableText.get("invites.invite-body-customizable",language);
+        return new TranslatableText(Main.getTranslator(), language).get("invites.invite-body-customizable");
     }
 
     public LoadedLocale getLanguage(){
@@ -220,10 +221,11 @@ public class GameManager {
     
     public void setLanguage(LoadedLocale locale){
         this.language = locale;
-        adminchannel.getManager().setName(TranslatableText.get("channels.text.admin", language)).queue();
-        maintextchannel.getManager().setName(TranslatableText.get("channels.text.main", language)).queue();
-        mainvoicechannel.getManager().setName(TranslatableText.get("channels.voice.main", language)).queue();
-        adminchannel.sendMessage(TranslatableText.get("commands.admin.lang.success", language)).queue(m -> adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build()).queue());
+        TranslatableText texts = new TranslatableText(Main.getTranslator(), language);
+        adminchannel.getManager().setName(texts.get("channels.text.admin")).queue();
+        maintextchannel.getManager().setName(texts.get("channels.text.main")).queue();
+        mainvoicechannel.getManager().setName(texts.get("channels.voice.main")).queue();
+        adminchannel.sendMessage(texts.get("commands.admin.lang.success")).queue(m -> adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build()).queue());
     }
     
     private void createChannels(Category category){
@@ -231,13 +233,14 @@ public class GameManager {
             this.category = category;
         }
         if(this.category != null){
+            TranslatableText texts = new TranslatableText(Main.getTranslator(), language);
             // create admin text channel
-            setupTextChannel(TranslatableText.get("channels.text.admin",language), ChannelType.ADMIN);
+            setupTextChannel(texts.get("channels.text.admin"), ChannelType.ADMIN);
             // create main text channel
-            setupTextChannel(TranslatableText.get("channels.text.main",language), ChannelType.ANNOUNCEMENTS);
+            setupTextChannel(texts.get("channels.text.main"), ChannelType.ANNOUNCEMENTS);
             
             // create main voice channel
-            category.createVoiceChannel(TranslatableText.get("channels.voice.main",language)).queue(channel -> this.mainvoicechannel = channel);
+            category.createVoiceChannel(texts.get("channels.voice.main")).queue(channel -> this.mainvoicechannel = channel);
         }
     }
     
@@ -271,7 +274,8 @@ public class GameManager {
                 break;
             case ANNOUNCEMENTS:
                 this.maintextchannel = (TextChannel) channel;
-                maintextchannel.sendMessage(TranslatableText.get("buttons.leave-game-message", language).replaceAll("%button%",TranslatableText.get("buttons.leave-game", language))).setActionRow(Button.danger("leave:"+id,TranslatableText.get("buttons.leave-game", language))).queue(msg -> leavemessage = msg);
+                TranslatableText textpool = new TranslatableText(Main.getTranslator(), language);
+                maintextchannel.sendMessage(textpool.get("buttons.leave-game-message").replaceAll("%button%",textpool.get("buttons.leave-game"))).setActionRow(Button.danger("leave:"+id,textpool.get("buttons.leave-game"))).queue(msg -> leavemessage = msg);
                 break;
         }
         Main.linkChannel(channel.getIdLong(), id);
@@ -323,7 +327,7 @@ public class GameManager {
                 try{
                     Main.getJDA().retrieveUserById(discord).queue(user ->{
                         guild.addRoleToMember(user, playerrole).queue();
-                        maintextchannel.sendMessage(TranslatableText.get("events.player-join-message",language).replaceAll("%user%",user.getAsMention())).queue();
+                        maintextchannel.sendMessage(new TranslatableText(Main.getTranslator(), language).get("events.player-join-message").replaceAll("%user%",user.getAsMention())).queue();
                     });
                     //user successfully added to the game
                     guild.retrieveMember(UserSnowflake.fromId(discord)).queue(m ->{
@@ -409,7 +413,7 @@ public class GameManager {
                             }
                         }
                     }
-                    maintextchannel.sendMessage(TranslatableText.get("events.player-leave-message", language).replaceAll("%user%",member.getAsMention())).queue();
+                    maintextchannel.sendMessage(new TranslatableText(Main.getTranslator(), language).get("events.player-leave-message").replaceAll("%user%",member.getAsMention())).queue();
                 });
                 playerset.remove(player);
             }
@@ -457,7 +461,8 @@ public class GameManager {
     protected void sendInvite(TextChannel channel){
         if(!locked){
             LoadedLocale guildlang = DatabaseManager.getGuildLanguage(guild);
-            String buttontitle = jointype == JoinType.PUBLIC ? TranslatableText.get("buttons.join-game", guildlang) : TranslatableText.get("buttons.join-private-game", guildlang);
+            TranslatableText texts = new TranslatableText(Main.getTranslator(), guildlang);
+            String buttontitle = jointype == JoinType.PUBLIC ? texts.get("buttons.join-game") : texts.get("buttons.join-private-game");
             Button joinbutton = Button.primary("join:"+id, buttontitle);
             if(jointype == JoinType.PRIVATE){
                 joinbutton = Button.secondary("joinprivate:"+id, buttontitle);
@@ -488,23 +493,25 @@ public class GameManager {
     
     private void clearInvites(){
         for(Message msg : invites){
-            setInviteExpired(msg, language);
+            setInviteExpired(msg);
         }
     }
     
-    public static void setInviteExpired(Message invite, LoadedLocale language) {
+    public static void setInviteExpired(Message invite) {
+        TranslatableText texts = new TranslatableText(Main.getTranslator(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild())));
         Main.logAdmin("marking invite " + invite.getId() + " as expired");
-        setInviteState(invite, TranslatableText.get("invites.expired-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild()))), TranslatableText.get("buttons.expired-game", language), ButtonStyle.SECONDARY, 0x40454c, false);
+        setInviteState(invite, texts.get("invites.expired-title"), texts.get("buttons.expired-game"), ButtonStyle.SECONDARY, 0x40454c, false);
     }
     
-    public static void setInviteLocked(Message invite, LoadedLocale language) {
+    public static void setInviteLocked(Message invite) {
+        TranslatableText texts = new TranslatableText(Main.getTranslator(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild())));
         Main.logAdmin("marking invite " + invite.getId() + " as locked");
-        setInviteState(invite, TranslatableText.get("invites.locked-title", DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild()))), TranslatableText.get("buttons.locked-game", language), ButtonStyle.PRIMARY, 0x553369, false);
+        setInviteState(invite, texts.get("invites.locked-title"), texts.get("buttons.locked-game"), ButtonStyle.PRIMARY, 0x553369, false);
     }
     
-    public static void setInviteOpen(Message invite, LoadedLocale language) {
+    public static void setInviteOpen(Message invite) {
         Main.logAdmin("marking invite " + invite.getId() + " as open");
-        setInviteState(invite, "", TranslatableText.get("buttons.join-game", language), ButtonStyle.PRIMARY, 0xb491c8, true);
+        setInviteState(invite, "", new TranslatableText(Main.getTranslator(), DatabaseManager.getGuildLanguage(Objects.requireNonNull(invite.getGuild()))).get("buttons.join-game"), ButtonStyle.PRIMARY, 0xb491c8, true);
     }
     
     public void lock(){
@@ -518,19 +525,20 @@ public class GameManager {
     
     public void lock(boolean lock){
         locked = lock;
+        TranslatableText texts = new TranslatableText(Main.getTranslator(), language);
         if(lock){
             if(adminchannel != null){
-                adminchannel.sendMessage(TranslatableText.get("commands.admin.lock.success",language)).queue();
+                adminchannel.sendMessage(texts.get("commands.admin.lock.success")).queue();
             }
             for(Message msg : invites){
-                setInviteLocked(msg, language);
+                setInviteLocked(msg);
             }
         } else {
             if(adminchannel != null){
-                adminchannel.sendMessage(TranslatableText.get("commands.admin.unlock.success",language)).queue();
+                adminchannel.sendMessage(texts.get("commands.admin.unlock.success")).queue();
             }
             for(Message msg : invites){
-                setInviteOpen(msg, language);
+                setInviteOpen(msg);
             }
         }
     }
