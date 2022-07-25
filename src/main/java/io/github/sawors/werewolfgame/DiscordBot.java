@@ -1,0 +1,28 @@
+package io.github.sawors.werewolfgame;
+
+import io.github.sawors.werewolfgame.discord.DiscordCommandListener;
+import io.github.sawors.werewolfgame.discord.DiscordInteractionsListener;
+import io.github.sawors.werewolfgame.discord.DiscordListeners;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+
+import javax.security.auth.login.LoginException;
+
+public class DiscordBot {
+    protected static JDA initJDA(String token, boolean standalone){
+        JDABuilder builder = JDABuilder.createDefault(token);
+        builder
+            .addEventListeners(new DiscordListeners())
+            .addEventListeners(new DiscordCommandListener())
+            .addEventListeners(new InstanceCommandListeners())
+            .addEventListeners(new DiscordInteractionsListener());
+        
+        try{
+            Main.logAdmin("Successfully started Discord Bot !");
+            return builder.build();
+        }catch (LoginException | IllegalArgumentException e){
+            Main.logAdmin("Discord token not found, disabling Discord bot features");
+            return null;
+        }
+    }
+}

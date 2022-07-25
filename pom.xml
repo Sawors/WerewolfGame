@@ -29,11 +29,6 @@
         </developer>
     </developers>
 
-    <scm>
-        <connection>scm:git:git://github.com/Sawors/WerewolfGame.git</connection>
-        <developerConnection>scm:git:ssh://github.com:Sawors/WerewolfGame.git</developerConnection>
-        <url>http://github.com/Sawors/WerewolfGame/tree/master</url>
-    </scm>
 
     <distributionManagement>
         <snapshotRepository>
@@ -49,6 +44,7 @@
     <properties>
         <java.version>16</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.fullVersion>${project.version}</project.fullVersion>
     </properties>
     <build>
         <plugins>
@@ -96,25 +92,12 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.github.sawors.werewolfgame.StandaloneLauncher</mainClass>
+                            <mainClass>io.github.sawors.werewolfgame.StandaloneLauncher</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
         </plugins>
         <resources>
             <resource>
