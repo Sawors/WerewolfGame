@@ -7,6 +7,7 @@ import com.github.sawors.werewolfgame.database.UserDataType;
 import com.github.sawors.werewolfgame.database.UserId;
 import com.github.sawors.werewolfgame.discord.ChannelType;
 import com.github.sawors.werewolfgame.discord.DiscordManager;
+import com.github.sawors.werewolfgame.game.events.BackgroundEvent;
 import com.github.sawors.werewolfgame.game.events.GameEvent;
 import com.github.sawors.werewolfgame.game.events.PhaseType;
 import com.github.sawors.werewolfgame.game.events.RoleEvent;
@@ -42,10 +43,6 @@ import java.util.function.Consumer;
 public class GameManager {
 
     private GameType gametype;
-    private GamePhase gamephase;
-    private HashMap<String, UserId> discordlink = new HashMap<>();
-    private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
-    private HashMap<GuildChannel, TextRole> rolechannels = new HashMap<>();
     private final String id;
     private final Guild guild;
     private ArrayList<Message> invites = new ArrayList<>();
@@ -80,11 +77,17 @@ public class GameManager {
     private Set<UserId> playerset = new HashSet<>();
     private Map<PlayerRole, Integer> rolepool = new HashMap<>();
     private Map<UserId, WerewolfPlayer> playerlink = new HashMap<>();
-    List<GameEvent> addedevents = new ArrayList<>();
+    private List<GameEvent> addedevents = new ArrayList<>();
     private Queue<GameEvent> eventqueue = new LinkedList<>();
     private int round = 0;
     private Set<PlayerRole> usedroles = new HashSet<>();
     private GameEvent currentevent;
+    private GamePhase gamephase;
+    private HashMap<String, UserId> discordlink = new HashMap<>();
+    private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
+    private HashMap<TextChannel, TextRole> rolechannels = new HashMap<>();
+    private List<BackgroundEvent> backgroundevents = new ArrayList<>();
+    private TextChannel wolfchannel;
 
     
     
@@ -165,6 +168,10 @@ public class GameManager {
         ;
     }
     
+    public Map<TextChannel, TextRole> getRoleChannels(){
+        return Map.copyOf(rolechannels);
+    }
+    
     //TODO : Find a better way to implement that
     // BE CAREFUL WHEN MODIFYING THE ORDER !
     public String getPreferencesString(){
@@ -240,20 +247,18 @@ public class GameManager {
         maintextchannel.getManager().setName(texts.get("channels.text.main")).queue();
         mainvoicechannel.getManager().setName(texts.get("channels.voice.main")).queue();
         adminchannel.sendMessage(texts.get("commands.admin.lang.success")).queue(m -> adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build()).queue());
-        for(Map.Entry<GuildChannel, TextRole> entry : rolechannels.entrySet()){
-            GuildChannel channel = entry.getKey();
+        for(Map.Entry<TextChannel, TextRole> entry : rolechannels.entrySet()){
+            TextChannel channel = entry.getKey();
             entry.getKey().getManager().setName(entry.getValue().getChannelName(language)).queue();
-            if(channel instanceof TextChannel tchan){
-                MessageEmbed helpmsg = entry.getValue().getHelpMessageEmbed();
-                String welcomemsg = entry.getValue().getIntroMessage();
-                if(helpmsg != null){
-                    tchan.sendMessageEmbeds(helpmsg).queue();
-                }
-                if(welcomemsg != null && welcomemsg.length() > 0){
-                    tchan.sendMessage(welcomemsg).queue();
-                }
+            MessageEmbed helpmsg = entry.getValue().getHelpMessageEmbed();
+            String welcomemsg = entry.getValue().getIntroMessage();
+            if(helpmsg != null){
+                channel.sendMessageEmbeds(helpmsg).queue();
             }
-            
+            if(welcomemsg != null && welcomemsg.length() > 0){
+                channel.sendMessage(welcomemsg).queue();
+            }
+    
         }
     }
     
@@ -690,6 +695,15 @@ public class GameManager {
                 }
                 createaction.queue(chan -> {
                     this.rolechannels.put(chan, chanrole);
+                    StringBuilder mentions = new StringBuilder();
+                    for(UserId uid : playerswithrole){
+                        if(DatabaseManager.getDiscordId(uid) != null){
+                            mentions.append(UserSnowflake.fromId(DatabaseManager.getDiscordId(uid)).getAsMention());
+                        }
+                    }
+                    if(mentions.toString().length() > 1){
+                        chan.sendMessage(mentions.toString()).queue();
+                    }
                     if(chanrole.getHelpMessageEmbed() != null){
                         chan.sendMessageEmbeds(chanrole.getHelpMessageEmbed()).queue();
                     }
@@ -778,8 +792,18 @@ public class GameManager {
 
     private void buildFirstDayQueue(){
         //eventqueue.add(new Intro(this));
-        eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn(), defaultVotePool(),Set.of(UserId.fromDiscordId("315237447065927691"), UserId.fromDiscordId("695610762286334002")), maintextchannel));
+        eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn(), defaultVotePool(),getRealPlayers() , maintextchannel));
         eventqueue.add(new NightfallEvent(Main.getRootExtensionn()));
+    }
+    
+    private Set<UserId> getRealPlayers(){
+        Set<UserId> output = new HashSet<>();
+        for(UserId usid: playerset){
+            if(DatabaseManager.getDiscordId(usid) != null && DatabaseManager.getDiscordId(usid).length() >= 6){
+                output.add(usid);
+            }
+        }
+        return output;
     }
 
     private void assignRoles(){

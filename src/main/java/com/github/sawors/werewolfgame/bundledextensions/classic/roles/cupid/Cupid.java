@@ -10,6 +10,7 @@ import com.github.sawors.werewolfgame.localization.LoadedLocale;
 import com.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -74,5 +75,20 @@ public class Cupid extends PrimaryRole implements FirstNightRole, TextRole {
     @Override
     public String getIntroMessage() {
         return "Welcome here Cupid !";
+    }
+    
+    @Override
+    public void onMessageSent(GenericMessageEvent event) {
+    
+    }
+    
+    @Override
+    public void onReactionAdded(GenericMessageEvent event) {
+    
+    }
+    
+    @Override
+    public void onReactionRemoved(GenericMessageEvent event) {
+    
     }
 }

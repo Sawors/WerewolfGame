@@ -4,6 +4,7 @@ import com.github.sawors.werewolfgame.Main;
 import com.github.sawors.werewolfgame.bundledextensions.classic.roles.cupid.Cupid;
 import com.github.sawors.werewolfgame.bundledextensions.classic.roles.hunter.Hunter;
 import com.github.sawors.werewolfgame.bundledextensions.classic.roles.littlegirl.LittleGirl;
+import com.github.sawors.werewolfgame.bundledextensions.classic.roles.littlegirl.LittleGirlListenEvent;
 import com.github.sawors.werewolfgame.bundledextensions.classic.roles.seer.Seer;
 import com.github.sawors.werewolfgame.bundledextensions.classic.roles.witch.Witch;
 import com.github.sawors.werewolfgame.extensionsloader.ExtensionMetadata;
@@ -23,6 +24,10 @@ public class ClassicExtensionLoader extends WerewolfExtension {
                 new LittleGirl(this),
                 new Seer(this),
                 new Witch(this)
+        );
+        
+        registerBackgroundEvents(
+                new LittleGirlListenEvent(this)
         );
         
         // manually load locales only for bundled extensions

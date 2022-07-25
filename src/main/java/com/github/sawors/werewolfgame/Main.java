@@ -54,6 +54,9 @@ public class Main {
     //
     // Language Data
     private static Translator instancetranslator = new Translator();
+    //
+    // Extensions
+    private static Set<WerewolfExtension> extensions = new HashSet<>();
 
 
     public static void init(boolean standalone, String token, File datastorage){
@@ -121,12 +124,11 @@ public class Main {
     
         // add root extension
         rootextension = new RootExtension(instancetranslator, datalocation);
-    
         // add classic extension
-        WerewolfExtension classicextension = new ClassicExtensionLoader();
-        rolepool.addAll(classicextension.getRoles());
-    
-        Main.logAdmin("rolepool",rolepool);
+        //WerewolfExtension classicextension = new ClassicExtensionLoader();
+        //rolepool.addAll(classicextension.getRoles());
+        extensions.add(new RootExtension(instancetranslator, datalocation));
+        extensions.add(new ClassicExtensionLoader());
     }
     
     protected static boolean isInstanceAdmin(String discordid){
