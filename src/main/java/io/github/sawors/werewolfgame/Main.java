@@ -16,6 +16,10 @@ import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -120,14 +124,22 @@ public class Main {
     
     
         //TODO : Extension loading
-    
-        loadExtensions();
+        
+        //TODO :create jar files for bundled jar extensions (to be added)
+        //      alternatively provide a way to download extensions from web <----- IMPORTANT !!!!! Provide full handling of web based extensions
+        
+        // load .jar extensions
+        File[] exts = extensionslocation.listFiles();
+        if(exts != null){
+            for(File file : exts){
+                loadExtension(file);
+            }
+        }
         // add root extension
         rootextension = new RootExtension(instancetranslator, datalocation);
-        // add classic extension
-        //WerewolfExtension classicextension = new ClassicExtensionLoader();
-        //rolepool.addAll(classicextension.getRoles());
         extensions.add(new RootExtension(instancetranslator, datalocation));
+    
+        // add classic extension
         extensions.add(new ClassicExtensionLoader());
     }
     
@@ -261,25 +273,6 @@ public class Main {
         }
     }
     
-    private static void loadExtensions(){
-        Main.logAdmin("Loading extensions");
-        File[] exts = extensionslocation.listFiles();
-        if(exts != null){
-            for(File file : exts){
-                if(file.toString().toLowerCase(Locale.ROOT).endsWith(".jar")){
-                    try(JarFile extension = new JarFile(file)){
-                        Enumeration<JarEntry> entries = extension.entries();
-                        while(entries.hasMoreElements()){
-                            Main.logAdmin(entries.nextElement().getName());
-                        }
-                    } catch (IOException e){
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        
-    }
     private void loadRoles(Set<PrimaryRole> toload){
         for(PrimaryRole role : toload){
             role.onLoad();
@@ -393,5 +386,67 @@ public class Main {
         }
     }
     // // // // // // // // // //
+    private static void loadExtension(File extensionjar){
+        Main.logAdmin("Loading",extensionjar);
+        if(extensionjar != null){
+            if(extensionjar.toString().toLowerCase(Locale.ROOT).endsWith(".jar")){
+                try(JarFile extension = new JarFile(extensionjar)){
+                    String mainname = "";
+                    Enumeration<JarEntry> findyaml = extension.entries();
+                    while(findyaml.hasMoreElements()){
+                        JarEntry tocheck = findyaml.nextElement();
+                        if(tocheck.getName().equals("extension.yml")){
+                            Main.logAdmin("extension.yml found for",extensionjar.getName());
+                            try(InputStream input = extension.getInputStream(tocheck)){
+                                Map<String, String> data = new Yaml().load(input);
+                                Main.logAdmin(data);
+                                mainname = data.get("main");
+                            }
+                        }
+                    }
+                    Enumeration<JarEntry> findmain = extension.entries();
+                    while(findmain.hasMoreElements()){
+                        JarEntry tocheck = findmain.nextElement();
+                        Main.logAdmin("Name",tocheck.getName());
+                        if(tocheck.getRealName().endsWith("/"+mainname+".class")){
+                            Main.logAdmin("Main class found for",extensionjar.getName());
+                            Main.logAdmin("Main class",tocheck.getName());
+                            URL[] classpath = {extensionjar.toURI().toURL()};
+                            Main.logAdmin(classpath);
+                            try(URLClassLoader classloader = URLClassLoader.newInstance(classpath)){
+                                Class<?> cl = classloader.loadClass(tocheck.getName().replaceAll("/",".").replaceAll(".class",""));
+                                Main.logAdmin(cl);
+                                Constructor<?> ctor = cl.getConstructor();
+                                Object crinst = ctor.newInstance();
+                                if(crinst instanceof WerewolfExtension){
+                                    Main.logAdmin(crinst);
+                                    extensions.add((WerewolfExtension) crinst);
+                                }
+                        
+                                break;
+                            } catch (
+                                    ClassNotFoundException |
+                                    InvocationTargetException |
+                                    NoSuchMethodException |
+                                    InstantiationException |
+                                    IllegalAccessException e) {
+                                Main.logAdmin("Error in loading extension",extensionjar);
+                                e.printStackTrace();
+                            }
+                            break;
+                        }
+                    }
+            
+            
+            
+            
+            
+            
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+        }
     
+    }
 }

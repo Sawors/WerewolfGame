@@ -19,6 +19,7 @@ public abstract class WerewolfExtension {
     public WerewolfExtension(){
         this.translator = new Translator();
         this.resourcedirectory = new File(Main.getExtensionsLocation()+File.separator+getMeta().getName());
+        resourcedirectory.mkdirs();
         this.extensionid = RandomStringUtils.randomAlphanumeric(6);
         reloadLanguages();
         onLoad();
@@ -61,12 +62,17 @@ public abstract class WerewolfExtension {
     public void reloadLanguages(){
         translator.clearLoadedLocales();
         File langlocation = new File(resourcedirectory+File.separator+"languages");
-        langlocation.mkdir();
+        langlocation.mkdirs();
         if(langlocation.exists() && langlocation.listFiles() != null){
             for(File file : Objects.requireNonNull(langlocation.listFiles())){
                 translator.load(file);
             }
         }
+    }
+    
+    @Override
+    public String toString() {
+        return "extension:"+this.resourcedirectory.toString();
     }
     
     @Override
