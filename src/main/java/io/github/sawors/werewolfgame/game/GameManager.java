@@ -132,7 +132,7 @@ public class GameManager {
             for(PlayerRole role : extension.getRoles()){
                 this.rolepool.put(role,role.priority());
             }
-            for(extension.)
+            this.backgroundevents.addAll(extension.getBackgroundEvents());
         }
     }
     
