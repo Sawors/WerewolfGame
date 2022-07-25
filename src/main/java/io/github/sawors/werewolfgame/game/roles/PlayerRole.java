@@ -18,7 +18,7 @@ public abstract class PlayerRole {
                 return this.getClass().getName();
         }
         /**
-         * Everything before wolves is <0, everything after >0.
+         * Everything before wolves is less than 0, everything after is greater
          *
          * When not active during the night set this value to null.
          *

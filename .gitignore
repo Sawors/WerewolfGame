@@ -115,3 +115,4 @@ run/
 /deleteoldbuild.bat
 /WerewolfGame/database.db
 /WerewolfGame/config.yml
+/signall.bat

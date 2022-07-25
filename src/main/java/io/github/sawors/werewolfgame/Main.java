@@ -16,11 +16,10 @@ import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class Main {
     //TODO : Linking check
@@ -122,6 +121,7 @@ public class Main {
     
         //TODO : Extension loading
     
+        loadExtensions();
         // add root extension
         rootextension = new RootExtension(instancetranslator, datalocation);
         // add classic extension
@@ -261,8 +261,24 @@ public class Main {
         }
     }
     
-    private void loadExtensions(){
-    
+    private static void loadExtensions(){
+        Main.logAdmin("Loading extensions");
+        File[] exts = extensionslocation.listFiles();
+        if(exts != null){
+            for(File file : exts){
+                if(file.toString().toLowerCase(Locale.ROOT).endsWith(".jar")){
+                    try(JarFile extension = new JarFile(file)){
+                        Enumeration<JarEntry> entries = extension.entries();
+                        while(entries.hasMoreElements()){
+                            Main.logAdmin(entries.nextElement().getName());
+                        }
+                    } catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        
     }
     private void loadRoles(Set<PrimaryRole> toload){
         for(PrimaryRole role : toload){
@@ -378,41 +394,4 @@ public class Main {
     }
     // // // // // // // // // //
     
-    private static Class<?> loadExtension(File file){
-        URL pathtofile;
-        try{
-           pathtofile = new URL("file://"+file.getCanonicalPath());
-           try(URLClassLoader loader = URLClassLoader.newInstance(new URL[]{pathtofile})){
-               try(InputStream config = loader.getResourceAsStream("resources/extension.yml")){
-                   Main.logAdmin(config);
-                   Main.logAdmin(pathtofile);
-                   Class<?> loaded0 = loader.loadClass("com/github/sawors/Main");
-                   Main.logAdmin(loaded0.getMethods());
-                   if(config != null){
-                       Yaml yaml = new Yaml();
-                       Map<String, String> data = yaml.load(config);
-                       String main = data.get("main");
-                       if(main != null){
-                           Class<?> loaded = loader.loadClass(main);
-                           if(loaded.isInstance(WerewolfExtension.class)){
-                               Main.logAdmin("uwu loaded : "+loaded.getName());
-                               loaded.getDeclaredMethod("load").invoke(null);
-                               return loaded;
-                           }
-                       }
-                   }
-                   
-               } catch (NoSuchMethodException e) {
-                   e.printStackTrace();
-               } catch (InvocationTargetException | IllegalAccessException e) {
-                   throw new RuntimeException(e);
-               }
-           } catch (ClassNotFoundException e) {
-               e.printStackTrace();
-           }
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        return null;
-    }
 }
