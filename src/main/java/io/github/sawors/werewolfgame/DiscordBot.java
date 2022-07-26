@@ -40,6 +40,7 @@ public class DiscordBot {
         pending.add(action);
     }
     
+    //TODO : Implement that
     public static void triggerActionQueue(){
         final Queue<RestAction<?>> localpending = new LinkedList<>(List.copyOf(pending));
         pending.clear();
