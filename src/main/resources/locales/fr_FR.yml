@@ -108,6 +108,7 @@ commands:
     lang:
       description: "change la langue de la partie. \n Exemple : la commande *language english* change la langue en anglais. \n Langues disponibles : **english**, **french**. \n **Utilisateurs Avancés** : vous pouvez directement définir la langue selon le format de sa localisation (si chargée dans l'instance : xx_XX)"
       success: "Langue changé avec succès en **Français**"
+      error: "La langue de la partie ne peut plus être changée lorsque la partie est lancée"
     lock:
       description: "verrouille la partie empêchant tout les autres membres du Discord de rejointre la partie grâce aux bouttons d'invitation"
       success: "Partie verrouillée, les bouttons d'invitation pour rejoindre la partie ne sont plus utilisables"
@@ -149,7 +150,7 @@ commands:
 
 roles:
   villager:
-    channel: "🧑‍🌾🗿🌻🐔villageois"
+    channel: "🧑villageois"
   wolf:
     channel: "🐺loups"
 

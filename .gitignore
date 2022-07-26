@@ -116,5 +116,4 @@ run/
 /WerewolfGame/database.db
 /WerewolfGame/config.yml
 /signall.bat
-/WerewolfGame/languages/en_UK.yml
-/WerewolfGame/languages/fr_FR.yml
+/WerewolfGame/*

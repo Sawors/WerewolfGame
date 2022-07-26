@@ -108,6 +108,7 @@ commands:
     lang:
       description: "change the game language \n Example : *language english* command sets the language to english. \n Registered languages : **english**, **french**. \n **Advanced Users** : you can directly set the language locale format (if loaded in the instance : xx_XX)"
       success: "Language successfully set to **English**"
+      error: "Game language cannot be changed when the game is started"
     lock:
       description: "locks the game,  preventing all users from joining it with invitation's buttons"
       success: "Game locked, players can no more use invitation's buttons to join"
@@ -143,7 +144,7 @@ commands:
 
 roles:
   villager:
-    channel: "🧑‍🌾🗿🌻🐔villager"
+    channel: "🧑‍villager"
   wolf:
     channel: "🐺wolves"
 

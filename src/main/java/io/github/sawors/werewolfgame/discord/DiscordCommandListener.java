@@ -6,6 +6,7 @@ import io.github.sawors.werewolfgame.commands.RegisterGuildCommand;
 import io.github.sawors.werewolfgame.commands.RegisterUserCommand;
 import io.github.sawors.werewolfgame.commands.TestCommand;
 import io.github.sawors.werewolfgame.game.GameManager;
+import io.github.sawors.werewolfgame.game.GamePhase;
 import io.github.sawors.werewolfgame.game.GameType;
 import io.github.sawors.werewolfgame.game.JoinType;
 import io.github.sawors.werewolfgame.localization.LoadedLocale;
@@ -199,7 +200,11 @@ public class DiscordCommandListener extends ListenerAdapter {
                         case"lang":
                             Main.logAdmin("?");
                             if(commands.length >= 2){
-                                manager.setLanguage(LoadedLocale.fromReference(commands[1]));
+                                if(manager.getGamePhase().equals(GamePhase.BEFORE_GAME)){
+                                    manager.setLanguage(LoadedLocale.fromReference(commands[1]));
+                                } else {
+                                    manager.getAdminChannel().sendMessage(new TranslatableText(Main.getTranslator(),manager.getLanguage()).get("commands.admin.lang.error")).queue();
+                                }
                             }
                             break;
                         case"lock":

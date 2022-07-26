@@ -1,6 +1,7 @@
 package io.github.sawors.werewolfgame.game;
 
 import io.github.sawors.werewolfgame.DatabaseManager;
+import io.github.sawors.werewolfgame.DiscordBot;
 import io.github.sawors.werewolfgame.LinkedUser;
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.database.UserDataType;
@@ -106,6 +107,7 @@ public class GameManager {
         this.jointype = accessibility;
         this.joinkey = RandomStringUtils.randomNumeric(5);
         this.language = DatabaseManager.getGuildLanguage(guild);
+        this.gamephase = GamePhase.BEFORE_GAME;
         
         createRoles(
                 a0 -> guild.createCategory("[\uD83D\uDC3A WEREWOLF : "+id+"]")
@@ -163,6 +165,10 @@ public class GameManager {
 
     public LoadedLocale getLanguage(){
         return language;
+    }
+    
+    public GamePhase getGamePhase(){
+        return  gamephase;
     }
 
     private void createRoles(Consumer<?> chainedaction){
@@ -269,20 +275,22 @@ public class GameManager {
         adminchannel.getManager().setName(texts.get("channels.text.admin")).queue();
         maintextchannel.getManager().setName(texts.get("channels.text.main")).queue();
         mainvoicechannel.getManager().setName(texts.get("channels.voice.main")).queue();
-        adminchannel.sendMessage(texts.get("commands.admin.lang.success")).queue(m -> adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build()).queue());
+        adminchannel.sendMessage(texts.get("commands.admin.lang.success")).queue(m -> DiscordBot.addPendingAction(adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build())));
+        Main.logAdmin(rolechannels);
         for(Map.Entry<TextChannel, TextRole> entry : rolechannels.entrySet()){
             TextChannel channel = entry.getKey();
-            entry.getKey().getManager().setName(entry.getValue().getChannelName(language)).queue();
+            Main.logAdmin(channel.getName());
+            DiscordBot.addPendingAction(entry.getKey().getManager().setName(entry.getValue().getChannelName(language)));
             MessageEmbed helpmsg = entry.getValue().getHelpMessageEmbed();
             String welcomemsg = entry.getValue().getIntroMessage();
             if(helpmsg != null){
-                channel.sendMessageEmbeds(helpmsg).queue();
+                DiscordBot.addPendingAction(channel.sendMessageEmbeds(helpmsg));
             }
             if(welcomemsg != null && welcomemsg.length() > 0){
-                channel.sendMessage(welcomemsg).queue();
+                DiscordBot.addPendingAction(channel.sendMessage(welcomemsg));
             }
-    
         }
+        DiscordBot.triggerActionQueue();
     }
     
     private void createChannels(Category category){
@@ -626,8 +634,9 @@ public class GameManager {
 
         invite.editMessageEmbeds(invite.getEmbeds()).setActionRow(modified).queue();
         invite.editMessageEmbeds(invite.getEmbeds()).setEmbeds(newembeds).queue();
+        
     }
-
+    
     public static void forceClean(Guild guild, String id){
         for(Role role : guild.getRoles()){
             if(role.getName().contains(id)){
@@ -752,7 +761,7 @@ public class GameManager {
                 
             }
         }
-        
+        gamephase = GamePhase.FIRST_DAY;
         buildFirstDayQueue();
         nextEvent();
     }
