@@ -1,6 +1,5 @@
 package io.github.sawors.werewolfgame;
 
-import io.github.sawors.werewolfgame.bundledextensions.classic.ClassicExtensionLoader;
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.GameManager;
@@ -176,7 +175,7 @@ public class Main {
         extensions.add(new RootExtension(instancetranslator, datalocation));
     
         // add classic extension
-        extensions.add(new ClassicExtensionLoader());
+        //extensions.add(new ClassicExtensionLoader());
     }
     
     protected static boolean isInstanceAdmin(String discordid){
