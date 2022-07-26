@@ -45,9 +45,10 @@ public class Translator {
                 Map<String, Object> structure = new Yaml().load(input);
                 String code = locale.getName().substring(0,locale.getName().indexOf("."));
                 String name = structure.containsKey("locale-name") ? YamlMapParser.getString(structure,"locale-name") : code;
-                locales.put(new LoadedLocale(code,name), structure);
+                String identifier = structure.containsKey("locale-identifier") ? YamlMapParser.getString(structure,"locale-identifier") : null;
+                locales.put(new LoadedLocale(code,name,identifier), structure);
                 if(defaultlocale == null){
-                    defaultlocale = new LoadedLocale(code,name);
+                    defaultlocale = new LoadedLocale(code,name,identifier);
                 }
             }catch (IOException e){
                 e.printStackTrace();

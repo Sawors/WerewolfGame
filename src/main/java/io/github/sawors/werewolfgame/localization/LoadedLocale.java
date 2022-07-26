@@ -33,15 +33,14 @@ public class LoadedLocale {
     }
     
     // Load only from Main
-    public LoadedLocale(@NotNull String code, @Nullable String name, @NotNull String referenceidentifier){
+    public LoadedLocale(@NotNull String code, @Nullable String name, @Nullable String referenceidentifier){
         if(name == null || name.equalsIgnoreCase("null")){
             this.name = code;
         } else {
             this.name = name;
         }
         this.code = code;
-        Main.logAdmin(referenceidentifier);
-        this.identifier = referenceidentifier.toLowerCase(Locale.ROOT);
+        this.identifier = referenceidentifier != null ? referenceidentifier.toLowerCase(Locale.ROOT) : "";
     }
     
     @Override
@@ -67,11 +66,10 @@ public class LoadedLocale {
     }
     
     public String getDisplay(){
-         return code+" : "+name+" ("+identifier+")";
+         return "["+code+"] "+name+" ("+identifier+")";
     }
     
     public static LoadedLocale fromReference(String reference){
-        Main.logAdmin("Loaded locales",Main.getTranslator().getLoadedLocales());
         if(reference.length() == 5 && reference.contains("_")){
             Main.logAdmin("Locale code found for locale "+reference+", using it for generation");
             return new LoadedLocale(reference);

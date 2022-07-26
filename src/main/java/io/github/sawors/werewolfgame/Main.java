@@ -56,10 +56,11 @@ public class Main {
     private static WerewolfExtension rootextension = new RootExtension(null, null);
     //
     // Language Data
-    private static Translator instancetranslator = new Translator();
+    private static final Translator instancetranslator = new Translator();
     //
     // Extensions
-    private static Set<WerewolfExtension> extensions = new HashSet<>();
+    private static final Set<WerewolfExtension> extensions = new HashSet<>();
+    private static final Map<File, BundledLocale> createdbundledlocales = new HashMap<>();
 
 
     public static void init(boolean standalone, String token, File datastorage){
@@ -117,8 +118,43 @@ public class Main {
         String configname = getConfigData("instance-name");
         instancename = configname.equals("") ? "I"+instancename : configname+" : I"+instancename;
         
+        
+        //TODO : for this and config add overwriting only for missing fields, useless to overwrite the whole file
+        BundledLocale[] bundledlocales = {
+                BundledLocale.en_UK,
+                BundledLocale.fr_FR
+        };
+        for(BundledLocale locale : bundledlocales){
+            try{
+                File file = new File(languageslocation+File.separator+locale+".yml");
+                boolean overwrite = false;
+                if(file.exists()){
+                    try(InputStream in = new FileInputStream(file); InputStream ref = Main.class.getClassLoader().getResourceAsStream(locale.getPath())) {
+                        Map<String, Object> loaded = new Yaml().load(in);
+                        Map<String, Object> reference = new Yaml().load(ref);
+        
+                        if(!loaded.keySet().containsAll(reference.keySet())){
+                            overwrite = true;
+                        }
+                    }
+                }
+                if(!file.exists() || overwrite){
+                    file.createNewFile();
+                    try(OutputStream out = new FileOutputStream(file); InputStream in = Main.class.getClassLoader().getResourceAsStream(locale.getPath())) {
+                        if(in != null){
+                            Main.logAdmin("Regenerating locale",file);
+                            out.write(in.readAllBytes());
+                            createdbundledlocales.put(file, locale);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    
         reloadLanguages();
-        Main.logAdmin("Default language set to",getTranslator().getDefaultLocale().getName());
+        Main.logAdmin("Default language set to",instancetranslator.getDefaultLocale().getDisplay());
     
     
     
@@ -192,20 +228,34 @@ public class Main {
         LoadedLocale defloc = BundledLocale.en_UK.getLocale();
         
         instancetranslator.clearLoadedLocales();
+        /*
         instancetranslator.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.en_UK.getPath()), BundledLocale.en_UK.getLocale());
         instancetranslator.load(Main.class.getClassLoader().getResourceAsStream(BundledLocale.fr_FR.getPath()), BundledLocale.fr_FR.getLocale());
+        */
         
         File[] toload = languageslocation.listFiles();
         if(toload != null){
             for(File locale : toload){
                 if(locale.getName().toLowerCase(Locale.ROOT).endsWith(".yml") || locale.getName().toLowerCase(Locale.ROOT).endsWith(".yaml") ){
-                    Main.logAdmin("Loading locale",locale.getAbsolutePath());
-                    instancetranslator.load(locale);
+                    if(createdbundledlocales.containsKey(locale)){
+                        try(InputStream stream = new FileInputStream(locale)){
+                            Main.logAdmin("Loading bundled locale",locale.getAbsolutePath());
+                            instancetranslator.load(stream,createdbundledlocales.get(locale).getLocale());
+                        } catch (IOException e){
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Main.logAdmin("Loading locale",locale.getAbsolutePath());
+                        instancetranslator.load(locale);
+                    }
                 }
             }
         }
         LoadedLocale defaultlocale = new LoadedLocale(getConfigData("instance-language"));
-        instancetranslator.setDefaultLocale(instancetranslator.getLoadedLocales().contains(defaultlocale) ? defaultlocale : defloc);
+        instancetranslator.setDefaultLocale(instancetranslator.getLoadedLocales().contains(defaultlocale) ? instancetranslator.getLoadedLocales().get(instancetranslator.getLoadedLocales().indexOf(defaultlocale)) : defloc);
+        for(LoadedLocale loc : instancetranslator.getLoadedLocales()){
+            Main.logAdmin("Loaded locale",loc.getDisplay());
+        }
         rootextension.setTranslator(instancetranslator);
     }
     public static @NotNull Translator getTranslator(){
@@ -226,31 +276,9 @@ public class Main {
                 }
 
                 if(!overwrite){
+                    // check for missing fields
                     Map<String, Object> refconfig = new Yaml().load(reference);
-                    String version = oldconfig.containsKey("config-version") ? YamlMapParser.getString(oldconfig, "config-version") : null;
-                    String refversion = YamlMapParser.getString(refconfig, "config-version");
-                    Main.logAdmin(version);
-                    Main.logAdmin(refversion);
-                    if(!(version != null && refversion != null && version.contains(".") && refversion.contains(".") && version.substring(0,version.indexOf(".")).equals(refversion.substring(0,version.indexOf("."))))){
-                        // version conflict detected, adding missing fields to the old config
-                        Set<String> oldfields = oldconfig.keySet();
-                        Set<String> newfields = refconfig.keySet();
-                        boolean outdated = false;
-                        for(String field : newfields){
-                            if(!oldfields.contains(field)){
-                                oldconfig.put(field, refconfig.get(field));
-                                outdated = true;
-                            }
-                        }
-                        if(outdated){
-                            try(OutputStream writer = new FileOutputStream(configfile)){
-                                writer.write(new Yaml().dump(oldconfig).getBytes());
-                            } catch (IOException e){
-                                e.printStackTrace();
-                            }
-                        }
-
-                    }
+                    overwrite = !oldconfig.keySet().containsAll(refconfig.keySet());
                 }
             } catch (FileNotFoundException e){
                 overwrite = true;
@@ -387,9 +415,8 @@ public class Main {
     }
     // // // // // // // // // //
     private static void loadExtension(File extensionjar){
-        Main.logAdmin("Loading",extensionjar);
-        if(extensionjar != null){
-            if(extensionjar.toString().toLowerCase(Locale.ROOT).endsWith(".jar")){
+        if(extensionjar != null && extensionjar.toString().toLowerCase(Locale.ROOT).endsWith(".jar")){
+                Main.logAdmin("Loading extension",extensionjar);
                 try(JarFile extension = new JarFile(extensionjar)){
                     String mainname = "";
                     Enumeration<JarEntry> findyaml = extension.entries();
@@ -399,7 +426,6 @@ public class Main {
                             Main.logAdmin("extension.yml found for",extensionjar.getName());
                             try(InputStream input = extension.getInputStream(tocheck)){
                                 Map<String, String> data = new Yaml().load(input);
-                                Main.logAdmin(data);
                                 mainname = data.get("main");
                             }
                         }
@@ -407,20 +433,16 @@ public class Main {
                     Enumeration<JarEntry> findmain = extension.entries();
                     while(findmain.hasMoreElements()){
                         JarEntry tocheck = findmain.nextElement();
-                        Main.logAdmin("Name",tocheck.getName());
                         if(tocheck.getRealName().endsWith("/"+mainname+".class")){
                             Main.logAdmin("Main class found for",extensionjar.getName());
-                            Main.logAdmin("Main class",tocheck.getName());
                             URL[] classpath = {extensionjar.toURI().toURL()};
-                            Main.logAdmin(classpath);
                             try(URLClassLoader classloader = URLClassLoader.newInstance(classpath)){
                                 Class<?> cl = classloader.loadClass(tocheck.getName().replaceAll("/",".").replaceAll(".class",""));
-                                Main.logAdmin(cl);
                                 Constructor<?> ctor = cl.getConstructor();
                                 Object crinst = ctor.newInstance();
                                 if(crinst instanceof WerewolfExtension){
-                                    Main.logAdmin(crinst);
                                     extensions.add((WerewolfExtension) crinst);
+                                    Main.logAdmin("Successfully loaded extension",extensionjar.getName());
                                 }
                         
                                 break;
@@ -446,7 +468,6 @@ public class Main {
                     e.printStackTrace();
                 }
             }
-        }
     
     }
 }

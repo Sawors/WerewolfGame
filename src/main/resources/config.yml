@@ -2,7 +2,6 @@ discord-token:
 database-file: default
 instance-language: "en_UK"
 instance-name: ""
-sample-field: "uwu"
 admin-users:
   - "315237447065927691"
 
