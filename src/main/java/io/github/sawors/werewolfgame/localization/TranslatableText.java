@@ -23,8 +23,16 @@ public class TranslatableText {
     }
     
     public String get(String key, boolean suppresserrors){
+        return get(key,suppresserrors, true);
+    }
+    
+    public String get(String key, boolean suppresserrors, boolean usefallback){
         if(!translator.getLoadedLocales().contains(locale)){
-            return suppresserrors ? null : "***locale "+locale+" not loaded, it usually indicate an error in locale name***";
+            if(usefallback){
+                return new TranslatableText(translator, translator.getDefaultLocale()).get(key,suppresserrors,false);
+            } else {
+                return suppresserrors ? null : "***locale "+locale+" not loaded, it usually indicate an error in locale name***";
+            }
         }
         String error = "***key \""+key+"\" in locale "+locale+" not found, report this to the locale's author***";
         try{
@@ -32,7 +40,11 @@ public class TranslatableText {
         } catch (ParseException e) {
             return suppresserrors ? null : error+" ***"+e.getMessage()+"***";
         } catch (InvalidKeyException e) {
-            return suppresserrors ? null : error;
+            if(usefallback){
+                return new TranslatableText(translator, translator.getDefaultLocale()).get(key,suppresserrors,false);
+            } else {
+                return suppresserrors ? null : error;
+            }
         }
     }
     

@@ -33,8 +33,11 @@ import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -90,6 +93,8 @@ public class GameManager {
     private List<BackgroundEvent> backgroundevents = new ArrayList<>();
     private TextChannel wolfchannel;
     private Set<WerewolfExtension> loadedextensions = new HashSet<>();
+    private Role deadrole;
+    private final float gamehue = (280+(int)(Math.random()*20))/360f;
 
     
     
@@ -114,18 +119,6 @@ public class GameManager {
                 )
         );
         
-        for(PlayerRole role : Main.getRolePool()){
-            Integer prio = role.priority();
-            rolepool.put(role, prio);
-            if(role instanceof PrimaryRole){
-                addRoleEvent(((PrimaryRole) role).getEvents());
-            }
-        }
-        
-        Main.logAdmin("Loaded events", addedevents);
-        
-        Main.registerNewGame(this);
-        
         
         // Load extensions (all by default before the extension loader is completed)
         for(WerewolfExtension extension : Main.getLoadedExtensions()){
@@ -133,7 +126,15 @@ public class GameManager {
                 this.rolepool.put(role,role.priority());
             }
             this.backgroundevents.addAll(extension.getBackgroundEvents());
+            for(BackgroundEvent event : backgroundevents){
+                event.initialize(this);
+            }
+            this.loadedextensions.add(extension);
         }
+    
+        Main.logAdmin("Loaded events", addedevents);
+    
+        Main.registerNewGame(this);
     }
     
     public void addRoleEvent(Collection<GameEvent> events){
@@ -165,18 +166,29 @@ public class GameManager {
     }
 
     private void createRoles(Consumer<?> chainedaction){
-        guild.createRole().setName("WW:"+id+":ADMIN").setMentionable(false).queue(a -> {
+        guild.createRole().setName("WW:"+id+":ADMIN").setMentionable(false).setHoisted(false).setColor(Color.HSBtoRGB(gamehue,.8f,.6f)).queue(a -> {
                     this.adminrole = a;
                     guild.createRole().setName("WW:" + id).setMentionable(false).queue(b -> {
                         this.playerrole = b;
                         if(owner != null){
                             setAdmin(owner);
                         }
-                        chainedaction.accept(null);
+                        guild.createRole().setName("WW:"+id+":DEAD").setMentionable(false).setHoisted(false).setColor(Color.HSBtoRGB(gamehue,.6f,.1f)).queue(c -> {
+                            this.deadrole = c;
+                            chainedaction.accept(null);
+                        });
                     });
                 }
         )
         ;
+    }
+    
+    public TextChannel getWolfChannel(){
+        return wolfchannel;
+    }
+    
+    public float getGameHue(){
+        return gamehue;
     }
     
     public Map<TextChannel, TextRole> getRoleChannels(){
@@ -340,9 +352,13 @@ public class GameManager {
         Main.unlinkChannel(adminchannel.getIdLong());
         Main.unlinkChannel(maintextchannel.getIdLong());
         Main.unlinkChannel(mainvoicechannel.getIdLong());
+        for(TextChannel channel : rolechannels.keySet()){
+            Main.unlinkChannel(channel.getIdLong());
+        }
         DiscordManager.cleanCategory(category);
         playerrole.delete().queue();
         adminrole.delete().queue();
+        deadrole.delete().queue();
         Main.removeGame(id);
     }
 
@@ -623,10 +639,11 @@ public class GameManager {
                 try{
                     List<GuildChannel> channels = cat.getChannels();
                     for(int i = 0; i<channels.size(); i++){
+                        final int fi = i;
                         if(i == channels.size()-1){
-                            channels.get(i).delete().queue(c -> cat.delete().queue());
+                            channels.get(i).delete().queueAfter(fi,TimeUnit.SECONDS,c -> cat.delete().queueAfter(fi,TimeUnit.SECONDS));
                         } else {
-                            channels.get(i).delete().queue();
+                            channels.get(i).delete().queueAfter(fi,TimeUnit.SECONDS);
                         }
                     }
                 } catch (InsufficientPermissionException e){
@@ -671,7 +688,12 @@ public class GameManager {
     |=================[EVENT QUEUE]==================|
     |------------------------------------------------|
 */
-    
+    private Set<PlayerRole> getCompleteRolePool(){
+        Set<PlayerRole> completeroles = new HashSet<>(Set.copyOf(rolepool.keySet()));
+        completeroles.add(new Wolf(Main.getRootExtensionn()));
+        completeroles.add(new Villager(Main.getRootExtensionn()));
+        return completeroles;
+    }
     
     public void startGame(){
         Main.logAdmin("Let's gooooooooooooooooooo");
@@ -687,7 +709,8 @@ public class GameManager {
         //create role channels
         // TODO : OPTIMISE THE SEARCH
         Main.logAdmin("Used Roles",usedroles);
-        for(PlayerRole role : usedroles){
+        Main.logAdmin("keys",getCompleteRolePool());
+        for(PlayerRole role : getCompleteRolePool()){
             if(role instanceof TextRole chanrole && ((TextRole) role).getChannelName(language) != null && ((TextRole) role).getChannelName(language).length() > 0){
                 ChannelAction<TextChannel> createaction = category.createTextChannel(((TextRole) role).getChannelName(language));
                 List<UserId> playerswithrole = new ArrayList<>();
@@ -706,6 +729,10 @@ public class GameManager {
                 }
                 createaction.queue(chan -> {
                     this.rolechannels.put(chan, chanrole);
+                    Main.linkChannel(chan.getIdLong(),this.getId());
+                    if(role.getClass().equals(Wolf.class)){
+                        this.wolfchannel = chan;
+                    }
                     StringBuilder mentions = new StringBuilder();
                     for(UserId uid : playerswithrole){
                         if(DatabaseManager.getDiscordId(uid) != null){
@@ -830,17 +857,19 @@ public class GameManager {
         int playercount = pendingusers.size();
 
         logEvent("Player count : "+playercount, LogDestination.CONSOLE);
-        logEvent("Complete role pool : "+rolepool.keySet(), LogDestination.CONSOLE);
+        logEvent("Complete role pool : "+getCompleteRolePool(), LogDestination.CONSOLE);
 
-        List<PlayerRole> villageuniqueroles = new ArrayList<>(rolepool.keySet());
+        List<PlayerRole> villageuniqueroles = new ArrayList<>(getCompleteRolePool());
         villageuniqueroles.removeIf(role -> role instanceof Villager);
         villageuniqueroles.removeIf(role -> role instanceof Wolf);
+        villageuniqueroles.removeIf(role -> !(role instanceof PrimaryRole));
         Collections.shuffle(villageuniqueroles);
         Queue<PlayerRole> pendingroles = new LinkedList<>(villageuniqueroles);
         logEvent("Pending village roles : "+pendingroles, LogDestination.CONSOLE);
 
-        List<PlayerRole> wolfroles = new ArrayList<>(rolepool.keySet());
+        List<PlayerRole> wolfroles = new ArrayList<>(getCompleteRolePool());
         wolfroles.removeIf(role -> !(role instanceof Wolf));
+        wolfroles.removeIf(role -> !(role instanceof PrimaryRole));
         Collections.shuffle(wolfroles);
         Queue<PlayerRole> pendingwolves = new LinkedList<>(wolfroles);
         logEvent("Pending wolf roles : "+pendingwolves, LogDestination.CONSOLE);
@@ -888,5 +917,9 @@ public class GameManager {
     public void setupTimedAction(int seconds, Runnable action){
         final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         executor.schedule(action,seconds,TimeUnit.SECONDS);
+    }
+    
+    public List<BackgroundEvent> getBackgroundEvents() {
+        return this.backgroundevents;
     }
 }

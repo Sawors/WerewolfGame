@@ -147,55 +147,11 @@ commands:
     partie: "create"
     mettre: "set"
 
-
-# Bundled extensions translations
-
 roles:
-  witch:
-    channel: "🐀sorcière"
-    intro:
-    embed:
-      title:
-      text:
-      role-description:
-      action-description:
-      thumbnail-url:
-  seer:
-    channel: "🔮voyante"
-    intro:
-    embed:
-      title:
-      text:
-      role-description:
-      action-description:
-      thumbnail-url:
-  littlegirl:
-    channel: "🌒petite-fille"
-    intro:
-    embed:
-      title:
-      text:
-      role-description:
-      action-description:
-      thumbnail-url:
-  cupid:
-    channel: "💘cupidon"
-    intro:
-    embed:
-      title:
-      text:
-      role-description:
-      action-description:
-      thumbnail-url:
+  villager:
+    channel: "🧑‍🌾🗿🌻🐔villageois"
   wolf:
     channel: "🐺loups"
-    intro:
-    embed:
-      title:
-      text:
-      role-description:
-      action-description:
-      thumbnail-url:
 
 
 

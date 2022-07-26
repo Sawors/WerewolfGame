@@ -4,12 +4,12 @@ import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.game.events.BackgroundEvent;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.localization.Translator;
+import net.dv8tion.jda.api.Permission;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public abstract class WerewolfExtension {
@@ -19,15 +19,16 @@ public abstract class WerewolfExtension {
     public final File resourcedirectory;
     public String extensionid;
     public ExtensionMetadata meta;
+    public static final Map<File, String> createdbundledlocales = new HashMap<>();
     
     public WerewolfExtension(){
         this.translator = new Translator();
+        this.meta = loadMetadata();
         this.resourcedirectory = new File(Main.getExtensionsLocation()+File.separator+getMeta().getName());
         resourcedirectory.mkdirs();
         this.extensionid = RandomStringUtils.randomAlphanumeric(6);
-        this.meta = loadMetadata();
-        reloadLanguages();
         onLoad();
+        reloadLanguages();
     }
     protected WerewolfExtension(Translator translator, File resourcedirectory){
         this.translator = translator;
@@ -37,14 +38,36 @@ public abstract class WerewolfExtension {
     }
     public abstract void onLoad();
     public Set<PlayerRole> getRoles() {
-        return roles;
+        Set<PlayerRole> newinstances = new HashSet<>();
+        for(PlayerRole role : roles){
+            try{
+                newinstances.add(role.getClass().getConstructor(WerewolfExtension.class).newInstance(this));
+            }catch (NoSuchMethodException |
+                        InstantiationException |
+                        IllegalAccessException |
+                        InvocationTargetException e){
+                e.printStackTrace();
+            }
+        }
+        return newinstances;
     }
     public List<BackgroundEvent> getBackgroundEvents(){
-        return events;
+        List<BackgroundEvent> newinstances = new ArrayList<>();
+        for(BackgroundEvent event : events){
+            try{
+                newinstances.add(event.getClass().getConstructor(WerewolfExtension.class).newInstance(this));
+            }catch (NoSuchMethodException |
+                    InstantiationException |
+                    IllegalAccessException |
+                    InvocationTargetException e){
+                e.printStackTrace();
+            }
+        }
+        return newinstances;
     }
     public ExtensionMetadata getMeta(){
         return this.meta;
-    };
+    }
     
     public void registerNewRoles(PlayerRole... role){
         this.roles.addAll(List.of(role));
@@ -96,6 +119,54 @@ public abstract class WerewolfExtension {
         }
         
         return new ExtensionMetadata(name,version,author,source,description);
+    }
+    
+    public void addBundledLocale(String... localesname){
+        File languageslocation = new File(resourcedirectory+File.separator+"languages");
+        for(String locale : localesname){
+            
+            String locfilename = locale.toLowerCase(Locale.ROOT).endsWith(".yml") || locale.toLowerCase(Locale.ROOT).endsWith(".yaml") ? locale : locale+".yml";
+            
+            try{
+                File file = new File(languageslocation+File.separator+locale+".yml");
+                boolean overwrite = false;
+                if(file.exists()){
+                    try(InputStream in = new FileInputStream(file); InputStream ref = getClass().getModule().getResourceAsStream("locales/"+locfilename)) {
+                        Map<String, Object> loaded = new Yaml().load(in);
+                        Map<String, Object> reference = new Yaml().load(ref);
+                
+                        if(loaded == null || reference == null || !loaded.keySet().containsAll(reference.keySet())){
+                            overwrite = true;
+                        }
+                    }
+                }
+                if(!file.exists() || overwrite){
+                    file.createNewFile();
+                    try(OutputStream out = new FileOutputStream(file); InputStream in = getClass().getModule().getResourceAsStream("locales/"+locfilename)) {
+                        if(in != null){
+                            Main.logAdmin("["+meta.getName()+"] -> "+"Regenerating locale",file);
+                            out.write(in.readAllBytes());
+                            createdbundledlocales.put(file, locale);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    public List<Permission> getDefaultRoleChannelAllow(){
+        return List.of(
+                Permission.VIEW_CHANNEL,
+                Permission.MESSAGE_ADD_REACTION
+        );
+    }
+    public List<Permission> getDefaultRoleChannelDeny(){
+        return List.of(
+                Permission.MANAGE_CHANNEL,
+                Permission.MESSAGE_SEND
+        );
     }
     
     @Override

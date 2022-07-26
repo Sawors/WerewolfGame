@@ -2,6 +2,7 @@ package io.github.sawors.werewolfgame.discord;
 
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.game.GameManager;
+import io.github.sawors.werewolfgame.game.events.BackgroundEvent;
 import io.github.sawors.werewolfgame.game.events.RoleEvent;
 import io.github.sawors.werewolfgame.game.roles.TextRole;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -23,26 +24,43 @@ public class DiscordListeners extends ListenerAdapter {
     
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        GameManager manager = Main.getManager(event.getChannel().getIdLong());
         TextRole role = getEventRole(event);
         if(role != null){
             role.onMessageSent(event);
+        }
+        if(manager != null){
+            for(BackgroundEvent bgevent : manager.getBackgroundEvents()){
+                bgevent.onMessageSent(event);
+            }
         }
     }
     
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
+        GameManager manager = Main.getManager(event.getChannel().getIdLong());
         TextRole role = getEventRole(event);
         if(role != null){
             role.onReactionAdded(event);
+        }
+        if(manager != null){
+            for(BackgroundEvent bgevent : manager.getBackgroundEvents()){
+                bgevent.onReactionAdded(event);
+            }
         }
     }
     
     @Override
     public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
+        GameManager manager = Main.getManager(event.getChannel().getIdLong());
         TextRole role = getEventRole(event);
         if(role != null){
-            Main.logAdmin("reaction remove event");
             role.onReactionRemoved(event);
+        }
+        if(manager != null){
+            for(BackgroundEvent bgevent : manager.getBackgroundEvents()){
+                bgevent.onReactionRemoved(event);
+            }
         }
     }
     

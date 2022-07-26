@@ -436,7 +436,7 @@ public class Main {
                             Main.logAdmin("Main class found for",extensionjar.getName());
                             URL[] classpath = {extensionjar.toURI().toURL()};
                             try(URLClassLoader classloader = URLClassLoader.newInstance(classpath)){
-                                Class<?> cl = classloader.loadClass(tocheck.getName().replaceAll("/",".").replaceAll(".class",""));
+                                Class<?> cl = classloader.loadClass(tocheck.getName().replaceAll("/",".").substring(0,tocheck.getName().length()-".class".length()));
                                 Constructor<?> ctor = cl.getConstructor();
                                 Object crinst = ctor.newInstance();
                                 if(crinst instanceof WerewolfExtension){
