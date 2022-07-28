@@ -2,7 +2,7 @@ package io.github.sawors.werewolfgame.game.roles;
 
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 
-public abstract class VillagerLike extends PlayerRole {
+public abstract class VillagerLike extends PrimaryRole {
     public VillagerLike(WerewolfExtension extension) {
         super(extension);
     }

@@ -50,6 +50,6 @@ public class DiscordBot {
             if(localpending.size() > 0){
                 localpending.poll().queue();
             }
-        }, 100, 200, TimeUnit.MILLISECONDS);
+        }, 100, 250, TimeUnit.MILLISECONDS);
     }
 }

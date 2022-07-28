@@ -30,6 +30,7 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -80,6 +81,7 @@ public class GameManager {
     private StringBuilder logholder = new StringBuilder();
     
     // GAME DATA
+    private Set<UserId> readyplayers = new HashSet<>();
     private Set<UserId> playerset = new HashSet<>();
     private Map<PlayerRole, Integer> rolepool = new HashMap<>();
     private Map<UserId, WerewolfPlayer> playerlink = new HashMap<>();
@@ -138,6 +140,18 @@ public class GameManager {
         Main.logAdmin("Loaded events", addedevents);
     
         Main.registerNewGame(this);
+    }
+
+    public void setReady(UserId id, boolean ready){
+        if(ready){
+            readyplayers.add(id);
+        } else {
+            readyplayers.remove(id);
+        }
+    }
+
+    public TextChannel getWaitingChannel(){
+        return waitingchannel;
     }
     
     public void addRoleEvent(Collection<GameEvent> events){
@@ -273,9 +287,11 @@ public class GameManager {
     public void setLanguage(LoadedLocale locale){
         this.language = locale;
         TranslatableText texts = new TranslatableText(Main.getTranslator(), language);
-        adminchannel.getManager().setName(texts.get("channels.text.admin")).queue();
-        maintextchannel.getManager().setName(texts.get("channels.text.main")).queue();
-        mainvoicechannel.getManager().setName(texts.get("channels.voice.main")).queue();
+        DiscordBot.addPendingAction(adminchannel.getManager().setName(texts.get("channels.text.admin")));
+        DiscordBot.addPendingAction(maintextchannel.getManager().setName(texts.get("channels.text.main")));
+        DiscordBot.addPendingAction(mainvoicechannel.getManager().setName(texts.get("channels.voice.main")));
+        DiscordBot.addPendingAction(waitingchannel.getManager().setName(texts.get("channels.text.waiting")));
+        DiscordBot.triggerActionQueue();
         adminchannel.sendMessage(texts.get("commands.admin.lang.success")).queue(m -> DiscordBot.addPendingAction(adminchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(buildTutorial()).setColor(0x89CFF0).build())));
         Main.logAdmin(rolechannels);
         for(Map.Entry<TextChannel, TextRole> entry : rolechannels.entrySet()){
@@ -312,30 +328,50 @@ public class GameManager {
         }
     }
 
-    private void setChannelVisible(GuildChannel channel, boolean visible){
+    private RestAction<?> setChannelVisible(GuildChannel channel, boolean visible){
         List<Permission> allow = new ArrayList<>();
         List<Permission> deny = new ArrayList<>();
+        PermissionOverride base = channel.getPermissionContainer().getPermissionOverride(playerrole);
+        if(base != null){
+            allow.addAll(base.getAllowed());
+            deny.addAll(base.getDenied());
+        }
 
+        // I could use array inversion to switch these 2 values, but I don't think it deserves much goal other than flexing
         if(visible){
             allow.add(Permission.VIEW_CHANNEL);
+            deny.remove(Permission.VIEW_CHANNEL);
         } else {
             deny.add(Permission.VIEW_CHANNEL);
+            allow.remove(Permission.VIEW_CHANNEL);
         }
 
-        channel.getPermissionContainer().getManager().putRolePermissionOverride(playerrole.getIdLong(), allow,deny).queue();
+        return channel.getPermissionContainer().getManager().putRolePermissionOverride(playerrole.getIdLong(), allow,deny);
     }
 
-    private void setChannelLocked(TextChannel channel, boolean locked){
+    private RestAction<?> setChannelLocked(TextChannel channel, boolean locked){
         List<Permission> allow = new ArrayList<>();
         List<Permission> deny = new ArrayList<>();
-
-        if(locked){
-            deny.add(Permission.MESSAGE_SEND);
-        } else {
-            allow.add(Permission.MESSAGE_SEND);
+        PermissionOverride base = channel.getPermissionContainer().getPermissionOverride(playerrole);
+        if(base != null){
+            allow.addAll(base.getAllowed());
+            deny.addAll(base.getDenied());
         }
 
-        channel.getPermissionContainer().getManager().putRolePermissionOverride(playerrole.getIdLong(), allow,deny).queue();
+        // I could use array inversion to switch these 2 values, but I don't think it deserves much goal other than flexing
+        if(locked){
+            deny.add(Permission.MESSAGE_SEND);
+            deny.add(Permission.MESSAGE_ADD_REACTION);
+            allow.remove(Permission.MESSAGE_SEND);
+            allow.remove(Permission.MESSAGE_ADD_REACTION);
+        } else {
+            allow.add(Permission.MESSAGE_SEND);
+            allow.add(Permission.MESSAGE_ADD_REACTION);
+            deny.remove(Permission.MESSAGE_SEND);
+            deny.remove(Permission.MESSAGE_ADD_REACTION);
+        }
+
+        return channel.getPermissionContainer().getManager().putRolePermissionOverride(playerrole.getIdLong(), allow,deny);
     }
     
     private void setupTextChannel(String name, ChannelType type){
@@ -368,12 +404,22 @@ public class GameManager {
                 break;
             case ANNOUNCEMENTS:
                 this.maintextchannel = (TextChannel) channel;
-                setChannelVisible(channel, false);
+                setChannelVisible(channel, false).queue();
                 break;
             case WAITING:
                 this.waitingchannel = (TextChannel) channel;
                 TranslatableText textpool = new TranslatableText(Main.getTranslator(), language);
-                maintextchannel.sendMessage(textpool.get("buttons.leave-game-message").replaceAll("%button%",textpool.get("buttons.leave-game"))).setActionRow(Button.danger("leave:"+id,textpool.get("buttons.leave-game"))).queue(msg -> leavemessage = msg);
+                waitingchannel.sendMessageEmbeds(new EmbedBuilder().setDescription(
+                        textpool.get("events.intro-block.description")
+                                .replaceAll("%admin%",owner.getAsMention())
+                        +"\n\n"+textpool.get("events.intro-block.ready-instructions")
+                                .replaceAll("%emoji%",":white_check_mark:")).setFooter(
+                        textpool.get("events.intro-block.leave-button-indication")
+                                .replaceAll("%button%", textpool.get("buttons.leave-game")))
+                        .build()).setActionRow(Button.danger("leave:"+id,textpool.get("buttons.leave-game"))).queue(msg -> {
+                    leavemessage = msg;
+                    msg.addReaction("U+2705").queue();
+                });
                 break;
         }
         Main.linkChannel(channel.getIdLong(), id);
@@ -393,6 +439,7 @@ public class GameManager {
         Main.unlinkChannel(adminchannel.getIdLong());
         Main.unlinkChannel(maintextchannel.getIdLong());
         Main.unlinkChannel(mainvoicechannel.getIdLong());
+        Main.unlinkChannel(waitingchannel.getIdLong());
         for(TextChannel channel : rolechannels.keySet()){
             Main.unlinkChannel(channel.getIdLong());
         }
@@ -468,7 +515,7 @@ public class GameManager {
             if(player != null && playerset.contains(player)){
                 // remove discord link
                 if(discordlink.containsValue(player)){
-                    for(Map.Entry<String, UserId> entry : discordlink.entrySet()){
+                    for(Map.Entry<String, UserId> entry : new HashSet<>(discordlink.entrySet())){
                         if(entry.getValue().equals(player)){
                             discordlink.remove(entry.getKey());
                         }
@@ -476,7 +523,7 @@ public class GameManager {
                 }
                 // remove minecraft link
                 if(minecraftlink.containsValue(player)){
-                    for(Map.Entry<UUID, UserId> entry : minecraftlink.entrySet()){
+                    for(Map.Entry<UUID, UserId> entry : new HashSet<>(minecraftlink.entrySet())){
                         if(entry.getValue().equals(player)){
                             minecraftlink.remove(entry.getKey());
                         }
@@ -496,7 +543,7 @@ public class GameManager {
                     }
                     // kick it out of game voice channel
                     if(mb.getVoiceState() != null && mb.getVoiceState().inAudioChannel()){
-                        for(VoiceChannel chan : category.getVoiceChannels()){
+                        for(VoiceChannel chan : new HashSet<>(category.getVoiceChannels())){
                             if(chan.getMembers().contains(mb)){
                                 try{
                                     guild.kickVoiceMember(mb).queue();
@@ -681,13 +728,12 @@ public class GameManager {
                 try{
                     List<GuildChannel> channels = cat.getChannels();
                     for(int i = 0; i<channels.size(); i++){
-                        final int fi = i;
+                        DiscordBot.addPendingAction(channels.get(i).delete());
                         if(i == channels.size()-1){
-                            channels.get(i).delete().queueAfter(fi,TimeUnit.SECONDS,c -> cat.delete().queueAfter(fi,TimeUnit.SECONDS));
-                        } else {
-                            channels.get(i).delete().queueAfter(fi,TimeUnit.SECONDS);
+                            DiscordBot.addPendingAction(cat.delete());
                         }
                     }
+                    DiscordBot.triggerActionQueue();
                 } catch (InsufficientPermissionException e){
                     Main.logAdmin("Permission Error in guild : "+guild.getId(),e.getMessage());
                 }
@@ -739,15 +785,15 @@ public class GameManager {
     
     public void startGame(){
         Main.logAdmin("Let's gooooooooooooooooooo");
-        for(int i = 0; i<8; i++){
+        for(int i = 0; i<37; i++){
             UserId userid = new UserId();
             logEvent("adding fake player "+userid, LogDestination.CONSOLE);
             playerset.add(userid);
         }
         lock();
-        setChannelVisible(maintextchannel, false);
-        setChannelLocked(waitingchannel,true);
-        setChannelLocked(maintextchannel,true);
+        setChannelVisible(maintextchannel, true).queue(c -> setChannelLocked(maintextchannel,true).queue());
+        setChannelLocked(waitingchannel,true).queue();
+
         assignRoles();
         
         //create role channels
@@ -812,6 +858,7 @@ public class GameManager {
 
     private Set<LinkedUser> defaultVotePool(){
         Set<LinkedUser> votepool = new HashSet<>();
+        //TODO : Remove this
         List<String> fakenameslist = new ArrayList<>();
         fakenameslist.add("Pasawors");
         fakenameslist.add("esprit-absent");
@@ -830,6 +877,9 @@ public class GameManager {
         fakenameslist.add("l'Idiot");
         fakenameslist.add("JimmyBois");
         fakenameslist.add("aïecaillou");
+        for(int i = 1; i<64; i++){
+            fakenameslist.add("FakePlayer"+i);
+        }
         Collections.shuffle(fakenameslist);
         Queue<String> fakenames = new LinkedList<>(fakenameslist);
         for(int i = 1; fakenames.size()*i <= playerset.size(); i++){

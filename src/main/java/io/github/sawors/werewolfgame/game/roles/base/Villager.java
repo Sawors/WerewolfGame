@@ -1,6 +1,7 @@
 package io.github.sawors.werewolfgame.game.roles.base;
 
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
+import io.github.sawors.werewolfgame.game.events.GameEvent;
 import io.github.sawors.werewolfgame.game.roles.DefaultRoleType;
 import io.github.sawors.werewolfgame.game.roles.TextRole;
 import io.github.sawors.werewolfgame.game.roles.VillagerLike;
@@ -12,12 +13,19 @@ import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 public class Villager extends VillagerLike implements TextRole {
     public Villager(WerewolfExtension extension) {
         super(extension);
     }
-    
+
+    @Override
+    public Set<GameEvent> getEvents() {
+        return Set.of();
+    }
+
     @Override
     public String toString() {
         return DefaultRoleType.VILLAGER.toString();
@@ -30,12 +38,12 @@ public class Villager extends VillagerLike implements TextRole {
     
     @Override
     public Collection<Permission> getChannelAllow() {
-        return null;
+        return List.of(Permission.VIEW_CHANNEL);
     }
     
     @Override
     public Collection<Permission> getChannelDeny() {
-        return null;
+        return List.of(Permission.MESSAGE_SEND, Permission.CREATE_PUBLIC_THREADS);
     }
     
     @Override

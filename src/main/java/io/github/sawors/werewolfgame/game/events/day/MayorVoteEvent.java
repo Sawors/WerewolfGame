@@ -51,7 +51,7 @@ public class MayorVoteEvent extends GenericVote implements RoleEvent {
 
     @Override
     public void start(GameManager manager) {
-        votemessage.setTitle("Electing the Mayor");
+        votemessage.setTitle("📩 Electing the Mayor");
         votemessage.setDescription(messagebody);
         votemessage.addField("Supplementary Role","This role does not replace your original role",false);
         votemessage.addField("Role","The mayor will decide who should die if a tie happens when the Village decides which player to eliminate. \nWhen the Mayor dies a new Mayor is designated by the old one just before passing away",false);

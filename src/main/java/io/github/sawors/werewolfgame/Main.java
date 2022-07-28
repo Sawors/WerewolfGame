@@ -400,7 +400,9 @@ public class Main {
         }
         if(logchannels.size() > 0){
             for(PrivateChannel channel : logchannels){
-                channel.sendMessage(message).queue();
+                try{
+                    channel.sendMessage(message).queue();
+                }catch (Exception ignored){};
             }
         }
     }

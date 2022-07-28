@@ -5,8 +5,10 @@ import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.GameManager;
+import io.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -27,7 +29,7 @@ public abstract class GenericVote extends GameEvent {
     protected Set<UserId> voters;
     protected Set<UserId> votewinnertie = new HashSet<>();
     public GameManager manager;
-    protected Message buttonmessage = null;
+    protected Set<Message> buttonmessage = new HashSet<>();
 
     public GenericVote(WerewolfExtension extension, Set<LinkedUser> votepool, Set<UserId> voters, @Nullable TextChannel votechannel, @Nullable String votemessagebody, @Nullable Integer votetime){
         super(extension);
@@ -138,21 +140,69 @@ public abstract class GenericVote extends GameEvent {
             votebuttons.add(ActionRow.of(tempbuttons));
             tempbuttons.clear();
         }
+        List<List<ActionRow>> splitrows = new ArrayList<>();
+        if(votebuttons.size() > 5){
+            List<ActionRow> loadlist = new ArrayList<>();
+            for(int i = 5; i<votebuttons.size(); i++){
+                if(i%5 == 0){
+                    if(loadlist.size() > 0){
+                        splitrows.add(loadlist);
+                    }
+                    loadlist = new ArrayList<>();
+                }
+                loadlist.add(votebuttons.get(i));
+            }
+            if(loadlist.size() > 0){
+                splitrows.add(loadlist);
+            }
+            List<ActionRow> saferef = List.copyOf(votebuttons);
+            votebuttons = new ArrayList<>();
+            for(int i = 0; i<5; i++){
+                votebuttons.add(saferef.get(i));
+            }
+        }
+        TranslatableText textpool = new TranslatableText(Main.getTranslator(),manager.getLanguage());
+        embed.addField(textpool.get("roles.generic-vote.vote-time-title"), textpool.get("roles.generic-vote.vote-time-text").replaceAll("%time%",String.valueOf(votetime)), false);
 
-        votechannel.sendMessageEmbeds(embed.build()).setActionRows(votebuttons).queue(msg -> this.buttonmessage = msg);
+        votechannel.sendMessageEmbeds(embed.build()).setActionRows(votebuttons).queue(msg -> {
+            this.buttonmessage.add(msg);
+            if(splitrows.size() > 0){
+                for(int i  = 0; i < splitrows.size(); i++){
+                    if(i<splitrows.size()-1){
+                        votechannel.sendMessage("("+(i+1)+"/"+splitrows.size()+")").setActionRows(splitrows.get(i)).queue(m1 -> buttonmessage.add(m1));
+                    } else {
+                        votechannel.sendMessage("("+(i+1)+"/"+splitrows.size()+")").setActionRows(splitrows.get(i)).queue(m2 -> {
+                            m2.createThreadChannel(new TranslatableText(extension.getTranslator(), manager.getLanguage()).get("channels.thread-init")).queue();
+                            buttonmessage.add(m2);
+                        });
+                    }
+                }
+            } else {
+                msg.createThreadChannel(new TranslatableText(extension.getTranslator(), manager.getLanguage()).get("channels.thread-init")).queue();
+            }
+
+        });
     }
     
     public void closeVote(){
-        List<ActionRow> rows = new ArrayList<>();
-        for(ActionRow row : buttonmessage.getActionRows()){
-            List<Button> disabled = new ArrayList<>();
-            for(Button button : row.getButtons()){
-                disabled.add(button.asDisabled().withStyle(ButtonStyle.SECONDARY));
+        for(Message msg : buttonmessage){
+            List<ActionRow> rows = new ArrayList<>();
+            for(ActionRow row : msg.getActionRows()){
+                List<Button> disabled = new ArrayList<>();
+                for(Button button : row.getButtons()){
+                    disabled.add(button.asDisabled().withStyle(ButtonStyle.SECONDARY));
+                }
+                rows.add(ActionRow.of(disabled));
             }
-            rows.add(ActionRow.of(disabled));
+            msg.editMessage(msg).setActionRows(rows).queue();
         }
-        
-        buttonmessage.editMessageEmbeds(new EmbedBuilder(votemessage).build()).setActionRows(rows).queue();
+
+
+    }
+
+    private MessageEmbed.Field getSupplementaryRoleField(){
+        TranslatableText textpool = new TranslatableText(Main.getTranslator(),manager.getLanguage());
+        return new MessageEmbed.Field(textpool.get("supplementary.title"),textpool.get("supplementary.description"),false);
     }
 
     // events
@@ -169,5 +219,5 @@ public abstract class GenericVote extends GameEvent {
     public void onTie(List<UserId> tied, Map<UserId, Integer> results){}
     // Vote time events
     public void onTimeOut(Integer basetime){}
-    public void onTimeHalf(Integer basetime, Integer elapsedtime){};
+    public void onTimeHalf(Integer basetime, Integer elapsedtime){}
 }

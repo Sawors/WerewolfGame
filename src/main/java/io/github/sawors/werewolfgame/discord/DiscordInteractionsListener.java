@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.Modal;
@@ -127,6 +129,50 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     gm.addPlayer(UserId.fromDiscordId(event.getUser().getId()), input.getAsString());
                 }
                 event.deferEdit().queue();
+            }
+        }
+    }
+
+    @Override
+    public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
+        if(event.isFromGuild() && event.getUser() != null && !event.getUser().isBot() && event.getReactionEmote().isEmoji()){
+            GameManager manager = Main.getManager(event.getChannel().getIdLong());
+            if(manager != null){
+                if(event.getChannel().getId().equals(manager.getWaitingChannel().getId()) && event.getReactionEmote().getAsCodepoints().equals("U+2705")){
+                    manager.setReady(DatabaseManager.getUserId(event.getUserId()), true);
+                    event.retrieveMessage().queue(m -> {
+                        m.getReactions().forEach(r -> {
+                            if(r.getReactionEmote().isEmoji() && r.getReactionEmote().getAsCodepoints().equals("U+2705")){
+                                if(r.getCount() == 2){
+                                    event.getReaction().retrieveUsers().queue(users -> {
+                                        if(users.contains(Main.getJDA().getSelfUser())){
+                                            m.removeReaction("U+2705").queue();
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                    });
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onMessageReactionRemove(@NotNull MessageReactionRemoveEvent event) {
+        if(event.isFromGuild() && event.getUser() != null && !event.getUser().isBot() && event.getReactionEmote().isEmoji()){
+            GameManager manager = Main.getManager(event.getChannel().getIdLong());
+            if(manager != null){
+                if(event.getChannel().getId().equals(manager.getWaitingChannel().getId()) && event.getReactionEmote().getAsCodepoints().equals("U+2705")){
+                    manager.setReady(DatabaseManager.getUserId(event.getUserId()), false);
+                    event.retrieveMessage().queue(m -> {
+                        if(!m.getReactions().contains(event.getReaction())){
+                            m.addReaction("U+2705").queue();
+                        }
+                    });
+                }
+
             }
         }
     }

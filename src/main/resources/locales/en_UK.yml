@@ -78,7 +78,6 @@ buttons:
   expired-game: "Game Finished"
   locked-game: "Game Locked"
   leave-game: "Leave Game"
-  leave-game-message: "Click on the **%button%** button to leave the game"
 
 forms:
   private-game-code:
@@ -87,6 +86,7 @@ forms:
     text-placeholder: "very secret code here"
 
 channels:
+  thread-init: "You can discuss the vote here"
   voice:
     main: "🔊 Vocal"
   text:
@@ -98,6 +98,13 @@ channels:
 events:
   player-join-message: ":arrow_right: %user% **joined the Game !**"
   player-leave-message: ":arrow_left: %user% **has left the Game**"
+  intro-block:
+    description: |-
+      Welcome to a new game of **Werewolf** !
+      
+      Wait here until the admin (%admin%) is ready to start the game :smile:
+    ready-instructions: "Click on the %emoji% emoji when you are ready\n"
+    leave-button-indication: "Click on the [%button%] button to leave the game"
 
 commands:
   admin:

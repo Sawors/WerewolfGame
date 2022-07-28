@@ -1,13 +1,12 @@
 discord-token:
 database-file: default
 instance-language: "en_UK"
-instance-name: ""
+instance-name: "Main Instance"
 admin-users:
   - "315237447065927691"
 guild-max-games:
   default: 2
   938895004544430082: 1
-#DO NOT MODIFY THIS, IF AN OUTDATED CONFIG IS DETECTED IT WILL ONLY ADD THE MISSING FIELDS WITHOUT
-#AFFECTING YOUR DATA
+#DO NOT MODIFY THIS
 config-version: 0.1
 regenerate: false

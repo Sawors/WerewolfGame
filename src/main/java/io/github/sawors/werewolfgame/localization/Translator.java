@@ -19,6 +19,7 @@ public class Translator {
     
     private final Map<LoadedLocale, Map<String, Object>> locales = new HashMap<>();
     private LoadedLocale defaultlocale;
+    private LoadedLocale fallbacklocale;
     
     public Translator(LoadedLocale defaultlocale){
         this.defaultlocale = defaultlocale;

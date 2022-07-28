@@ -87,6 +87,7 @@ forms:
     text-placeholder: "12345"
 
 channels:
+  thread-init: "Vous pouvez discuter du vote ici"
   voice:
     main: "🔊 Vocal"
   text:
@@ -98,6 +99,13 @@ channels:
 events:
   player-join-message: ":arrow_right: %user% **a rejoint la partie !**"
   player-leave-message: ":arrow_left: %user% **a quitté la partie**"
+  intro-block:
+    description: |-
+      Bienvenue dans cette nouvelle partie de **Loup-Garou** !
+      
+      Patientez ici en attendant que l'admin (%admin%) soit prêt à lancer la partie :smile:
+    ready-instructions: "Cliquez sur l'emoji %emoji% pour indiquer que vous êtes prêt\n"
+    leave-button-indication: "Cliquez sur le boutton [%button%] pour quitter la partie"
 
 commands:
   admin:
@@ -151,11 +159,49 @@ commands:
     mettre: "set"
 
 roles:
+  supplementary:
+    title: "Supplementary Role"
+    description: "This role does not replace your original role"
+  generic-vote:
+    vote-time-title: "⏲️🕰️⌚⏱ Temps"
+    vote-time-text: "%time% secondes"
+  mayor:
+    name: "Maire"
+    embed:
+      title: "📩 Vote du Maire"
+      text:
+      role-description: |-
+        Le Maire à le pouvoir de décider quel joueur doit mourrir si lors du vote du Village deux joueurs se retrouvent à votes égaux.
+        Lorsque le Maire meurt il doit désigner son successeur
+      thumbnail-url: https://static.wikia.nocookie.net/loupgaroumal/images/c/c1/Capitaine.png/revision/latest?cb=20210221152503&path-prefix=fr
   villager:
+    name: "Simple Villageois"
     channel: "🧑villageois"
-  wolf:
-    channel: "🐺loups"
+    intro: "Bienvenue Villageois, le village compte sur vous !"
+    embed:
+      text: "*un petit pouvoir implique de ne pas voter comme un idiot*"
+      role-description: |-
+        Les simples villageois n'ont pas de pouvoir, leur seul tâche est de correctement voter lors du vote du Village pour éliminer les Loups-Garou
+      thumbnail-url: "https://static.wikia.nocookie.net/loupgaroumal/images/d/d6/Carte_SimpleVillaegois.png/revision/latest?cb=20210104170925&path-prefix=fr"
+    vote:
+      title: "📩 Vote du Village"
+      description: |-
+        Le village doit voter une personne à éliminer
 
+  wolf:
+    name: "Loup-Garou"
+    channel: "🐺loups"
+    embed:
+      text: "*Quand les neiges tombent et que les vents blancs soufflent, le loup solitaire meurt, mais la meute survit*"
+      role-description: |-
+      thumbnail-url: "https://static.wikia.nocookie.net/loupgaroumal/images/1/1e/Carte2.png/revision/latest?cb=20210104171045&path-prefix=fr"
+    vote:
+      title: "📩 Votez une victime"
+      description: |-
+        Qui sera le joueur que vous allez dévorer cette nuit ?
+        
+        Attention : en cas d'égalité à la fin du compteur la victime sera choisie aléatoirement parmis celles ayant le plus haut nombre de votes
+      
 
 
 
