@@ -13,6 +13,12 @@
     <description>Used to develop extensions for the WerewolfGame project.</description>
     <url>https://github.com/Sawors/WerewolfGame</url>
 
+    <scm>
+        <connection>scm:git:https://github.com/Sawors/WerewolfGame.git</connection>
+        <url>http://github.com/Sawors/WerewolfGame</url>
+        <developerConnection>scm:git:https://github.com/Sawors/WerewolfGame.git</developerConnection>
+    </scm>
+
     <licenses>
         <license>
             <name>MIT License</name>
