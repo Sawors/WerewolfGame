@@ -93,6 +93,7 @@ channels:
     # for text channels Discord restrictions applies : no capital letter, spaces are replaced by "-"
     main: "📯place-du-village"
     admin: "🔧admin"
+    waiting: "🌿attente"
 
 events:
   player-join-message: ":arrow_right: %user% **a rejoint la partie !**"
@@ -125,6 +126,7 @@ commands:
       success: "Serveur *%name%:%id%* enregistré avec succès"
     create:
       success: "Partie créée ! ID : %id%"
+      error: "Échec de la création de la partie, ce serveur ne permet que %max% partie(s) en même temps"
       private-game-code-message: "Salut %user% ! \nPuisque tu as créé une partie de Loup-Garou en mode **Privé** tes joueurs doivent utiliser ce code pour rejoindre : **`%key%`**"
     set:
       admin-text-success: "Le **Salon Admin** est maintenant %channel% !"

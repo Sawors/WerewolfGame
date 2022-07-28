@@ -93,6 +93,7 @@ channels:
     # for text channels Discord restrictions applies : no capital letter, spaces are replaced by "-"
     main: "📯village-place"
     admin: "🔧admin"
+    waiting: "🌿waiting"
 
 events:
   player-join-message: ":arrow_right: %user% **joined the Game !**"
@@ -125,6 +126,7 @@ commands:
       success: "Server *%name%:%id%* successfully registered"
     create:
       success: "Game created ! ID : %id%"
+      error: "Could not create the game, this server only allows %max% game(s) to be played at the same time"
       private-game-code-message: "Hello %user% ! \nSince you created a new Werewolf game in **Private** mode players must this code to join it : **`%key%`**"
     set:
       admin-text-success: "**Admin Channel** successfully set to text channel %channel%"
