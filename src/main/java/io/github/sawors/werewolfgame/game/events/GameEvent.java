@@ -14,4 +14,12 @@ public abstract class GameEvent {
     public abstract void start(GameManager manager);
 
     public abstract GamePhase getPhase();
+
+    public String getStartMessage(){
+        return null;
+    }
+
+    public String getEndMessage(){
+        return null;
+    }
 }

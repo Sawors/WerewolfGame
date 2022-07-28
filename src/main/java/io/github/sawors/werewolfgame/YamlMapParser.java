@@ -34,16 +34,20 @@ public class YamlMapParser {
                 level++;
                 String localkey = hierarchy[level];
                 if(text instanceof Map){
-                    if(((Map<?, ?>) text).containsKey(localkey)){
-                        text = ((Map<?, ?>) text).get(localkey);
+                    Map<String, Object> inputmap = new HashMap<>();
+                    ((Map<?, ?>) text).forEach((s,d) -> inputmap.put(s.toString(),d));
+                    if(inputmap.containsKey(localkey)){
+                        text = inputmap.get(localkey);
                     } else {
-                        throw new ParseException("Parsing error at level : "+key,level);
+                        throw new ParseException("Parsing error in map at level : "+key,level);
                     }
                 } else if (text instanceof List){
-                    if(((List<?>) text).contains(localkey)){
-                        text = ((List<?>) text).get(((List<?>) text).indexOf(localkey));
+                    List<String> inputlist = new ArrayList<>();
+                    ((List<?>) text).forEach(e -> inputlist.add(e.toString()));
+                    if(inputlist.contains(localkey)){
+                        text = inputlist.get(inputlist.indexOf(localkey));
                     } else {
-                        throw new ParseException("Parsing error at level : "+key,level);
+                        throw new ParseException("Parsing error in list at level : "+key,level);
                     }
                 }
             } while (text instanceof Collection || text instanceof Map);

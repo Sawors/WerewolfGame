@@ -4,14 +4,10 @@ instance-language: "en_UK"
 instance-name: ""
 admin-users:
   - "315237447065927691"
-
+guild-max-games:
+  default: 2
+  938895004544430082: 1
 #DO NOT MODIFY THIS, IF AN OUTDATED CONFIG IS DETECTED IT WILL ONLY ADD THE MISSING FIELDS WITHOUT
 #AFFECTING YOUR DATA
-parentmap:
-  childmap1:
-    cm0: "0"
-  childmap2:
-    cmp3: "3"
-    cmp4: "4"
 config-version: 0.1
 regenerate: false

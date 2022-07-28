@@ -115,23 +115,29 @@ public class DiscordCommandListener extends ListenerAdapter {
                     break;
                 case"create":
                 case"game":
-                    JoinType jointype = JoinType.PUBLIC;
-                    if(args.length >= 3 && args[2].equalsIgnoreCase("private")){
-                        jointype = JoinType.PRIVATE;
-                    }
-                    GameManager gm = new GameManager(event.getGuild(), GameType.DISCORD, jointype);
-                    try{
-                        gm.sendInvite();
-                    }catch (NullPointerException e){
-                        DatabaseManager.registerGuildAuto(event.getGuild());
-                        try {
+                    Main.logAdmin("Games", Main.getGuildGames(event.getGuild().getIdLong()));
+                    Main.logAdmin("Max", Main.getMaxGames(event.getGuild().getId()));
+                    if(Main.getGuildGames(event.getGuild().getIdLong()) < Main.getMaxGames(event.getGuild().getId())){
+                        JoinType jointype = JoinType.PUBLIC;
+                        if(args.length >= 3 && args[2].equalsIgnoreCase("private")){
+                            jointype = JoinType.PRIVATE;
+                        }
+                        GameManager gm = new GameManager(event.getGuild(), GameType.DISCORD, jointype);
+                        try{
                             gm.sendInvite();
-                        }catch (NullPointerException ignored){}
-                    }
-                    gm.setOwner(event.getAuthor());
-                    event.getChannel().sendMessage(texts.get("commands.ww.create.success").replaceAll("%id%", gm.getId())).queue();
-                    if(jointype == JoinType.PRIVATE){
-                        event.getAuthor().openPrivateChannel().queue(chan -> chan.sendMessage(texts.get("commands.ww.create.private-game-code-message").replaceAll("%user%", event.getAuthor().getAsMention()).replaceAll("%key%", gm.getJoinKey())).queue());
+                        }catch (NullPointerException e){
+                            DatabaseManager.registerGuildAuto(event.getGuild());
+                            try {
+                                gm.sendInvite();
+                            }catch (NullPointerException ignored){}
+                        }
+                        gm.setOwner(event.getAuthor());
+                        event.getChannel().sendMessage(texts.get("commands.ww.create.success").replaceAll("%id%", gm.getId())).queue();
+                        if(jointype == JoinType.PRIVATE){
+                            event.getAuthor().openPrivateChannel().queue(chan -> chan.sendMessage(texts.get("commands.ww.create.private-game-code-message").replaceAll("%user%", event.getAuthor().getAsMention()).replaceAll("%key%", gm.getJoinKey())).queue());
+                        }
+                    } else {
+                        event.getChannel().sendMessage(texts.get("commands.ww.create.error").replaceAll("%max%", String.valueOf(Main.getMaxGames(event.getGuild().getId())))).queue();
                     }
                 case"clean":
                 case"clear":

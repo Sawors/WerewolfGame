@@ -4,7 +4,6 @@ import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.GameManager;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
-import io.github.sawors.werewolfgame.game.roles.PrimaryRole;
 import io.github.sawors.werewolfgame.localization.BundledLocale;
 import io.github.sawors.werewolfgame.localization.LoadedLocale;
 import io.github.sawors.werewolfgame.localization.Translator;
@@ -26,7 +25,11 @@ import java.util.jar.JarFile;
 
 public class Main {
     //TODO : Linking check
+    //
+    // Link GameManager's id (String) with its GameManager
     private static HashMap<String, GameManager> activegames = new HashMap<>();
+    // Link Guild's id and the number of games currently being played in it
+    private static HashMap<String, Integer> guildgamesamount = new HashMap<>();
     private static boolean standalone;
     private static boolean discordenabled = false;
     private static boolean minecraftenabled = false;
@@ -298,11 +301,9 @@ public class Main {
         }
     }
     
-    private void loadRoles(Set<PrimaryRole> toload){
-        for(PrimaryRole role : toload){
-            role.onLoad();
-            role.getEvents();
-        }
+    public static int getGuildGames(Long guildid){
+        String gid = String.valueOf(guildid);
+        return guildgamesamount.getOrDefault(gid, 0);
     }
     
     //TODO : handle config without bukkit methods
@@ -347,11 +348,33 @@ public class Main {
     }
 
     public static void registerNewGame(GameManager manager){
+
         activegames.put(manager.getId(), manager);
+        guildgamesamount.put(manager.getGuild().getId(), getGuildGames(manager.getGuild().getIdLong())+1);
+    }
+
+    public static int getMaxGames(String guildid){
+        Integer maxgames = YamlMapParser.getInt(configmap, "guild-max-games."+guildid);
+        if(maxgames != null){
+            return maxgames;
+        } else {
+            maxgames = YamlMapParser.getInt(configmap, "guild-max-games.default");
+            return maxgames != null ? maxgames : 0;
+        }
     }
     
     public static void removeGame(String managerid){
+        if (activegames.containsKey(managerid)) {
+            GameManager manager = activegames.get(managerid);
+            if(getGuildGames(manager.getGuild().getIdLong()) >  1){
+                guildgamesamount.put(manager.getGuild().getId(), getGuildGames(manager.getGuild().getIdLong())-1);
+            } else {
+                guildgamesamount.remove(manager.getGuild().getId());
+            }
+
+        }
         activegames.remove(managerid);
+
     }
 
     public static String generateRandomGameId(){

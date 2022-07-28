@@ -303,10 +303,38 @@ public class GameManager {
             setupTextChannel(texts.get("channels.text.admin"), ChannelType.ADMIN);
             // create main text channel
             setupTextChannel(texts.get("channels.text.main"), ChannelType.ANNOUNCEMENTS);
+            // create waiting channel
+            setupTextChannel(texts.get("channels.text.waiting"), ChannelType.ANNOUNCEMENTS);
             
             // create main voice channel
             category.createVoiceChannel(texts.get("channels.voice.main")).queue(channel -> this.mainvoicechannel = channel);
         }
+    }
+
+    private void setChannelVisible(GuildChannel channel, boolean visible){
+        List<Permission> allow = new ArrayList<>();
+        List<Permission> deny = new ArrayList<>();
+
+        if(visible){
+            allow.add(Permission.VIEW_CHANNEL);
+        } else {
+            deny.add(Permission.VIEW_CHANNEL);
+        }
+
+        channel.getPermissionContainer().getManager().putRolePermissionOverride(playerrole.getIdLong(), allow,deny).queue();
+    }
+
+    private void setChannelLocked(TextChannel channel, boolean locked){
+        List<Permission> allow = new ArrayList<>();
+        List<Permission> deny = new ArrayList<>();
+
+        if(locked){
+            deny.add(Permission.MESSAGE_SEND);
+        } else {
+            allow.add(Permission.MESSAGE_SEND);
+        }
+
+        channel.getPermissionContainer().getManager().putRolePermissionOverride(playerrole.getIdLong(), allow,deny).queue();
     }
     
     private void setupTextChannel(String name, ChannelType type){
