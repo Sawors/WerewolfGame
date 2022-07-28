@@ -5,9 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.security.InvalidKeyException;
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class YamlMapParser {
     public static String getData(Map<String, Object> loadedyaml, String key) throws InvalidKeyException, ParseException {
@@ -75,6 +73,24 @@ public class YamlMapParser {
         } catch (ParseException | InvalidKeyException eparse){
             return null;
         }
-        
+    }
+
+    public static List<String> getallkeys(Map<?,?> maptoparse){
+        List<String> fields = new ArrayList<>();
+
+        Queue<Map<?, ?>> submaps = new LinkedList<>();
+        submaps.add(maptoparse);
+        //TODO : add full key building mechanic to check for missing fields and warn user (keys like : "roles.witch.channel")
+        //  with each field telling the whole path to it thus making it really unique and removing possible duplications (using YAML default duplicate error)
+        while(submaps.size() > 0){
+            Map<?, ?> toparse = submaps.poll();
+            for(Map.Entry<?, ?> entry : toparse.entrySet()){
+                if(entry.getValue() instanceof Map map){
+                    submaps.add(map);
+                }
+                fields.add(entry.getKey().toString());
+            }
+        }
+        return fields;
     }
 }

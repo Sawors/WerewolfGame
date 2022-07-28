@@ -131,10 +131,8 @@ public class Main {
                     try(InputStream in = new FileInputStream(file); InputStream ref = Main.class.getClassLoader().getResourceAsStream(locale.getPath())) {
                         Map<String, Object> loaded = new Yaml().load(in);
                         Map<String, Object> reference = new Yaml().load(ref);
-        
-                        if(!loaded.keySet().containsAll(reference.keySet())){
-                            overwrite = true;
-                        }
+
+                        overwrite = ! new HashSet<>(YamlMapParser.getallkeys(loaded)).containsAll(YamlMapParser.getallkeys(reference));
                     }
                 }
                 if(!file.exists() || overwrite){
@@ -171,8 +169,8 @@ public class Main {
             }
         }
         // add root extension
-        rootextension = new RootExtension(instancetranslator, datalocation);
-        extensions.add(new RootExtension(instancetranslator, datalocation));
+        rootextension = new RootExtension(instancetranslator, null);
+        extensions.add(rootextension);
     
         // add classic extension
         //extensions.add(new ClassicExtensionLoader());
@@ -277,7 +275,7 @@ public class Main {
                 if(!overwrite){
                     // check for missing fields
                     Map<String, Object> refconfig = new Yaml().load(reference);
-                    overwrite = !oldconfig.keySet().containsAll(refconfig.keySet());
+                    overwrite = !new HashSet<>(YamlMapParser.getallkeys(oldconfig)).containsAll(YamlMapParser.getallkeys(refconfig));
                 }
             } catch (FileNotFoundException e){
                 overwrite = true;

@@ -1,6 +1,7 @@
 package io.github.sawors.werewolfgame.extensionsloader;
 
 import io.github.sawors.werewolfgame.Main;
+import io.github.sawors.werewolfgame.YamlMapParser;
 import io.github.sawors.werewolfgame.game.events.BackgroundEvent;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.localization.Translator;
@@ -17,6 +18,8 @@ public abstract class WerewolfExtension {
     public List<BackgroundEvent> events = new ArrayList<>();
     public Translator translator;
     public final File resourcedirectory;
+    public File langlocation;
+    public File configfile;
     public String extensionid;
     public ExtensionMetadata meta;
     public static final Map<File, String> createdbundledlocales = new HashMap<>();
@@ -26,6 +29,19 @@ public abstract class WerewolfExtension {
         this.meta = loadMetadata();
         this.resourcedirectory = new File(Main.getExtensionsLocation()+File.separator+getMeta().getName());
         resourcedirectory.mkdirs();
+        langlocation = new File(resourcedirectory+File.separator+"languages");
+        langlocation.mkdirs();
+        configfile = new File(resourcedirectory+File.separator+"config.yml");
+        try{
+            configfile.createNewFile();
+            try(OutputStream out = new FileOutputStream(configfile); InputStream in = getClass().getModule().getResourceAsStream("config.yml")){
+                if(in != null){
+                    out.write(in.readAllBytes());
+                }
+            }
+        } catch (IOException e){
+            Main.logAdmin("Error while creating config.yml for extension "+meta.getName(),e.getMessage());
+        }
         this.extensionid = RandomStringUtils.randomAlphanumeric(6);
         onLoad();
         reloadLanguages();
@@ -33,6 +49,9 @@ public abstract class WerewolfExtension {
     protected WerewolfExtension(Translator translator, File resourcedirectory){
         this.translator = translator;
         this.resourcedirectory = resourcedirectory;
+        if(this.resourcedirectory != null){
+            this.resourcedirectory.mkdirs();
+        }
         this.extensionid = RandomStringUtils.randomAlphanumeric(6);
         //onLoad();
     }
@@ -91,8 +110,6 @@ public abstract class WerewolfExtension {
     
     public void reloadLanguages(){
         translator.clearLoadedLocales();
-        File langlocation = new File(resourcedirectory+File.separator+"languages");
-        langlocation.mkdirs();
         if(langlocation.exists() && langlocation.listFiles() != null){
             for(File file : Objects.requireNonNull(langlocation.listFiles())){
                 translator.load(file);
@@ -122,36 +139,38 @@ public abstract class WerewolfExtension {
     }
     
     public void addBundledLocale(String... localesname){
-        File languageslocation = new File(resourcedirectory+File.separator+"languages");
-        for(String locale : localesname){
-            
-            String locfilename = locale.toLowerCase(Locale.ROOT).endsWith(".yml") || locale.toLowerCase(Locale.ROOT).endsWith(".yaml") ? locale : locale+".yml";
-            
-            try{
-                File file = new File(languageslocation+File.separator+locale+".yml");
-                boolean overwrite = false;
-                if(file.exists()){
-                    try(InputStream in = new FileInputStream(file); InputStream ref = getClass().getModule().getResourceAsStream("locales/"+locfilename)) {
-                        Map<String, Object> loaded = new Yaml().load(in);
-                        Map<String, Object> reference = new Yaml().load(ref);
-                
-                        if(loaded == null || reference == null || !loaded.keySet().containsAll(reference.keySet())){
-                            overwrite = true;
+        if(resourcedirectory != null){
+            File languageslocation = new File(resourcedirectory+File.separator+"languages");
+            for(String locale : localesname){
+
+                String locfilename = locale.toLowerCase(Locale.ROOT).endsWith(".yml") || locale.toLowerCase(Locale.ROOT).endsWith(".yaml") ? locale : locale+".yml";
+
+                try{
+                    File file = new File(languageslocation+File.separator+locale+".yml");
+                    boolean overwrite = false;
+                    if(file.exists()){
+                        try(InputStream in = new FileInputStream(file); InputStream ref = getClass().getModule().getResourceAsStream("locales/"+locfilename)) {
+                            Map<String, Object> loaded = new Yaml().load(in);
+                            Map<String, Object> reference = new Yaml().load(ref);
+
+                            if(loaded == null || reference == null || !new HashSet<>(YamlMapParser.getallkeys(loaded)).containsAll(YamlMapParser.getallkeys(reference))){
+                                overwrite = true;
+                            }
                         }
                     }
-                }
-                if(!file.exists() || overwrite){
-                    file.createNewFile();
-                    try(OutputStream out = new FileOutputStream(file); InputStream in = getClass().getModule().getResourceAsStream("locales/"+locfilename)) {
-                        if(in != null){
-                            Main.logAdmin("["+meta.getName()+"] -> "+"Regenerating locale",file);
-                            out.write(in.readAllBytes());
-                            createdbundledlocales.put(file, locale);
+                    if(!file.exists() || overwrite){
+                        file.createNewFile();
+                        try(OutputStream out = new FileOutputStream(file); InputStream in = getClass().getModule().getResourceAsStream("locales/"+locfilename)) {
+                            if(in != null){
+                                Main.logAdmin("["+meta.getName()+"] -> "+"Regenerating locale",file);
+                                out.write(in.readAllBytes());
+                                createdbundledlocales.put(file, locale);
+                            }
                         }
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -171,7 +190,7 @@ public abstract class WerewolfExtension {
     
     @Override
     public String toString() {
-        return "extension:"+this.resourcedirectory.toString();
+        return "extension:"+this.resourcedirectory;
     }
     
     @Override
