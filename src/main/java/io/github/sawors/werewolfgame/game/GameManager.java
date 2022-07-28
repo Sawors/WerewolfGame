@@ -64,6 +64,7 @@ public class GameManager {
     private int paramstringlength = 0;
     private LoadedLocale language;
     private boolean locked = false;
+    private TextChannel waitingchannel;
 
     // GAME OPTIONS
     private boolean instantvote = true;
@@ -304,7 +305,7 @@ public class GameManager {
             // create main text channel
             setupTextChannel(texts.get("channels.text.main"), ChannelType.ANNOUNCEMENTS);
             // create waiting channel
-            setupTextChannel(texts.get("channels.text.waiting"), ChannelType.ANNOUNCEMENTS);
+            setupTextChannel(texts.get("channels.text.waiting"), ChannelType.WAITING);
             
             // create main voice channel
             category.createVoiceChannel(texts.get("channels.voice.main")).queue(channel -> this.mainvoicechannel = channel);
@@ -367,6 +368,10 @@ public class GameManager {
                 break;
             case ANNOUNCEMENTS:
                 this.maintextchannel = (TextChannel) channel;
+                setChannelVisible(channel, false);
+                break;
+            case WAITING:
+                this.waitingchannel = (TextChannel) channel;
                 TranslatableText textpool = new TranslatableText(Main.getTranslator(), language);
                 maintextchannel.sendMessage(textpool.get("buttons.leave-game-message").replaceAll("%button%",textpool.get("buttons.leave-game"))).setActionRow(Button.danger("leave:"+id,textpool.get("buttons.leave-game"))).queue(msg -> leavemessage = msg);
                 break;
@@ -424,7 +429,7 @@ public class GameManager {
                 try{
                     Main.getJDA().retrieveUserById(discord).queue(user ->{
                         guild.addRoleToMember(user, playerrole).queue();
-                        maintextchannel.sendMessage(new TranslatableText(Main.getTranslator(), language).get("events.player-join-message").replaceAll("%user%",user.getAsMention())).queue();
+                        waitingchannel.sendMessage(new TranslatableText(Main.getTranslator(), language).get("events.player-join-message").replaceAll("%user%",user.getAsMention())).queue();
                     });
                     //user successfully added to the game
                     guild.retrieveMember(UserSnowflake.fromId(discord)).queue(m ->{
@@ -510,7 +515,7 @@ public class GameManager {
                             }
                         }
                     }
-                    maintextchannel.sendMessage(new TranslatableText(Main.getTranslator(), language).get("events.player-leave-message").replaceAll("%user%",member.getAsMention())).queue();
+                    waitingchannel.sendMessage(new TranslatableText(Main.getTranslator(), language).get("events.player-leave-message").replaceAll("%user%",member.getAsMention())).queue();
                 });
                 playerset.remove(player);
             }
@@ -740,7 +745,9 @@ public class GameManager {
             playerset.add(userid);
         }
         lock();
-        
+        setChannelVisible(maintextchannel, false);
+        setChannelLocked(waitingchannel,true);
+        setChannelLocked(maintextchannel,true);
         assignRoles();
         
         //create role channels
