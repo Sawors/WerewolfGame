@@ -2,6 +2,7 @@ package io.github.sawors.werewolfgame.game;
 
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
+import io.github.sawors.werewolfgame.game.roles.PrimaryRole;
 import io.github.sawors.werewolfgame.game.teams.classic.Village;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ public class WerewolfPlayer {
     
     UserId user;
     List<PlayerRole> roles = new ArrayList<>();
+    PrimaryRole mainrole;
     boolean alive = true;
     boolean awake = true;
     GameManager gm;
@@ -23,9 +25,10 @@ public class WerewolfPlayer {
         this.gm = manager;
     }
 
-    public WerewolfPlayer(UserId parent, GameManager manager, PlayerRole role){
+    public WerewolfPlayer(UserId parent, GameManager manager, PrimaryRole role){
         this.user = parent;
         this.gm = manager;
+        this.mainrole = role;
         this.roles.add(role);
     }
 
@@ -48,9 +51,19 @@ public class WerewolfPlayer {
     public List<PlayerRole> getRoles() {
         return List.copyOf(roles);
     }
-    
+
+
+
     public void addRole(PlayerRole role) {
+        if(role instanceof PrimaryRole pr){
+            this.roles.removeIf(r -> r instanceof PrimaryRole);
+            this.mainrole = pr;
+        }
         this.roles.add(role);
+    }
+
+    public PrimaryRole getMainRole(){
+        return this.mainrole;
     }
     
     public void removeRole(PlayerRole role){

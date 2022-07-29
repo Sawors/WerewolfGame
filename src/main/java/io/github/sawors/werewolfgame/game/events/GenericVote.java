@@ -19,7 +19,7 @@ import java.util.*;
 
 public abstract class GenericVote extends GameEvent {
 
-    protected Integer votetime = 30;
+    protected Integer votetime;
     protected Set<LinkedUser> votepool;
     protected EmbedBuilder votemessage = new EmbedBuilder();
     protected String messagebody;
@@ -31,13 +31,11 @@ public abstract class GenericVote extends GameEvent {
     public GameManager manager;
     protected Set<Message> buttonmessage = new HashSet<>();
 
-    public GenericVote(WerewolfExtension extension, Set<LinkedUser> votepool, Set<UserId> voters, @Nullable TextChannel votechannel, @Nullable String votemessagebody, @Nullable Integer votetime){
+    public GenericVote(WerewolfExtension extension, Set<UserId> voters, @Nullable TextChannel votechannel){
         super(extension);
-        this.votepool = votepool;
         this.voters = voters;
         this.votechannel = votechannel;
-        this.messagebody = votemessagebody != null ? votemessagebody : "";
-        this.votetime = votetime != null && votetime > 0 ? votetime : 30;
+        this.votetime = 30;
     };
     
     public void setVotePool(Set<LinkedUser> votepool){
@@ -162,7 +160,7 @@ public abstract class GenericVote extends GameEvent {
             }
         }
         TranslatableText textpool = new TranslatableText(Main.getTranslator(),manager.getLanguage());
-        embed.addField(textpool.get("roles.generic-vote.vote-time-title"), textpool.get("roles.generic-vote.vote-time-text").replaceAll("%time%",String.valueOf(votetime)), false);
+        embed.addField(textpool.get("votes.generic.time.title"), textpool.get("votes.generic.time.display").replaceAll("%time%",String.valueOf(votetime)), false);
 
         votechannel.sendMessageEmbeds(embed.build()).setActionRows(votebuttons).queue(msg -> {
             this.buttonmessage.add(msg);

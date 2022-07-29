@@ -1,5 +1,6 @@
 package io.github.sawors.werewolfgame.game.events.night;
 
+import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.GameManager;
 import io.github.sawors.werewolfgame.game.GamePhase;
@@ -14,6 +15,7 @@ public class SunriseEvent extends GameEvent {
     
     @Override
     public void start(GameManager manager) {
+        Main.logAdmin("Wakey Wakey ! Rise and shine !");
         manager.buildQueue(PhaseType.DAY);
     }
     

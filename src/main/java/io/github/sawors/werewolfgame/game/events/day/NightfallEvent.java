@@ -17,6 +17,7 @@ public class NightfallEvent extends GameEvent {
     public void start(GameManager manager) {
         Main.logAdmin("The Night Is Falling");
         manager.buildQueue(PhaseType.NIGHT);
+        manager.nextEvent();
     }
     
     @Override

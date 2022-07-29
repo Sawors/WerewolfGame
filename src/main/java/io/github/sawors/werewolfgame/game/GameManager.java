@@ -16,6 +16,7 @@ import io.github.sawors.werewolfgame.game.events.RoleEvent;
 import io.github.sawors.werewolfgame.game.events.day.MayorVoteEvent;
 import io.github.sawors.werewolfgame.game.events.day.NightfallEvent;
 import io.github.sawors.werewolfgame.game.events.night.SunriseEvent;
+import io.github.sawors.werewolfgame.game.events.night.WolfKillEvent;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.game.roles.PrimaryRole;
 import io.github.sawors.werewolfgame.game.roles.TextRole;
@@ -148,6 +149,10 @@ public class GameManager {
         } else {
             readyplayers.remove(id);
         }
+    }
+
+    public Map<UserId, WerewolfPlayer> getPlayerRoles(){
+        return Map.copyOf(playerlink);
     }
 
     public TextChannel getWaitingChannel(){
@@ -422,6 +427,21 @@ public class GameManager {
                 });
                 break;
         }
+
+        List<Permission> allow = new ArrayList<>();
+        List<Permission> deny = new ArrayList<>();
+        PermissionOverride base = channel.getPermissionContainer().getPermissionOverride(playerrole);
+        if(base != null){
+            allow.addAll(base.getAllowed());
+            deny.addAll(base.getDenied());
+        }
+        deny.add(Permission.CREATE_PUBLIC_THREADS);
+        deny.add(Permission.CREATE_PRIVATE_THREADS);
+        allow.remove(Permission.CREATE_PUBLIC_THREADS);
+        allow.remove(Permission.CREATE_PRIVATE_THREADS);
+
+        channel.getPermissionContainer().getManager().putRolePermissionOverride(playerrole.getIdLong(),allow,deny).queue();
+
         Main.linkChannel(channel.getIdLong(), id);
     }
     
@@ -769,7 +789,16 @@ public class GameManager {
                 break;
         }
     }
-    
+
+    public TextChannel getRoleChannel(TextRole role){
+        for(Map.Entry<TextChannel, TextRole> entry : rolechannels.entrySet()){
+            if(entry.getValue().equals(role)){
+                return entry.getKey();
+            }
+        }
+
+        return maintextchannel;
+    }
     
 /*
     |------------------------------------------------|
@@ -785,7 +814,7 @@ public class GameManager {
     
     public void startGame(){
         Main.logAdmin("Let's gooooooooooooooooooo");
-        for(int i = 0; i<37; i++){
+        for(int i = 0; i<10; i++){
             UserId userid = new UserId();
             logEvent("adding fake player "+userid, LogDestination.CONSOLE);
             playerset.add(userid);
@@ -856,7 +885,7 @@ public class GameManager {
         }
     }
 
-    private Set<LinkedUser> defaultVotePool(){
+    public Set<LinkedUser> defaultVotePool(){
         Set<LinkedUser> votepool = new HashSet<>();
         //TODO : Remove this
         List<String> fakenameslist = new ArrayList<>();
@@ -886,9 +915,6 @@ public class GameManager {
             Collections.shuffle(fakenameslist);
             fakenames.addAll(fakenameslist);
         }
-        Main.logAdmin("Name Pool", fakenames);
-        Main.logAdmin(playerset);
-        Main.logAdmin(playerset.contains(UserId.fromDiscordId("315237447065927691")));
         playerset.forEach(uid -> votepool.add(new LinkedUser(uid, DatabaseManager.getUserData(uid, UserDataType.NAME) != null ? DatabaseManager.getUserData(uid, UserDataType.NAME) : fakenames.poll(),UUID.randomUUID(),"",null,null)));
         return votepool;
     }
@@ -909,7 +935,7 @@ public class GameManager {
 
     private void buildNightQueue(){
 
-
+        eventqueue.add(new WolfKillEvent(Main.getRootExtensionn(),getRealPlayers(),getRoleChannel(new Wolf(Main.getRootExtensionn()))));
 
         eventqueue.add(new SunriseEvent(Main.getRootExtensionn()));
     }
@@ -924,7 +950,7 @@ public class GameManager {
 
     private void buildFirstDayQueue(){
         //eventqueue.add(new Intro(this));
-        eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn(), defaultVotePool(),getRealPlayers() , maintextchannel));
+        eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn(), getRealPlayers() , maintextchannel));
         eventqueue.add(new NightfallEvent(Main.getRootExtensionn()));
     }
     
@@ -994,7 +1020,7 @@ public class GameManager {
             }
             logEvent("Giving role "+role+" to player "+user+" (Wolf Phase)", LogDestination.CONSOLE);
             usedroles.add(role);
-            playerlink.put(user, new WerewolfPlayer(user, this, role));
+            playerlink.put(user, new WerewolfPlayer(user, this, (PrimaryRole) role));
         }
         for(UserId user : pendingusers){
             PlayerRole role = pendingroles.poll();
@@ -1003,7 +1029,7 @@ public class GameManager {
             }
             logEvent("Giving role "+role+" to player "+user+" (Village Phase)", LogDestination.CONSOLE);
             usedroles.add(role);
-            playerlink.put(user, new WerewolfPlayer(user, this, role));
+            playerlink.put(user, new WerewolfPlayer(user, this, (PrimaryRole) role));
         }
         logEvent(playerlink, LogDestination.CONSOLE);
     }

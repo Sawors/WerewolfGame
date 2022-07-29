@@ -138,6 +138,8 @@ public class Main {
                         overwrite = ! new HashSet<>(YamlMapParser.getallkeys(loaded)).containsAll(YamlMapParser.getallkeys(reference));
                     }
                 }
+                //TODO : for testing purposes
+                overwrite = true;
                 if(!file.exists() || overwrite){
                     file.createNewFile();
                     try(OutputStream out = new FileOutputStream(file); InputStream in = Main.class.getClassLoader().getResourceAsStream(locale.getPath())) {

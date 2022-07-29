@@ -160,48 +160,59 @@ commands:
 
 roles:
   supplementary:
-    title: "Supplementary Role"
-    description: "This role does not replace your original role"
-  generic-vote:
-    vote-time-title: "⏲️🕰️⌚⏱ Temps"
-    vote-time-text: "%time% secondes"
+    title: "Rôle Supplémentaire"
+    description: "Ce rôle ne remplace pas vôtre rôle principal"
+  generic:
+    role-description: "Description du Rôle"
+    win-condition: "Condition de Victoire"
   mayor:
     name: "Maire"
-    embed:
-      title: "📩 Vote du Maire"
-      text:
-      role-description: |-
-        Le Maire à le pouvoir de décider quel joueur doit mourrir si lors du vote du Village deux joueurs se retrouvent à votes égaux.
-        Lorsque le Maire meurt il doit désigner son successeur
-      thumbnail-url: https://static.wikia.nocookie.net/loupgaroumal/images/c/c1/Capitaine.png/revision/latest?cb=20210221152503&path-prefix=fr
+    role-description: |-
+      Le Maire guide le Village, si lors du vote d'élimination plusieurs personnes se retrouvent à égalité le Maire doit décider lequel d'entre eux doit être exécuté
+      
+      Lors de sa mort le Maire doit désigner son successeur
+    thumbnail: "https://static.wikia.nocookie.net/loupgaroumal/images/c/c1/Capitaine.png/revision/latest?cb=20210221152503&path-prefix=fr"
   villager:
     name: "Simple Villageois"
     channel: "🧑villageois"
     intro: "Bienvenue Villageois, le village compte sur vous !"
-    embed:
-      text: "*un petit pouvoir implique de ne pas voter comme un idiot*"
-      role-description: |-
-        Les simples villageois n'ont pas de pouvoir, leur seul tâche est de correctement voter lors du vote du Village pour éliminer les Loups-Garou
-      thumbnail-url: "https://static.wikia.nocookie.net/loupgaroumal/images/d/d6/Carte_SimpleVillaegois.png/revision/latest?cb=20210104170925&path-prefix=fr"
-    vote:
-      title: "📩 Vote du Village"
-      description: |-
-        Le village doit voter une personne à éliminer
+    text: "Simple villageois, votre village est en péril, votez sagement !"
+    role-description: |-
+      Les simples villageois n'ont pas de pouvoir, leur seul tâche est de correctement voter lors du **Vote du Village** pour éliminer les **Loups-Garou**
+    win-condition: "Le but des Villageois ainsi que celui du Village est d'éliminer tous les Loups-Garou avant d'être dévorés"
+    thumbnail: "https://static.wikia.nocookie.net/loupgaroumal/images/d/d6/Carte_SimpleVillaegois.png/revision/latest?cb=20210104170925&path-prefix=fr"
 
   wolf:
     name: "Loup-Garou"
     channel: "🐺loups"
-    embed:
-      text: "*Quand les neiges tombent et que les vents blancs soufflent, le loup solitaire meurt, mais la meute survit*"
-      role-description: |-
-      thumbnail-url: "https://static.wikia.nocookie.net/loupgaroumal/images/1/1e/Carte2.png/revision/latest?cb=20210104171045&path-prefix=fr"
-    vote:
-      title: "📩 Votez une victime"
-      description: |-
-        Qui sera le joueur que vous allez dévorer cette nuit ?
-        
-        Attention : en cas d'égalité à la fin du compteur la victime sera choisie aléatoirement parmis celles ayant le plus haut nombre de votes
+    text: "*Quand les neiges tombent et que les vents blancs soufflent, le loup solitaire meurt, mais la meute survit*"
+    role-description: |- 
+      WOLF DESC HERE
+    win-condition: "Mangez tout les Villageois avant qu'ils ne vous éliminent"
+    thumbnail: "https://static.wikia.nocookie.net/loupgaroumal/images/1/1e/Carte2.png/revision/latest?cb=20210104171045&path-prefix=fr"
+
+votes:
+  generic:
+    time:
+      title: "⌚ Temps"
+      display: "%time% secondes"
+      messages: "Plus que **%time%** secondes restantes pour faire un choix"
+  mayor:
+    title: "📩 Vote du Maire"
+    description: |-
+      Votez pour le meilleur Maire
+  village:
+    title: "📩 Vote du Village"
+    description: |-
+      Le village doit voter une personne à éliminer.
       
+      En cas d'égalité la victime sera désignée par le Maire
+  wolves:
+    title: "📩 Votez une victime"
+    description: |-
+      Qui sera le joueur que vous allez dévorer cette nuit ?
+
+      Attention : en cas d'égalité à la fin du compteur la victime sera choisie aléatoirement parmis celles ayant le plus haut nombre de votes
 
 
 

@@ -14,11 +14,13 @@ import java.util.Set;
 public class VillageVoteEvent extends GenericVote {
     public VillageVoteEvent(WerewolfExtension extension, Set<LinkedUser> votepool, Set<UserId> voters, @Nullable TextChannel channel) {
         //TODO : allow user to change vote time during game configuration
-        super(extension, votepool, voters, channel,"",60);
+        super(extension, voters, channel);
+        this.votetime = 5*60;
     }
 
     @Override
     public void start(GameManager manager) {
+        this.votepool = manager.defaultVotePool();
         // TODO vote
     }
     

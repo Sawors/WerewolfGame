@@ -1,6 +1,5 @@
 package io.github.sawors.werewolfgame.game.events.day;
 
-import io.github.sawors.werewolfgame.LinkedUser;
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
@@ -10,6 +9,7 @@ import io.github.sawors.werewolfgame.game.events.GenericVote;
 import io.github.sawors.werewolfgame.game.events.RoleEvent;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.game.roles.base.Mayor;
+import io.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.List;
@@ -19,9 +19,9 @@ import java.util.Set;
 public class MayorVoteEvent extends GenericVote implements RoleEvent {
 
     
-    public MayorVoteEvent(WerewolfExtension extension, Set<LinkedUser> votepool, Set<UserId> voters , TextChannel channel) {
+    public MayorVoteEvent(WerewolfExtension extension, Set<UserId> voters , TextChannel channel) {
         // TODO : user-defined vote time
-        super(extension, votepool, voters, channel, "Vote for the best Mayor !",30);
+        super(extension, voters, channel);
         Main.logAdmin("Voters",voters);
         Main.logAdmin("Votepool",votepool);
     }
@@ -51,11 +51,13 @@ public class MayorVoteEvent extends GenericVote implements RoleEvent {
 
     @Override
     public void start(GameManager manager) {
-        votemessage.setTitle("📩 Electing the Mayor");
-        votemessage.setDescription(messagebody);
-        votemessage.addField("Supplementary Role","This role does not replace your original role",false);
-        votemessage.addField("Role","The mayor will decide who should die if a tie happens when the Village decides which player to eliminate. \nWhen the Mayor dies a new Mayor is designated by the old one just before passing away",false);
-
+        this.votepool = manager.defaultVotePool();
+        TranslatableText texts = new TranslatableText(Main.getTranslator(), manager.getLanguage());
+        votemessage.setTitle(texts.get("votes.mayor.title"));
+        votemessage.setDescription(texts.get("votes.mayor.description"));
+        votemessage.addField(texts.get("roles.supplementary.title"),texts.get("roles.supplementary.description"),false);
+        votemessage.addField(texts.get("roles.generic.role-description"),texts.get("roles.mayor.role-description"),false);
+        votemessage.setThumbnail(texts.get("roles.mayor.thumbnail"));
         start(manager,votemessage);
     }
     
