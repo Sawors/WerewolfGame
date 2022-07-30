@@ -13,13 +13,11 @@ public enum BundledLocale {
     public LoadedLocale getLocale(){
         
         LoadedLocale fallback = Main.getTranslator().getDefaultLocale();
-        
-        switch(this){
-            case en_UK:
-                return new LoadedLocale("en_UK","English (United Kingdom)","english");
-            case fr_FR:
-                return new LoadedLocale("fr_FR","Français (France)","french");
-        }
-        return fallback;
+
+        return switch (this) {
+            case en_UK -> new LoadedLocale("en_UK", "English (United Kingdom)", "english");
+            case fr_FR -> new LoadedLocale("fr_FR", "Français (France)", "french");
+            default -> fallback;
+        };
     }
 }

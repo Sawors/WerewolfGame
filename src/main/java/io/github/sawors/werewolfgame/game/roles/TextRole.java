@@ -13,8 +13,8 @@ public interface TextRole {
     Collection<Permission> getChannelAllow();
     Collection<Permission> getChannelDeny();
     
-    MessageEmbed getHelpMessageEmbed();
-    String getIntroMessage();
+    MessageEmbed getHelpMessageEmbed(LoadedLocale language);
+    String getIntroMessage(LoadedLocale language);
     
     void onMessageSent(GenericMessageEvent event);
     void onReactionAdded(GenericMessageEvent event);

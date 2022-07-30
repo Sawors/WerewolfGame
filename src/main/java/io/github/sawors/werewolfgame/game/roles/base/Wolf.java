@@ -1,5 +1,6 @@
 package io.github.sawors.werewolfgame.game.roles.base;
 
+import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.events.GameEvent;
 import io.github.sawors.werewolfgame.game.roles.DefaultRoleType;
@@ -7,6 +8,7 @@ import io.github.sawors.werewolfgame.game.roles.TextRole;
 import io.github.sawors.werewolfgame.game.roles.WolfLike;
 import io.github.sawors.werewolfgame.localization.LoadedLocale;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
@@ -56,13 +58,21 @@ public class Wolf extends WolfLike implements TextRole {
     }
     
     @Override
-    public MessageEmbed getHelpMessageEmbed() {
-        return null;
+    public MessageEmbed getHelpMessageEmbed(LoadedLocale language) {
+        TranslatableText textpool = new TranslatableText(getExtension().getTranslator(), language);
+        return
+                new EmbedBuilder()
+                        .setTitle(textpool.get("roles.wolf.name",true))
+                        .setDescription(textpool.get("roles.wolf.text",true))
+                        .addField(textpool.get("roles.generic.role-description"), textpool.get("roles.wolf.role-description"),false)
+                        .addField(textpool.get("roles.generic.win-condition"), textpool.get("roles.wolf.win-condition"),false)
+                        .setThumbnail(textpool.get("roles.wolf.thumbnail", true))
+                        .build();
     }
     
     @Override
-    public String getIntroMessage() {
-        return "Welcome to the Wolves text channel";
+    public String getIntroMessage(LoadedLocale language) {
+        return new TranslatableText(Main.getTranslator(), language).get("roles.wolf.intro",true);
     }
     
     @Override

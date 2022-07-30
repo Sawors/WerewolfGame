@@ -117,7 +117,7 @@ public class GameManager {
                 a0 -> guild.createCategory("[\uD83D\uDC3A WEREWOLF : "+id+"]")
                         .addRolePermissionOverride(playerrole.getIdLong(), List.of(Permission.VIEW_CHANNEL), List.of(Permission.MANAGE_CHANNEL))
                         .addRolePermissionOverride(adminrole.getIdLong(),List.of(Permission.VIEW_CHANNEL), List.of())
-                        .addRolePermissionOverride(guild.getPublicRole().getIdLong(),List.of(), List.of(Permission.VIEW_CHANNEL))
+                        .addRolePermissionOverride(guild.getPublicRole().getIdLong(),List.of(), List.of(Permission.VIEW_CHANNEL, Permission.CREATE_PUBLIC_THREADS, Permission.CREATE_PRIVATE_THREADS))
                         .queue(a1 -> {
                     category = a1;
                     this.createChannels(category);
@@ -303,8 +303,8 @@ public class GameManager {
             TextChannel channel = entry.getKey();
             Main.logAdmin(channel.getName());
             DiscordBot.addPendingAction(entry.getKey().getManager().setName(entry.getValue().getChannelName(language)));
-            MessageEmbed helpmsg = entry.getValue().getHelpMessageEmbed();
-            String welcomemsg = entry.getValue().getIntroMessage();
+            MessageEmbed helpmsg = entry.getValue().getHelpMessageEmbed(language);
+            String welcomemsg = entry.getValue().getIntroMessage(language);
             if(helpmsg != null){
                 DiscordBot.addPendingAction(channel.sendMessageEmbeds(helpmsg));
             }
@@ -402,8 +402,8 @@ public class GameManager {
                 })));
                 //adminchannel.sendMessage("Start Game").setActionRow(Button.success("start"+id, "Start Game")).queue();
                 adminchannel.getPermissionContainer().getManager()
-                        .putRolePermissionOverride(adminrole.getIdLong(), Permission.VIEW_CHANNEL.getRawValue(),Permission.MANAGE_CHANNEL.getRawValue())
-                        .putRolePermissionOverride(playerrole.getIdLong(), Permission.UNKNOWN.getRawValue(),Permission.VIEW_CHANNEL.getRawValue())
+                        .putRolePermissionOverride(adminrole.getIdLong(), List.of(Permission.VIEW_CHANNEL),List.of(Permission.MANAGE_CHANNEL))
+                        .putRolePermissionOverride(playerrole.getIdLong(), List.of(Permission.UNKNOWN),List.of(Permission.VIEW_CHANNEL))
                         .queue();
                 
                 break;
@@ -427,20 +427,6 @@ public class GameManager {
                 });
                 break;
         }
-
-        List<Permission> allow = new ArrayList<>();
-        List<Permission> deny = new ArrayList<>();
-        PermissionOverride base = channel.getPermissionContainer().getPermissionOverride(playerrole);
-        if(base != null){
-            allow.addAll(base.getAllowed());
-            deny.addAll(base.getDenied());
-        }
-        deny.add(Permission.CREATE_PUBLIC_THREADS);
-        deny.add(Permission.CREATE_PRIVATE_THREADS);
-        allow.remove(Permission.CREATE_PUBLIC_THREADS);
-        allow.remove(Permission.CREATE_PRIVATE_THREADS);
-
-        channel.getPermissionContainer().getManager().putRolePermissionOverride(playerrole.getIdLong(),allow,deny).queue();
 
         Main.linkChannel(channel.getIdLong(), id);
     }
@@ -820,9 +806,10 @@ public class GameManager {
             playerset.add(userid);
         }
         lock();
+        waitingchannel.sendMessage(new TranslatableText(Main.getTranslator(), language).get("channels.game-started").replaceAll("%channel%",maintextchannel.getAsMention())).queue();
         setChannelVisible(maintextchannel, true).queue(c -> setChannelLocked(maintextchannel,true).queue());
         setChannelLocked(waitingchannel,true).queue();
-
+        maintextchannel.sendMessage(guild.getPublicRole().getAsMention()).queue();
         assignRoles();
         
         //create role channels
@@ -861,11 +848,11 @@ public class GameManager {
                     if(mentions.toString().length() > 1){
                         chan.sendMessage(mentions.toString()).queue();
                     }
-                    if(chanrole.getHelpMessageEmbed() != null){
-                        chan.sendMessageEmbeds(chanrole.getHelpMessageEmbed()).queue();
+                    if(chanrole.getHelpMessageEmbed(language) != null){
+                        chan.sendMessageEmbeds(chanrole.getHelpMessageEmbed(language)).queue();
                     }
-                    if(chanrole.getIntroMessage() != null && chanrole.getIntroMessage().length() > 0){
-                        chan.sendMessage(chanrole.getIntroMessage()).queue();
+                    if(chanrole.getIntroMessage(language) != null && chanrole.getIntroMessage(language).length() > 0){
+                        chan.sendMessage(chanrole.getIntroMessage(language)).queue();
                     }
                 });
                 
@@ -906,13 +893,8 @@ public class GameManager {
         fakenameslist.add("l'Idiot");
         fakenameslist.add("JimmyBois");
         fakenameslist.add("aïecaillou");
-        for(int i = 1; i<64; i++){
-            fakenameslist.add("FakePlayer"+i);
-        }
-        Collections.shuffle(fakenameslist);
         Queue<String> fakenames = new LinkedList<>(fakenameslist);
         for(int i = 1; fakenames.size()*i <= playerset.size(); i++){
-            Collections.shuffle(fakenameslist);
             fakenames.addAll(fakenameslist);
         }
         playerset.forEach(uid -> votepool.add(new LinkedUser(uid, DatabaseManager.getUserData(uid, UserDataType.NAME) != null ? DatabaseManager.getUserData(uid, UserDataType.NAME) : fakenames.poll(),UUID.randomUUID(),"",null,null)));
@@ -935,7 +917,9 @@ public class GameManager {
 
     private void buildNightQueue(){
 
-        eventqueue.add(new WolfKillEvent(Main.getRootExtensionn(),getRealPlayers(),getRoleChannel(new Wolf(Main.getRootExtensionn()))));
+
+
+        eventqueue.add(new WolfKillEvent(Main.getRootExtensionn(),getRoleChannel(new Wolf(Main.getRootExtensionn()))));
 
         eventqueue.add(new SunriseEvent(Main.getRootExtensionn()));
     }
@@ -950,11 +934,11 @@ public class GameManager {
 
     private void buildFirstDayQueue(){
         //eventqueue.add(new Intro(this));
-        eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn(), getRealPlayers() , maintextchannel));
+        eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn(), maintextchannel));
         eventqueue.add(new NightfallEvent(Main.getRootExtensionn()));
     }
     
-    private Set<UserId> getRealPlayers(){
+    public Set<UserId> getRealPlayers(){
         Set<UserId> output = new HashSet<>();
         for(UserId usid: playerset){
             if(DatabaseManager.getDiscordId(usid) != null && DatabaseManager.getDiscordId(usid).length() >= 6){

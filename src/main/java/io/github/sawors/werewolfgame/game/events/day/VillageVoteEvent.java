@@ -12,15 +12,20 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 public class VillageVoteEvent extends GenericVote {
-    public VillageVoteEvent(WerewolfExtension extension, Set<LinkedUser> votepool, Set<UserId> voters, @Nullable TextChannel channel) {
+    public VillageVoteEvent(WerewolfExtension extension, @Nullable TextChannel channel) {
         //TODO : allow user to change vote time during game configuration
-        super(extension, voters, channel);
+        super(extension, channel);
         this.votetime = 5*60;
     }
 
     @Override
     public void start(GameManager manager) {
-        this.votepool = manager.defaultVotePool();
+        Set<LinkedUser> votepool = manager.defaultVotePool();
+        votepool.removeIf(us -> manager.getPlayerRoles().get(us.getId()) == null || !manager.getPlayerRoles().get(us.getId()).isAlive());
+        this.votepool = votepool;
+        Set<UserId> voters = manager.getRealPlayers();
+        voters.removeIf(us -> manager.getPlayerRoles().get(us) == null || !manager.getPlayerRoles().get(us).isAlive());
+        this.voters = voters;
         // TODO vote
     }
     

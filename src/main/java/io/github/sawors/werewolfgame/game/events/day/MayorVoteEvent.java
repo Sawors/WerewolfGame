@@ -14,14 +14,13 @@ import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MayorVoteEvent extends GenericVote implements RoleEvent {
 
     
-    public MayorVoteEvent(WerewolfExtension extension, Set<UserId> voters , TextChannel channel) {
+    public MayorVoteEvent(WerewolfExtension extension, TextChannel channel) {
         // TODO : user-defined vote time
-        super(extension, voters, channel);
+        super(extension, channel);
         Main.logAdmin("Voters",voters);
         Main.logAdmin("Votepool",votepool);
     }
@@ -52,6 +51,8 @@ public class MayorVoteEvent extends GenericVote implements RoleEvent {
     @Override
     public void start(GameManager manager) {
         this.votepool = manager.defaultVotePool();
+        this.voters = manager.getRealPlayers();
+
         TranslatableText texts = new TranslatableText(Main.getTranslator(), manager.getLanguage());
         votemessage.setTitle(texts.get("votes.mayor.title"));
         votemessage.setDescription(texts.get("votes.mayor.description"));

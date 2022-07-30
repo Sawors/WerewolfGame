@@ -31,9 +31,8 @@ public abstract class GenericVote extends GameEvent {
     public GameManager manager;
     protected Set<Message> buttonmessage = new HashSet<>();
 
-    public GenericVote(WerewolfExtension extension, Set<UserId> voters, @Nullable TextChannel votechannel){
+    public GenericVote(WerewolfExtension extension, @Nullable TextChannel votechannel){
         super(extension);
-        this.voters = voters;
         this.votechannel = votechannel;
         this.votetime = 30;
     };

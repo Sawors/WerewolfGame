@@ -88,6 +88,7 @@ forms:
 
 channels:
   thread-init: "Vous pouvez discuter du vote ici"
+  game-started: "La partie à commencé ! Ce salon est fermé, toute l'histoire se déroule à présent dans %channel%"
   voice:
     main: "🔊 Vocal"
   text:

@@ -7,6 +7,7 @@ import io.github.sawors.werewolfgame.game.roles.TextRole;
 import io.github.sawors.werewolfgame.game.roles.VillagerLike;
 import io.github.sawors.werewolfgame.localization.LoadedLocale;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
@@ -47,12 +48,20 @@ public class Villager extends VillagerLike implements TextRole {
     }
     
     @Override
-    public MessageEmbed getHelpMessageEmbed() {
-        return null;
+    public MessageEmbed getHelpMessageEmbed(LoadedLocale language) {
+        TranslatableText textpool = new TranslatableText(getExtension().getTranslator(), language);
+        return
+                new EmbedBuilder()
+                        .setTitle(textpool.get("roles.villager.name",true))
+                        .setDescription(textpool.get("roles.villager.text",true))
+                        .addField(textpool.get("roles.generic.role-description"), textpool.get("roles.villager.role-description"),false)
+                        .addField(textpool.get("roles.generic.win-condition"), textpool.get("roles.villager.win-condition"),false)
+                        .setThumbnail(textpool.get("roles.villager.thumbnail", true))
+                        .build();
     }
     
     @Override
-    public String getIntroMessage() {
+    public String getIntroMessage(LoadedLocale language) {
         return null;
     }
     

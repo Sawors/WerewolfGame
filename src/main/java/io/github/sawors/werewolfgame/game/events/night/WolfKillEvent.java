@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class WolfKillEvent extends GenericVote implements RoleEvent {
-    public WolfKillEvent(WerewolfExtension extension, Set<UserId> voters, @Nullable TextChannel votechannel) {
-        super(extension, voters, votechannel);
+    public WolfKillEvent(WerewolfExtension extension, @Nullable TextChannel votechannel) {
+        super(extension, votechannel);
     }
 
     @Override
@@ -30,6 +30,9 @@ public class WolfKillEvent extends GenericVote implements RoleEvent {
         Set<LinkedUser> votepool = manager.defaultVotePool();
         votepool.removeIf(us -> manager.getPlayerRoles().get(us.getId()) == null || manager.getPlayerRoles().get(us.getId()).getMainRole() instanceof WolfLike || !manager.getPlayerRoles().get(us.getId()).isAlive());
         this.votepool = votepool;
+        Set<UserId> voters = manager.getRealPlayers();
+        voters.removeIf(us -> manager.getPlayerRoles().get(us) == null ||!(manager.getPlayerRoles().get(us).getMainRole() instanceof WolfLike) || !manager.getPlayerRoles().get(us).isAlive());
+        this.voters = voters;
         TranslatableText texts = new TranslatableText(Main.getTranslator(), manager.getLanguage());
         votemessage.setTitle(texts.get("votes.wolves.title"));
         votemessage.setDescription(texts.get("votes.wolves.description"));

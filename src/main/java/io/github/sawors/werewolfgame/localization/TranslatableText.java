@@ -50,7 +50,7 @@ public class TranslatableText {
     
     /*public static @Nullable String get(@NotNull String textkey, @NotNull LoadedLocale locale, boolean suppreserrors){
         if(!locales.containsKey(locale)){
-            return suppreserrors ? null : "***locale "+locale+" not loaded, it usually indicate an error in locale name***";
+            return suppreserrors ? null : "***locale "+locale+" not loaded, it usually indicates an error in locale name***";
         }
         String error = "***key \""+textkey+"\" in locale "+locale+" not found, report this to the locale's author***";
         try{
