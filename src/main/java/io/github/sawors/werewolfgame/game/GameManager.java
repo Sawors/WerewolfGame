@@ -69,11 +69,7 @@ public class GameManager {
     private TextChannel waitingchannel;
 
     // GAME OPTIONS
-    private boolean instantvote = true;
-    private boolean autowolf = true;
-    private boolean uselogchannel = false;
-    private double autowolfpercentage = 0.25;
-    private int wolfamount = 1;
+    private GameOptions options = new GameOptions();
 
     // LOGGING OPTIONS
     private TextChannel logchannel = null;
@@ -176,6 +172,7 @@ public class GameManager {
                 +"\n\n `lock` : "+texts.get("commands.admin.lock.description")
                 +"\n\n `unlock` : "+texts.get("commands.admin.unlock.description")
                 +"\n\n `admin` : "+texts.get("commands.admin.admin.description")
+                +"\n\n `use` : "+texts.get("commands.admin.use.description")
         ;
     }
     
@@ -978,22 +975,18 @@ public class GameManager {
         Queue<PlayerRole> pendingwolves = new LinkedList<>(wolfroles);
         logEvent("Pending wolf roles : "+pendingwolves, LogDestination.CONSOLE);
 
-        if(autowolf){
-            autowolfpercentage = Math.max(Math.min(autowolfpercentage, 0.75), 0.25);
-            // casting to int here does floor the amount as it is a positive number (if roof just do +1)
-            wolfamount = (int) (playercount*autowolfpercentage);
-        }
+        options.computeWolfAmount(playercount);
 
         if(playercount < 4){
             throw new IndexOutOfBoundsException("too few players to start the game (must be > 4, got "+playercount);
         }
 
         // assigning roles
-        if(autowolf){
-            logEvent("Using autowolf with wolves percentage set to "+(int)(autowolfpercentage*100)+"%", LogDestination.CONSOLE);
+        if(options.autoWolf()){
+            logEvent("Using autowolf with wolves percentage set to "+(int)(options.autowolfPercentage()*100)+"%", LogDestination.CONSOLE);
         }
-        logEvent("Wolves amount : "+wolfamount, LogDestination.CONSOLE);
-        for(int i = 0; i < wolfamount; i++){
+        logEvent("Wolves amount : "+options.wolfAmount(), LogDestination.CONSOLE);
+        for(int i = 0; i < options.wolfAmount(); i++){
             UserId user = pendingusers.poll();
             if(user == null){
                 throw new IndexOutOfBoundsException("too few players to start the game, could not give wolf roles, all players are wolves (???? Serious issue, please report it to https://github.com/Sawors/WerewolfGame/issues/new");

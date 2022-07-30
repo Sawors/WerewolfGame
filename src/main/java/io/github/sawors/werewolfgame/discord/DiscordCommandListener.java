@@ -234,6 +234,16 @@ public class DiscordCommandListener extends ListenerAdapter {
                                 event.getChannel().sendMessage(texts.get("commands.admin.admin.success").replaceAll("%user%",member.getAsMention())).queue();
                             }
                             break;
+                        case"use":
+                            if(commands.length >= 2){
+                                String param = args[1];
+                                switch(param){
+                                    case"autowolf":
+                                        break;
+                                    case"delays":
+                                        break;
+                                }
+                            }
                     }
                 }
             }
