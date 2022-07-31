@@ -11,9 +11,11 @@ import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.game.roles.base.Mayor;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class MayorVoteEvent extends GenericVote implements RoleEvent {
 
@@ -29,6 +31,10 @@ public class MayorVoteEvent extends GenericVote implements RoleEvent {
     public void onWin(UserId winner, Map<UserId, Integer> results) {
         Main.logAdmin("Winner",winner);
         closeVote();
+        votechannel.sendMessage(new TranslatableText(getExtension().getTranslator(), manager.getLanguage()).get("votes.mayor.end")).queue();
+        User w = manager.getDiscordUser(winner);
+        String name = w != null ? w.getName() : winner.toString();
+        votechannel.sendMessage(":tada: **"+name+"** :tada:").queueAfter(3, TimeUnit.SECONDS);
         manager.nextEvent();
     }
 
@@ -37,17 +43,7 @@ public class MayorVoteEvent extends GenericVote implements RoleEvent {
         Main.logAdmin("Ignoring Tie",tielist);
         onWin(tielist.get(0), results);
     }
-
-    @Override
-    public void onValidationFail() {
-
-    }
-
-    @Override
-    public void onValidationSuccess(boolean forced) {
-
-    }
-
+    
     @Override
     public void start(GameManager manager) {
         this.votepool = manager.defaultVotePool();

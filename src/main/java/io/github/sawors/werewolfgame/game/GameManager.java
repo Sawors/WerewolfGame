@@ -14,9 +14,10 @@ import io.github.sawors.werewolfgame.game.events.GameEvent;
 import io.github.sawors.werewolfgame.game.events.PhaseType;
 import io.github.sawors.werewolfgame.game.events.RoleEvent;
 import io.github.sawors.werewolfgame.game.events.day.MayorVoteEvent;
-import io.github.sawors.werewolfgame.game.events.day.NightfallEvent;
-import io.github.sawors.werewolfgame.game.events.night.SunriseEvent;
 import io.github.sawors.werewolfgame.game.events.night.WolfKillEvent;
+import io.github.sawors.werewolfgame.game.events.utility.IntroEvent;
+import io.github.sawors.werewolfgame.game.events.utility.NightfallEvent;
+import io.github.sawors.werewolfgame.game.events.utility.SunriseEvent;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.game.roles.PrimaryRole;
 import io.github.sawors.werewolfgame.game.roles.TextRole;
@@ -36,6 +37,7 @@ import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -88,7 +90,7 @@ public class GameManager {
     private Set<PlayerRole> usedroles = new HashSet<>();
     private GameEvent currentevent;
     private GamePhase gamephase;
-    private HashMap<String, UserId> discordlink = new HashMap<>();
+    private HashMap<UserId, User> discordlink = new HashMap<>();
     private HashMap<UUID, UserId> minecraftlink = new HashMap<>();
     private HashMap<TextChannel, TextRole> rolechannels = new HashMap<>();
     private List<BackgroundEvent> backgroundevents = new ArrayList<>();
@@ -320,16 +322,20 @@ public class GameManager {
             TranslatableText texts = new TranslatableText(Main.getTranslator(), language);
             // create admin text channel
             setupTextChannel(texts.get("channels.text.admin"), ChannelType.ADMIN);
-            // create main text channel
-            setupTextChannel(texts.get("channels.text.main"), ChannelType.ANNOUNCEMENTS);
             // create waiting channel
             setupTextChannel(texts.get("channels.text.waiting"), ChannelType.WAITING);
+            // create main text channel
+            setupTextChannel(texts.get("channels.text.main"), ChannelType.ANNOUNCEMENTS);
             
             // create main voice channel
             category.createVoiceChannel(texts.get("channels.voice.main")).queue(channel -> this.mainvoicechannel = channel);
         }
     }
-
+    
+    public GameOptions getOptions(){
+        return options;
+    }
+    
     private RestAction<?> setChannelVisible(GuildChannel channel, boolean visible){
         List<Permission> allow = new ArrayList<>();
         List<Permission> deny = new ArrayList<>();
@@ -453,6 +459,10 @@ public class GameManager {
         Main.removeGame(id);
     }
 
+    public @Nullable User getDiscordUser(UserId id){
+        return discordlink.get(id);
+    }
+    
     public void addPlayer(UserId playerid, String privatekey){
         if(jointype == JoinType.PRIVATE && !Objects.equals(privatekey,joinkey)){
             Main.logAdmin(playerid+" could not join game "+id+" reason : (private game) wrong key -> "+privatekey+"!="+joinkey);
@@ -474,8 +484,8 @@ public class GameManager {
                 playerset.add(playerid);
             }
             String discord = DatabaseManager.getDiscordId(playerid);
-            if(discord != null && !discordlink.containsKey(discord)){
-                discordlink.put(discord, playerid);
+            if(discord != null && !discordlink.containsKey(playerid)){
+                Main.getJDA().retrieveUserById(DatabaseManager.getDiscordId(playerid)).queue(u -> discordlink.put(playerid, u));
                 try{
                     Main.getJDA().retrieveUserById(discord).queue(user ->{
                         guild.addRoleToMember(user, playerrole).queue();
@@ -517,9 +527,9 @@ public class GameManager {
     public void removePlayer(UserId player){
             if(player != null && playerset.contains(player)){
                 // remove discord link
-                if(discordlink.containsValue(player)){
-                    for(Map.Entry<String, UserId> entry : new HashSet<>(discordlink.entrySet())){
-                        if(entry.getValue().equals(player)){
+                if(discordlink.containsKey(player)){
+                    for(Map.Entry<UserId, User> entry : new HashSet<>(discordlink.entrySet())){
+                        if(entry.getKey().equals(player)){
                             discordlink.remove(entry.getKey());
                         }
                     }
@@ -795,70 +805,71 @@ public class GameManager {
         return completeroles;
     }
     
-    public void startGame(){
+    public void startGame() {
         Main.logAdmin("Let's gooooooooooooooooooo");
-        for(int i = 0; i<10; i++){
+        for (int i = 0; i < 10; i++) {
             UserId userid = new UserId();
-            logEvent("adding fake player "+userid, LogDestination.CONSOLE);
+            logEvent("adding fake player " + userid, LogDestination.CONSOLE);
             playerset.add(userid);
         }
         lock();
-        waitingchannel.sendMessage(new TranslatableText(Main.getTranslator(), language).get("channels.game-started").replaceAll("%channel%",maintextchannel.getAsMention())).queue();
-        setChannelVisible(maintextchannel, true).queue(c -> setChannelLocked(maintextchannel,true).queue());
-        setChannelLocked(waitingchannel,true).queue();
+        waitingchannel.sendMessage(new TranslatableText(Main.getTranslator(), language).get("channels.game-started").replaceAll("%channel%", maintextchannel.getAsMention())).queue();
+        setChannelVisible(maintextchannel, true).queue(c -> setChannelLocked(maintextchannel, true).queue());
+        setChannelLocked(waitingchannel, true).queue();
         maintextchannel.sendMessage(guild.getPublicRole().getAsMention()).queue();
         assignRoles();
-        
+    
         //create role channels
         // TODO : OPTIMISE THE SEARCH
-        Main.logAdmin("Used Roles",usedroles);
-        Main.logAdmin("keys",getCompleteRolePool());
-        for(PlayerRole role : getCompleteRolePool()){
-            if(role instanceof TextRole chanrole && ((TextRole) role).getChannelName(language) != null && ((TextRole) role).getChannelName(language).length() > 0){
+        Main.logAdmin("Used Roles", usedroles);
+        Main.logAdmin("keys", getCompleteRolePool());
+        for (PlayerRole role : getCompleteRolePool()) {
+            if (role instanceof TextRole chanrole && ((TextRole) role).getChannelName(language) != null && ((TextRole) role).getChannelName(language).length() > 0) {
                 ChannelAction<TextChannel> createaction = category.createTextChannel(((TextRole) role).getChannelName(language));
                 List<UserId> playerswithrole = new ArrayList<>();
-                for(Map.Entry<UserId, WerewolfPlayer> entry : playerlink.entrySet()){
-                    if(entry.getValue().getRoles().contains(chanrole)){
+                for (Map.Entry<UserId, WerewolfPlayer> entry : playerlink.entrySet()) {
+                    if (entry.getValue().getRoles().contains(chanrole)) {
                         playerswithrole.add(entry.getKey());
                     }
                 }
                 createaction = createaction.addRolePermissionOverride(playerrole.getIdLong(), List.of(Permission.UNKNOWN), List.of(Permission.VIEW_CHANNEL));
                 createaction = createaction.addRolePermissionOverride(adminrole.getIdLong(), List.of(Permission.VIEW_CHANNEL), List.of(Permission.MESSAGE_SEND, Permission.MANAGE_CHANNEL, Permission.MESSAGE_ADD_REACTION));
-                for(UserId id : playerswithrole){
+                for (UserId id : playerswithrole) {
                     String discordid = DatabaseManager.getDiscordId(id);
-                    if(discordid != null){
-                        createaction = createaction.addMemberPermissionOverride(UserSnowflake.fromId(discordid).getIdLong(), chanrole.getChannelAllow(),chanrole.getChannelDeny());
+                    if (discordid != null) {
+                        createaction = createaction.addMemberPermissionOverride(UserSnowflake.fromId(discordid).getIdLong(), chanrole.getChannelAllow(), chanrole.getChannelDeny());
                     }
                 }
                 createaction.queue(chan -> {
                     this.rolechannels.put(chan, chanrole);
-                    Main.linkChannel(chan.getIdLong(),this.getId());
-                    if(role.getClass().equals(Wolf.class)){
+                    Main.linkChannel(chan.getIdLong(), this.getId());
+                    if (role.getClass().equals(Wolf.class)) {
                         this.wolfchannel = chan;
                     }
                     StringBuilder mentions = new StringBuilder();
-                    for(UserId uid : playerswithrole){
-                        if(DatabaseManager.getDiscordId(uid) != null){
+                    for (UserId uid : playerswithrole) {
+                        if (DatabaseManager.getDiscordId(uid) != null) {
                             mentions.append(UserSnowflake.fromId(DatabaseManager.getDiscordId(uid)).getAsMention());
                         }
                     }
-                    if(mentions.toString().length() > 1){
+                    if (mentions.toString().length() > 1) {
                         chan.sendMessage(mentions.toString()).queue();
                     }
-                    if(chanrole.getHelpMessageEmbed(language) != null){
+                    if (chanrole.getHelpMessageEmbed(language) != null) {
                         chan.sendMessageEmbeds(chanrole.getHelpMessageEmbed(language)).queue();
                     }
-                    if(chanrole.getIntroMessage(language) != null && chanrole.getIntroMessage(language).length() > 0){
+                    if (chanrole.getIntroMessage(language) != null && chanrole.getIntroMessage(language).length() > 0) {
                         chan.sendMessage(chanrole.getIntroMessage(language)).queue();
                     }
                 });
-                
+    
             }
         }
         gamephase = GamePhase.FIRST_DAY;
         buildFirstDayQueue();
         nextEvent();
     }
+    
     public void nextEvent(){
         if(eventqueue.isEmpty()){
             // TODO ???
@@ -930,7 +941,7 @@ public class GameManager {
     }
 
     private void buildFirstDayQueue(){
-        //eventqueue.add(new Intro(this));
+        eventqueue.add(new IntroEvent(Main.getRootExtensionn()));
         eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn(), maintextchannel));
         eventqueue.add(new NightfallEvent(Main.getRootExtensionn()));
     }

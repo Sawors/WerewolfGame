@@ -22,4 +22,8 @@ public abstract class GameEvent {
     public String getEndMessage(){
         return null;
     }
+    
+    public WerewolfExtension getExtension(){
+        return extension;
+    }
 }

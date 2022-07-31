@@ -14,7 +14,8 @@ public class GameOptions {
     private double autowolfpercentage = 0.25;
     private int wolfamount = 1;
     private boolean fancydelays = true;
-    private boolean usevotetime = true;
+    private boolean usevotetime = false;
+    private boolean tellvotes = false;
 
     private Set<WerewolfExtension> usedextensions = new HashSet<>();
     private Set<PrimaryRole> addedroles = new HashSet<>();
@@ -58,8 +59,18 @@ public class GameOptions {
         return instantvote;
     }
 
-    public void setInstantVote(boolean instantvote) {
+    public boolean instantVote(boolean instantvote) {
         this.instantvote = instantvote;
+        return instantvote;
+    }
+    
+    public boolean tellVotes() {
+        return tellvotes;
+    }
+    
+    public boolean tellVotes(boolean tellvotes) {
+        this.tellvotes = tellvotes;
+        return tellvotes;
     }
 
     public boolean autoWolf() {

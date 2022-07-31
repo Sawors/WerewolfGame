@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
@@ -158,8 +159,10 @@ public abstract class GenericVote extends GameEvent {
                 votebuttons.add(saferef.get(i));
             }
         }
-        TranslatableText textpool = new TranslatableText(Main.getTranslator(),manager.getLanguage());
-        embed.addField(textpool.get("votes.generic.time.title"), textpool.get("votes.generic.time.display").replaceAll("%time%",String.valueOf(votetime)), false);
+        if(manager.getOptions().useVoteTimer()){
+            TranslatableText textpool = new TranslatableText(Main.getTranslator(),manager.getLanguage());
+            embed.addField(textpool.get("votes.generic.time.title"), textpool.get("votes.generic.time.display").replaceAll("%time%",String.valueOf(votetime)), false);
+        }
 
         votechannel.sendMessageEmbeds(embed.build()).setActionRows(votebuttons).queue(msg -> {
             this.buttonmessage.add(msg);
@@ -209,8 +212,30 @@ public abstract class GenericVote extends GameEvent {
     public void onValidationAttempt(boolean force, boolean wait){}
     //  Vote Events
     public void onVote(UserId voter, UserId voted){}
-    public void onVoteNew(UserId voter, UserId voted){}
-    public void onVoteChanged(UserId voter, UserId voted){}
+    public void onVoteNew(UserId voter, UserId voted){
+        User u = manager.getDiscordUser(voter);
+        User v = manager.getDiscordUser(voted);
+        String votername = u != null ? u.getName() : voter.toString();
+        String votedname = v != null ? v.getName() : voted.toString();
+        TranslatableText texts = new TranslatableText(Main.getTranslator(),manager.getLanguage());
+        String msg = texts.get("votes.generic.messages.new-vote").replaceAll("%user%",votername);
+        if(manager.getOptions().tellVotes()){
+            msg += texts.get("votes.generic.messages.tell-vote").replaceAll("%user%",votedname);
+        }
+        votechannel.sendMessage(msg).queue();
+    }
+    public void onVoteChanged(UserId voter, UserId voted){
+        User u = manager.getDiscordUser(voter);
+        User v = manager.getDiscordUser(voted);
+        String votername = u != null ? u.getName() : voter.toString();
+        String votedname = v != null ? v.getName() : voted.toString();
+        TranslatableText texts = new TranslatableText(Main.getTranslator(),manager.getLanguage());
+        String msg = texts.get("votes.generic.messages.change-vote").replaceAll("%user%",votername);
+        if(manager.getOptions().tellVotes()){
+            msg += texts.get("votes.generic.messages.tell-vote").replaceAll("%user%",votedname);
+        }
+        votechannel.sendMessage(msg).queue();
+    }
     // Vote result Events
     public void onWin(UserId winner, Map<UserId, Integer> results){}
     public void onTie(List<UserId> tied, Map<UserId, Integer> results){}

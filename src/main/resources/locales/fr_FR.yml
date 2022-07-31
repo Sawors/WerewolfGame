@@ -107,6 +107,16 @@ events:
       Patientez ici en attendant que l'admin (%admin%) soit prêt à lancer la partie :smile:
     ready-instructions: "Cliquez sur l'emoji %emoji% pour indiquer que vous êtes prêt\n"
     leave-button-indication: "Cliquez sur le boutton [%button%] pour quitter la partie"
+  story:
+    1: ">>> Dans “l’Est sauvage”, le petit hameau de Thiercelieux est depuis peu devenu la proie des Loups-Garous."
+    2: ">>> Des meurtres sont commis chaque nuit par certains habitants du village, 
+    devenus Lycanthropes à cause d’un phénomène mystérieux...
+    \nLes Villageois doivent se ressaisir pour éradiquer ce nouveau fléau venu du fond des âges, 
+    avant que le hameau ne perde ses derniers habitants."
+    3: ">>> Ainsi nous voilà tous réunis, 
+    tout le village assis en cercle autour d'un grand feu 
+    pour traquer et tuer ces Loups-Garou qui se dissumulent parmis nous."
+    4: ">>> Aujoud'hui un Maire doit être élu, que le vote s'ouvre et puisse votre choix être le bon..."
 
 commands:
   admin:
@@ -130,6 +140,8 @@ commands:
     admin:
       description: "donne aux utilisateurs mentionnés la permission d'administrateur de cette partie et l'accès à ce salon"
       success: "%user% est maintenant un administrateur"
+    use:
+      description: "permet de modifier les paramètres de la partie, les combinaisons possibles sont : *autowolf* <[0...75]>, *timer* <true/false>"
   ww:
     register:
       success: "Serveur *%name%:%id%* enregistré avec succès"
@@ -198,10 +210,15 @@ votes:
       title: "⌚ Temps"
       display: "%time% secondes"
       messages: "Plus que **%time%** secondes restantes pour faire un choix"
+    messages:
+      new-vote: "**%user%** a voté"
+      change-vote: "**%user%** a changé son vote"
+      tell-vote: " pour **%user%**"
   mayor:
     title: "📩 Vote du Maire"
     description: |-
       Votez pour le meilleur Maire
+    end: "Vote terminé ! Le Maire élu par le Village est..."
   village:
     title: "📩 Vote du Village"
     description: |-
