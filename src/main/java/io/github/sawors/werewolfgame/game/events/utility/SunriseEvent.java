@@ -1,4 +1,4 @@
-package io.github.sawors.werewolfgame.game.events.night;
+package io.github.sawors.werewolfgame.game.events.utility;
 
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;

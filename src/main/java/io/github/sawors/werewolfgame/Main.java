@@ -464,9 +464,20 @@ public class Main {
                                 Class<?> cl = classloader.loadClass(tocheck.getName().replaceAll("/",".").substring(0,tocheck.getName().length()-".class".length()));
                                 Constructor<?> ctor = cl.getConstructor();
                                 Object crinst = ctor.newInstance();
-                                if(crinst instanceof WerewolfExtension){
-                                    extensions.add((WerewolfExtension) crinst);
-                                    Main.logAdmin("Successfully loaded extension",extensionjar.getName());
+                                if(crinst instanceof WerewolfExtension wwext){
+                                    boolean contains = false;
+                                    for(WerewolfExtension ext : extensions){
+                                        if(ext.getMeta().getName().equals(wwext.getMeta().getName())) {
+                                            contains = true;
+                                            break;
+                                        }
+                                    }
+                                    if(!contains){
+                                        extensions.add(wwext);
+                                        Main.logAdmin("Successfully loaded extension",extensionjar.getName());
+                                    } else {
+                                        Main.logAdmin("Error in loading extension",extensionjar+" -> an extension with the same name is already loaded ("+wwext.getMeta().getName()+")");
+                                    }
                                 }
                         
                                 break;
@@ -482,12 +493,6 @@ public class Main {
                             break;
                         }
                     }
-            
-            
-            
-            
-            
-            
                 } catch (IOException e){
                     e.printStackTrace();
                 }
