@@ -1,8 +1,6 @@
 package io.github.sawors.werewolfgame.game.roles.base;
 
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
-import io.github.sawors.werewolfgame.game.events.GameEvent;
-import io.github.sawors.werewolfgame.game.roles.DefaultRoleType;
 import io.github.sawors.werewolfgame.game.roles.TextRole;
 import io.github.sawors.werewolfgame.game.roles.VillagerLike;
 import io.github.sawors.werewolfgame.localization.LoadedLocale;
@@ -15,21 +13,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public class Villager extends VillagerLike implements TextRole {
     public Villager(WerewolfExtension extension) {
         super(extension);
-    }
-
-    @Override
-    public Set<GameEvent> getEvents() {
-        return Set.of();
-    }
-
-    @Override
-    public String toString() {
-        return DefaultRoleType.VILLAGER.toString();
     }
     
     @Override
@@ -62,6 +49,11 @@ public class Villager extends VillagerLike implements TextRole {
     
     @Override
     public String getIntroMessage(LoadedLocale language) {
+        return null;
+    }
+    
+    @Override
+    public String getAnnouncementMessage(LoadedLocale locale) {
         return null;
     }
     

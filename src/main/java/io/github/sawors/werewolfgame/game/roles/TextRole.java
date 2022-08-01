@@ -16,6 +16,8 @@ public interface TextRole {
     MessageEmbed getHelpMessageEmbed(LoadedLocale language);
     String getIntroMessage(LoadedLocale language);
     
+    String getAnnouncementMessage(LoadedLocale locale);
+    
     void onMessageSent(GenericMessageEvent event);
     void onReactionAdded(GenericMessageEvent event);
     void onReactionRemoved(GenericMessageEvent event);

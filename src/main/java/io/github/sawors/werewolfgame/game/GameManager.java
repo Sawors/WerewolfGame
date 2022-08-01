@@ -11,9 +11,9 @@ import io.github.sawors.werewolfgame.discord.DiscordManager;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.events.BackgroundEvent;
 import io.github.sawors.werewolfgame.game.events.GameEvent;
-import io.github.sawors.werewolfgame.game.events.PhaseType;
 import io.github.sawors.werewolfgame.game.events.RoleEvent;
 import io.github.sawors.werewolfgame.game.events.day.MayorVoteEvent;
+import io.github.sawors.werewolfgame.game.events.day.VillageVoteEvent;
 import io.github.sawors.werewolfgame.game.events.night.WolfKillEvent;
 import io.github.sawors.werewolfgame.game.events.utility.IntroEvent;
 import io.github.sawors.werewolfgame.game.events.utility.NightfallEvent;
@@ -98,6 +98,7 @@ public class GameManager {
     private Set<WerewolfExtension> loadedextensions = new HashSet<>();
     private Role deadrole;
     private final float gamehue = (280+(int)(Math.random()*20))/360f;
+    private UserId mayor;
 
     
     
@@ -115,6 +116,7 @@ public class GameManager {
                 a0 -> guild.createCategory("[\uD83D\uDC3A WEREWOLF : "+id+"]")
                         .addRolePermissionOverride(playerrole.getIdLong(), List.of(Permission.VIEW_CHANNEL), List.of(Permission.MANAGE_CHANNEL))
                         .addRolePermissionOverride(adminrole.getIdLong(),List.of(Permission.VIEW_CHANNEL), List.of())
+                        .addRolePermissionOverride(deadrole.getIdLong(),List.of(Permission.VIEW_CHANNEL), List.of(Permission.MESSAGE_SEND, Permission.MESSAGE_SEND_IN_THREADS,Permission.CREATE_PRIVATE_THREADS,Permission.CREATE_PUBLIC_THREADS,Permission.MESSAGE_ADD_REACTION))
                         .addRolePermissionOverride(guild.getPublicRole().getIdLong(),List.of(), List.of(Permission.VIEW_CHANNEL, Permission.CREATE_PUBLIC_THREADS, Permission.CREATE_PRIVATE_THREADS))
                         .queue(a1 -> {
                     category = a1;
@@ -188,6 +190,14 @@ public class GameManager {
     
     public GamePhase getGamePhase(){
         return  gamephase;
+    }
+    
+    public UserId getMayor(){
+        return mayor;
+    }
+    
+    public void setMayor(UserId user){
+        this.mayor = user;
     }
 
     private void createRoles(Consumer<?> chainedaction){
@@ -445,6 +455,13 @@ public class GameManager {
     public void clean(){
         Main.logAdmin("Cleaning game ["+id+"]");
         clearInvites();
+        eventqueue.clear();
+        currentevent = null;
+        for(UserId uid : playerset){
+            try{
+                getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(uid)), false).queue();
+            } catch (IllegalArgumentException | IllegalStateException ignored){}
+        }
         Main.unlinkChannel(adminchannel.getIdLong());
         Main.unlinkChannel(maintextchannel.getIdLong());
         Main.unlinkChannel(mainvoicechannel.getIdLong());
@@ -793,6 +810,34 @@ public class GameManager {
         return maintextchannel;
     }
     
+    public void killUser(UserId id){
+        if(playerlink.containsKey(id)){
+            playerlink.get(id).kill();
+            guild.addRoleToMember(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), deadrole).queue();
+            for(BackgroundEvent event : backgroundevents){
+                event.onPlayerKilled(id);
+            }
+            try{
+                getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), true).queue();
+            } catch (IllegalArgumentException | IllegalStateException ignored){}
+        }
+    }
+    
+    public Set<PrimaryRole> getUsedRoles(){
+        Set<PrimaryRole> allroles = new HashSet<>();
+        for(Map.Entry<UserId, WerewolfPlayer> entry : playerlink.entrySet()){
+            // Here we are not using WerewolfPlayer.getMainRole() to ensure we correctly get the role event if WerewolfPlayer.mainrole is not correctly set
+            List<PlayerRole> usroles = entry.getValue().getRoles();
+            for(PlayerRole role : usroles){
+                if(role instanceof PrimaryRole prole){
+                    allroles.add(prole);
+                    break;
+                }
+            }
+        }
+        
+        return allroles;
+    }
 /*
     |------------------------------------------------|
     |=================[EVENT QUEUE]==================|
@@ -821,8 +866,6 @@ public class GameManager {
     
         //create role channels
         // TODO : OPTIMISE THE SEARCH
-        Main.logAdmin("Used Roles", usedroles);
-        Main.logAdmin("keys", getCompleteRolePool());
         for (PlayerRole role : getCompleteRolePool()) {
             if (role instanceof TextRole chanrole && ((TextRole) role).getChannelName(language) != null && ((TextRole) role).getChannelName(language).length() > 0) {
                 ChannelAction<TextChannel> createaction = category.createTextChannel(((TextRole) role).getChannelName(language));
@@ -865,14 +908,14 @@ public class GameManager {
     
             }
         }
-        gamephase = GamePhase.FIRST_DAY;
+        gamephase = GamePhase.SUNRISE;
         buildFirstDayQueue();
         nextEvent();
     }
     
     public void nextEvent(){
         if(eventqueue.isEmpty()){
-            // TODO ???
+            Main.logAdmin("no more events, THIS IS AN ERROR");
         } else {
             GameEvent next = eventqueue.poll();
             currentevent = next;
@@ -921,29 +964,72 @@ public class GameManager {
         return currentevent;
     }
     
+    public void setGamePhase(GamePhase phase){
+        Main.logAdmin("Changing game phase",gamephase+" -> "+phase);
+        this.gamephase = phase;
+    }
     
+    private Map<GameEvent, GamePhase> getUsedEvents(){
+        Map<GameEvent, GamePhase> events = new HashMap<>();
+        for(PrimaryRole role : getUsedRoles()){
+            boolean isholderalive = true;
+            /*for(WerewolfPlayer player : playerlink.values()){
+                isholderalive = player != null && player.getMainRole().equals(role) && player.isAlive();
+            }*/
+            if(isholderalive){
+                events.putAll(role.getEvents());
+                events.putAll(role.getRoundEvents(round));
+            }
+        }
+        return events;
+    }
 
     private void buildNightQueue(){
-
-
-
-        eventqueue.add(new WolfKillEvent(Main.getRootExtensionn(),getRoleChannel(new Wolf(Main.getRootExtensionn()))));
-
+        round++;
+        Map<GameEvent, GamePhase> events = getUsedEvents();
+        for(Map.Entry<GameEvent, GamePhase> entry : events.entrySet()){
+            if(entry.getValue().equals(GamePhase.NIGHT_PREWOLVES)){
+                eventqueue.add(entry.getKey());
+            }
+        }
+        eventqueue.add(new WolfKillEvent(Main.getRootExtensionn()));
+        for(Map.Entry<GameEvent, GamePhase> entry : events.entrySet()){
+            if(entry.getValue().equals(GamePhase.NIGHT_POSTWOLVES)){
+                eventqueue.add(entry.getKey());
+            }
+        }
         eventqueue.add(new SunriseEvent(Main.getRootExtensionn()));
+        for(GameEvent event : eventqueue){
+            Main.logAdmin("Night Queue",event);
+        }
     }
 
     private void buildDayQueue(){
-        round++;
-
-
-
+        Map<GameEvent, GamePhase> events = getUsedEvents();
+        for(Map.Entry<GameEvent, GamePhase> entry : events.entrySet()){
+            if(entry.getValue().equals(GamePhase.SUNRISE)){
+                eventqueue.add(entry.getKey());
+            }
+        }
+        eventqueue.add(new VillageVoteEvent(Main.getRootExtensionn()));
+        for(Map.Entry<GameEvent, GamePhase> entry : events.entrySet()){
+            if(entry.getValue().equals(GamePhase.NIGHTFALL)){
+                eventqueue.add(entry.getKey());
+            }
+        }
         eventqueue.add(new NightfallEvent(Main.getRootExtensionn()));
+        for(GameEvent event : eventqueue){
+            Main.logAdmin("Day Queue",event);
+        }
     }
 
     private void buildFirstDayQueue(){
         eventqueue.add(new IntroEvent(Main.getRootExtensionn()));
-        eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn(), maintextchannel));
+        eventqueue.add(new MayorVoteEvent(Main.getRootExtensionn()));
         eventqueue.add(new NightfallEvent(Main.getRootExtensionn()));
+        for(GameEvent event : eventqueue){
+            Main.logAdmin("First Day Queue",event);
+        }
     }
     
     public Set<UserId> getRealPlayers(){

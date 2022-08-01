@@ -18,6 +18,7 @@ public class WerewolfPlayer {
     boolean awake = true;
     GameManager gm;
     WerewolfTeam team = new Village();
+    List<String> tags = new ArrayList<>();
 
     
     public WerewolfPlayer(UserId parent, GameManager manager){
@@ -30,6 +31,18 @@ public class WerewolfPlayer {
         this.gm = manager;
         this.mainrole = role;
         this.roles.add(role);
+    }
+    
+    public List<String> getTags(){
+        return List.copyOf(tags);
+    }
+    
+    public void removeTag(String tag){
+        tags.remove(tag);
+    }
+    
+    public void addTag(String tag){
+        tags.add(tag);
     }
 
     @Override

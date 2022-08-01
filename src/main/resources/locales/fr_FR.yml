@@ -63,7 +63,7 @@ invites:
   invite-body-customizable: |-
     cette partie est de type `%type%`,
     
-    pour la rejoindre cliquez sur le boutton **%button%**
+    pour la rejoindre cliquez sur le bouton **%button%**
 
   # leave blank to use the same format as invite-body-customizable, otherwise it will be used for private invites
   # in place of invite-body-customizable
@@ -78,7 +78,7 @@ buttons:
   expired-game: "Partie terminée"
   locked-game: "Partie Fermée"
   leave-game: "Quitter"
-  leave-game-message: "Clique sur le boutton **%button%** pour quitter la partie"
+  leave-game-message: "Clique sur le bouton **%button%** pour quitter la partie"
 
 forms:
   private-game-code:
@@ -106,7 +106,7 @@ events:
       
       Patientez ici en attendant que l'admin (%admin%) soit prêt à lancer la partie :smile:
     ready-instructions: "Cliquez sur l'emoji %emoji% pour indiquer que vous êtes prêt\n"
-    leave-button-indication: "Cliquez sur le boutton [%button%] pour quitter la partie"
+    leave-button-indication: "Cliquez sur le bouton [%button%] pour quitter la partie"
   story:
     1: ">>> Dans “l’Est sauvage”, le petit hameau de Thiercelieux est depuis peu devenu la proie des Loups-Garous."
     2: ">>> Des meurtres sont commis chaque nuit par certains habitants du village, 
@@ -115,8 +115,12 @@ events:
     avant que le hameau ne perde ses derniers habitants."
     3: ">>> Ainsi nous voilà tous réunis, 
     tout le village assis en cercle autour d'un grand feu 
-    pour traquer et tuer ces Loups-Garou qui se dissumulent parmis nous."
-    4: ">>> Aujoud'hui un Maire doit être élu, que le vote s'ouvre et puisse votre choix être le bon..."
+    pour traquer et tuer ces Loups-Garou qui se dissimulent parmis nous."
+    4: "> Aujourd'hui un Maire doit être élu, que le vote s'ouvre et puisse votre choix être le bon..."
+    night-fall: "> Au loin le soleil se couche, une nouvelle nuit commence"
+    sun-rise: "> Le noir de la nuit laisse place au rose de l'aube, le soleil est en train de se lever"
+  village-sleep: "***\nLe Village s'endort***"
+  village-wakeup: "***\nLe Village se réveille***"
 
 commands:
   admin:
@@ -130,13 +134,13 @@ commands:
       success: "Langue changé avec succès en **Français**"
       error: "La langue de la partie ne peut plus être changée lorsque la partie est lancée"
     lock:
-      description: "verrouille la partie empêchant tout les autres membres du Discord de rejointre la partie grâce aux bouttons d'invitation"
-      success: "Partie verrouillée, les bouttons d'invitation pour rejoindre la partie ne sont plus utilisables"
+      description: "verrouille la partie empêchant tout les autres membres du Discord de rejoindre la partie grâce aux boutons d'invitation"
+      success: "Partie verrouillée, les boutons d'invitation pour rejoindre la partie ne sont plus utilisables"
       error: "La partie est déjà verrouillée, rien n'a été changé"
     unlock:
-      description: "déverrouille la partie, les nouveaux joueurs peuvent rejoindre en cliquant sur les bouttons d'invitation"
-      success: "Partie déverrouillée, les nouveaux joueurs peuvent maintenant rejoindre grâce aux bouttons d'invitation"
-      error: "La partie est déjà déverouillée, rien n'a été changé"
+      description: "déverrouille la partie, les nouveaux joueurs peuvent rejoindre en cliquant sur les boutons d'invitation"
+      success: "Partie déverrouillée, les nouveaux joueurs peuvent maintenant rejoindre grâce aux boutons d'invitation"
+      error: "La partie est déjà déverrouillée, rien n'a été changé"
     admin:
       description: "donne aux utilisateurs mentionnés la permission d'administrateur de cette partie et l'accès à ce salon"
       success: "%user% est maintenant un administrateur"
@@ -188,16 +192,16 @@ roles:
   villager:
     name: "Simple Villageois"
     channel: "🧑villageois"
-    intro: "Bienvenue Villageois, le village compte sur vous !"
+    announcement: ""
     text: "Simple villageois, votre village est en péril, votez sagement !"
     role-description: |-
       Les simples villageois n'ont pas de pouvoir, leur seul tâche est de correctement voter lors du **Vote du Village** pour éliminer les **Loups-Garou**
     win-condition: "Le but des Villageois ainsi que celui du Village est d'éliminer tous les Loups-Garou avant d'être dévorés"
     thumbnail: "https://static.wikia.nocookie.net/loupgaroumal/images/d/d6/Carte_SimpleVillaegois.png/revision/latest?cb=20210104170925&path-prefix=fr"
-
   wolf:
     name: "Loup-Garou"
     channel: "🐺loups"
+    announcement: "*Les **Loups** se réveillent et choisissent leur prochaine victime*"
     text: "*Quand les neiges tombent et que les vents blancs soufflent, le loup solitaire meurt, mais la meute survit*"
     role-description: |- 
       WOLF DESC HERE
@@ -214,6 +218,7 @@ votes:
       new-vote: "**%user%** a voté"
       change-vote: "**%user%** a changé son vote"
       tell-vote: " pour **%user%**"
+    death-announcement: "**%user%** est mort(e), son rôle était **%role%**"
   mayor:
     title: "📩 Vote du Maire"
     description: |-
@@ -225,13 +230,14 @@ votes:
       Le village doit voter une personne à éliminer.
       
       En cas d'égalité la victime sera désignée par le Maire
+    end: "Vote terminé ! Le Village a décidé d'éliminer %user%"
   wolves:
     title: "📩 Votez une victime"
     description: |-
       Qui sera le joueur que vous allez dévorer cette nuit ?
 
-      Attention : en cas d'égalité à la fin du compteur la victime sera choisie aléatoirement parmis celles ayant le plus haut nombre de votes
-
+      Attention : si vous ne parvenez pas à vous décider sur une victime à manger avant la fin du minuteur personne ne sera tué par les Loups cette nuit
+    end: "Vote terminé ! Le Maire élu par le Village est..."
 
 
 # DO NOT EDIT THIS

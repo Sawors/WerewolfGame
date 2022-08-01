@@ -15,10 +15,9 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
-public abstract class GenericVote extends GameEvent {
+public abstract class GenericVote extends GameEvent implements RoleEvent{
 
     protected Integer votetime;
     protected Set<LinkedUser> votepool;
@@ -32,9 +31,8 @@ public abstract class GenericVote extends GameEvent {
     public GameManager manager;
     protected Set<Message> buttonmessage = new HashSet<>();
 
-    public GenericVote(WerewolfExtension extension, @Nullable TextChannel votechannel){
+    public GenericVote(WerewolfExtension extension){
         super(extension);
-        this.votechannel = votechannel;
         this.votetime = 30;
     };
     
@@ -102,16 +100,24 @@ public abstract class GenericVote extends GameEvent {
     };
 
 
-    public void setVote(UserId voter, UserId voted){
-        if(votemap.containsKey(voter)){
-            onVoteChanged(voter,voted);
+    public void setVote(UserId voter, String voted){
+        if(UserId.fromString(voted) != null){
+            UserId usvoted = UserId.fromString(voted);
+            if(votemap.containsKey(voter)){
+                onVoteChanged(voter,usvoted);
+            } else {
+                onVoteNew(voter,usvoted);
+            }
+            onVote(voter,usvoted);
+            votemap.put(voter,usvoted);
+            Main.logAdmin(votemap);
         } else {
-            onVoteNew(voter,voted);
+            doAction(voter, voted);
         }
-        onVote(voter,voted);
-        votemap.put(voter,voted);
-        Main.logAdmin(votemap);
+        
     }
+    
+    public void doAction(UserId user, String action){}
 
     public Map<UserId, UserId> getVoteMap(){
         return Map.copyOf(votemap);
@@ -236,6 +242,7 @@ public abstract class GenericVote extends GameEvent {
         }
         votechannel.sendMessage(msg).queue();
     }
+    
     // Vote result Events
     public void onWin(UserId winner, Map<UserId, Integer> results){}
     public void onTie(List<UserId> tied, Map<UserId, Integer> results){}

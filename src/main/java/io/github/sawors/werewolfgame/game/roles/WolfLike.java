@@ -12,6 +12,4 @@ public abstract class WolfLike extends PrimaryRole {
         return 0;
     }
 
-    public abstract void wolfAction();
-
 }

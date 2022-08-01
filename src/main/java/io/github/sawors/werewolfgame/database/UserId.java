@@ -3,6 +3,7 @@ package io.github.sawors.werewolfgame.database;
 import io.github.sawors.werewolfgame.DatabaseManager;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
@@ -59,16 +60,16 @@ public class UserId {
         return RandomStringUtils.randomAlphanumeric(iduniquelength).toLowerCase(Locale.ENGLISH);
     }
     
-    public static UserId fromString(String id) throws IllegalArgumentException{
+    public static @Nullable UserId fromString(String id) {
         if(id.length() == iduniquelength){
             for(char ch : id.toCharArray()){
                 if(!Character.isLetterOrDigit(ch)){
-                    throw new IllegalArgumentException(id+" is not a correctly formatted PlayerId (only alphanumeric characters are allowed)");
+                    return null;
                 }
             }
             return new UserId(id);
         } else {
-            throw new IllegalArgumentException(id+" is not a correctly formatted PlayerId (only "+iduniquelength+" characters allowed, got "+id.length()+")");
+            return null;
         }
     }
     

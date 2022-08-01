@@ -2,8 +2,6 @@ package io.github.sawors.werewolfgame.game.roles.base;
 
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
-import io.github.sawors.werewolfgame.game.events.GameEvent;
-import io.github.sawors.werewolfgame.game.roles.DefaultRoleType;
 import io.github.sawors.werewolfgame.game.roles.TextRole;
 import io.github.sawors.werewolfgame.game.roles.WolfLike;
 import io.github.sawors.werewolfgame.localization.LoadedLocale;
@@ -16,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public class Wolf extends WolfLike implements TextRole {
     public Wolf(WerewolfExtension extension) {
@@ -24,24 +21,10 @@ public class Wolf extends WolfLike implements TextRole {
     }
     
     @Override
-    public String toString() {
-        return DefaultRoleType.WOLF.toString();
-    }
-
-    @Override
-    public void wolfAction() {
-
-    }
-    
-    @Override
-    public Set<GameEvent> getEvents() {
-        return Set.of();
-    }
-    
-    @Override
     public String getChannelName(@Nullable LoadedLocale language) {
-        return new TranslatableText(getExtension().getTranslator(), language).get("roles.wolf.channel");
+        return new TranslatableText(getExtension().getTranslator(), language).get("roles."+getRoleName()+".channel");
     }
+    
     @Override
     public Collection<Permission> getChannelAllow(){
         return List.of(
@@ -73,6 +56,11 @@ public class Wolf extends WolfLike implements TextRole {
     @Override
     public String getIntroMessage(LoadedLocale language) {
         return new TranslatableText(Main.getTranslator(), language).get("roles.wolf.intro",true);
+    }
+    
+    @Override
+    public String getAnnouncementMessage(LoadedLocale locale) {
+        return new TranslatableText(getExtension().getTranslator(), locale).get("roles."+getRoleName()+".announcement");
     }
     
     @Override

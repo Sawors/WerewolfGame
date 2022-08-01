@@ -4,6 +4,7 @@ import io.github.sawors.werewolfgame.DatabaseManager;
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.game.GameManager;
+import io.github.sawors.werewolfgame.game.GamePhase;
 import io.github.sawors.werewolfgame.game.events.GameEvent;
 import io.github.sawors.werewolfgame.game.events.GenericVote;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
@@ -77,7 +78,11 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     case"leave":
                         if(gm.getPlayerSet().contains(UserId.fromDiscordId(event.getUser().getId()))){
                             // player validated, removing it from the game
-                            gm.removePlayer(UserId.fromDiscordId(event.getUser().getId()));
+                            if(gm.getGamePhase().equals(GamePhase.BEFORE_GAME)){
+                                gm.removePlayer(UserId.fromDiscordId(event.getUser().getId()));
+                            } else {
+                                gm.killUser(UserId.fromDiscordId(event.getUser().getId()));
+                            }
                         } else {
                             Main.logAdmin("Attempt to remove Discord user "+event.getUser().getAsTag()+" from game "+gm.getId()+" via the leave button failed, user not in the game (THIS NEEDS TO BE INSPECTED !)");
                         }
@@ -93,7 +98,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                             GameEvent current = gm.getCurrentEvent();
                             if(current instanceof GenericVote){
                                 Main.logAdmin("Effectively vote");
-                                ((GenericVote) current).setVote(UserId.fromDiscordId(event.getUser().getId()),voted);
+                                ((GenericVote) current).setVote(UserId.fromDiscordId(event.getUser().getId()),String.valueOf(voted));
                                 Main.logAdmin(UserId.fromDiscordId(event.getUser().getId())+" -> "+voted);
                                 ((GenericVote) current).validate(false, false);
                             }
