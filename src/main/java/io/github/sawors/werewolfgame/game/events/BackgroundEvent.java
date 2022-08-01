@@ -20,6 +20,8 @@ public abstract class BackgroundEvent {
     public abstract void initialize(GameManager manager);
     
     public void onPlayerKilled(UserId victim){}
+    public void onPlayerSaved(UserId saved){}
+    public void onDeathConfirmed(UserId victim){}
     public void onGameStart(){}
     public void onVoteClose(UserId voted, List<UserId> voters){}
     public void onPlayerVote(UserId voter, UserId voted){}

@@ -8,7 +8,6 @@ import io.github.sawors.werewolfgame.game.WerewolfPlayer;
 import io.github.sawors.werewolfgame.game.events.GenericVote;
 import io.github.sawors.werewolfgame.game.events.RoleEvent;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
-import io.github.sawors.werewolfgame.game.roles.TextRole;
 import io.github.sawors.werewolfgame.game.roles.base.Mayor;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.entities.User;
@@ -51,7 +50,7 @@ public class MayorVoteEvent extends GenericVote implements RoleEvent {
     @Override
     public void start(GameManager manager) {
         // always add this
-        this.votechannel = getRole() != null && getRole() instanceof TextRole trole && manager.getRoleChannel(trole) != null ? manager.getRoleChannel(trole) : manager.getMainTextChannel();
+        this.votechannel = manager.getRoleChannel(getRole());
         
         this.votepool = manager.defaultVotePool();
         this.voters = manager.getRealPlayers();

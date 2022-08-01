@@ -158,6 +158,8 @@ public abstract class WerewolfExtension {
                             }
                         }
                     }
+                    //TODO : remove this once the tests are done
+                    overwrite = true;
                     if(!file.exists() || overwrite){
                         file.createNewFile();
                         try(OutputStream out = new FileOutputStream(file); InputStream in = getClass().getModule().getResourceAsStream("locales/"+locfilename)) {

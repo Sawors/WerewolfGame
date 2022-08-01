@@ -9,13 +9,14 @@ import io.github.sawors.werewolfgame.game.GamePhase;
 import io.github.sawors.werewolfgame.game.WerewolfPlayer;
 import io.github.sawors.werewolfgame.game.events.GenericVote;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
-import io.github.sawors.werewolfgame.game.roles.TextRole;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class VillageVoteEvent extends GenericVote {
     public VillageVoteEvent(WerewolfExtension extension) {
@@ -27,8 +28,7 @@ public class VillageVoteEvent extends GenericVote {
     @Override
     public void start(GameManager manager) {
         // always add this
-        this.votechannel = getRole() != null && getRole() instanceof TextRole trole && manager.getRoleChannel(trole) != null ? manager.getRoleChannel(trole) : manager.getMainTextChannel();
-        
+        this.votechannel = manager.getMainTextChannel();
         
         manager.setGamePhase(GamePhase.VILLAGE_VOTE);
         Set<LinkedUser> votepool = manager.defaultVotePool();
@@ -43,11 +43,8 @@ public class VillageVoteEvent extends GenericVote {
         votemessage.setTitle(texts.get("votes.village.title"));
         votemessage.setDescription(texts.get("votes.village.description"));
         votemessage.setThumbnail(texts.get("roles.village.thumbnail"));
-    
+        Main.logAdmin("Village vote",votemessage);
         start(manager,votemessage);
-        
-        manager.setGamePhase(GamePhase.NIGHTFALL);
-        manager.nextEvent();
     }
     
     /*
@@ -93,6 +90,9 @@ public class VillageVoteEvent extends GenericVote {
         votechannel.sendMessage(new TranslatableText(getExtension().getTranslator(), manager.getLanguage()).get("votes.village.end").replaceAll("%user%", name)).queue();
         manager.setGamePhase(GamePhase.NIGHT_POSTWOLVES);
         manager.killUser(winner);
+        manager.confirmDeath(winner);
+        String role = player.getMainRole() != null ? new TranslatableText(player.getMainRole().getExtension().getTranslator(), manager.getLanguage()).get("roles."+player.getMainRole().getRoleName()+".name") : "??????";
+        manager.getMainTextChannel().sendMessage(new TranslatableText(getExtension().getTranslator(),manager.getLanguage()).get("death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(1, TimeUnit.SECONDS);
         manager.nextEvent();
     }
     
@@ -105,5 +105,10 @@ public class VillageVoteEvent extends GenericVote {
     @Override
     public PlayerRole getRole() {
         return null;
+    }
+    
+    @Override
+    public void start(GameManager manager, EmbedBuilder embed) {
+        super.start(manager, embed);
     }
 }

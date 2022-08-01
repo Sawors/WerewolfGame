@@ -38,7 +38,7 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                     case"join":
                         if(!gm.getPlayerSet().contains(UserId.fromDiscordId(event.getUser().getId()))){
                             // player validated, adding it to the game
-                            gm.addplayer(UserId.fromDiscordId(event.getUser().getId()));
+                            gm.addPlayer(UserId.fromDiscordId(event.getUser().getId()));
                         } else {
                             Member mb = event.getMember();
                             //TODO : remember to provide a blocking system when the game is started / locked (game players locking system ?)
@@ -94,13 +94,12 @@ public class DiscordInteractionsListener extends ListenerAdapter {
                         String votedid = buttonid.substring(buttonid.indexOf("#")+1);
                         if(votedid.length() > 4){
                             Main.logAdmin("Voted",votedid);
-                            UserId voted = UserId.fromString(votedid);
                             GameEvent current = gm.getCurrentEvent();
-                            if(current instanceof GenericVote){
+                            if(current instanceof GenericVote vevent){
                                 Main.logAdmin("Effectively vote");
-                                ((GenericVote) current).setVote(UserId.fromDiscordId(event.getUser().getId()),String.valueOf(voted));
-                                Main.logAdmin(UserId.fromDiscordId(event.getUser().getId())+" -> "+voted);
-                                ((GenericVote) current).validate(false, false);
+                                vevent.setVote(UserId.fromDiscordId(event.getUser().getId()),votedid);
+                                Main.logAdmin(UserId.fromDiscordId(event.getUser().getId())+" -> "+votedid);
+                                vevent.validate(false, false);
                             }
                         }
                         event.deferEdit().queue();

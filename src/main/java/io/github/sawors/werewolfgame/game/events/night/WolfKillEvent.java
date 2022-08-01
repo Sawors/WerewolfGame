@@ -26,7 +26,7 @@ public class WolfKillEvent extends GenericVote implements RoleEvent {
     @Override
     public void start(GameManager manager) {
         // always add this
-        this.votechannel = getRole() != null && getRole() instanceof TextRole trole && manager.getRoleChannel(trole) != null ? manager.getRoleChannel(trole) : manager.getMainTextChannel();
+        this.votechannel = manager.getRoleChannel(getRole());
         
         manager.setGamePhase(GamePhase.NIGHT_WOLVES);
         Set<LinkedUser> votepool = manager.defaultVotePool();

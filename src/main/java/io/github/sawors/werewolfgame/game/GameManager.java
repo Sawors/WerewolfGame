@@ -36,6 +36,7 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -99,6 +100,7 @@ public class GameManager {
     private Role deadrole;
     private final float gamehue = (280+(int)(Math.random()*20))/360f;
     private UserId mayor;
+    private Set<UserId> pendingdeath = new HashSet<>();
 
     
     
@@ -537,7 +539,7 @@ public class GameManager {
         }
     }
     
-    public void addplayer(UserId playerid){
+    public void addPlayer(UserId playerid){
         addPlayer(playerid, null);
     }
     
@@ -800,10 +802,12 @@ public class GameManager {
         }
     }
 
-    public TextChannel getRoleChannel(TextRole role){
-        for(Map.Entry<TextChannel, TextRole> entry : rolechannels.entrySet()){
-            if(entry.getValue().equals(role)){
-                return entry.getKey();
+    public TextChannel getRoleChannel(PlayerRole role){
+        if(role instanceof TextRole){
+            for(Map.Entry<TextChannel, TextRole> entry : rolechannels.entrySet()){
+                if(entry.getValue().equals(role)){
+                    return entry.getKey();
+                }
             }
         }
 
@@ -811,13 +815,32 @@ public class GameManager {
     }
     
     public void killUser(UserId id){
+        pendingdeath.add(id);
+        for(BackgroundEvent event : backgroundevents){
+            event.onPlayerKilled(id);
+        }
+    }
+    
+    public void resurrectUser(UserId id){
+        pendingdeath.remove(id);
+        for(BackgroundEvent event : backgroundevents){
+            event.onPlayerSaved(id);
+        }
+    }
+    
+    public Set<UserId> getPendingDeath(){
+        return Set.copyOf(pendingdeath);
+    }
+    
+    public void confirmDeath(UserId id){
         if(playerlink.containsKey(id)){
             playerlink.get(id).kill();
-            guild.addRoleToMember(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), deadrole).queue();
+            
             for(BackgroundEvent event : backgroundevents){
-                event.onPlayerKilled(id);
+                event.onDeathConfirmed(id);
             }
             try{
+                guild.addRoleToMember(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), deadrole).queue();
                 getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), true).queue();
             } catch (IllegalArgumentException | IllegalStateException ignored){}
         }
@@ -837,6 +860,20 @@ public class GameManager {
         }
         
         return allroles;
+    }
+    
+    public @NotNull List<UserId> getUsersWithRole(PlayerRole role){
+        List<UserId> users = new ArrayList<>();
+        if(role != null){
+            for(Map.Entry<UserId, WerewolfPlayer> entry : playerlink.entrySet()){
+                for(PlayerRole prole : entry.getValue().getRoles()){
+                    if(prole.equals(role)){
+                        users.add(entry.getKey());
+                    }
+                }
+            }
+        }
+        return users;
     }
 /*
     |------------------------------------------------|
@@ -1115,5 +1152,9 @@ public class GameManager {
     
     public List<BackgroundEvent> getBackgroundEvents() {
         return this.backgroundevents;
+    }
+    
+    public void overwriteCurrentEvent(GameEvent event){
+        this.currentevent = event;
     }
 }

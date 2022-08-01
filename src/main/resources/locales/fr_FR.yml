@@ -121,6 +121,10 @@ events:
     sun-rise: "> Le noir de la nuit laisse place au rose de l'aube, le soleil est en train de se lever"
   village-sleep: "***\nLe Village s'endort***"
   village-wakeup: "***\nLe Village se réveille***"
+  no-kill-happened: "Cette nuit, il n'y a eu aucune mort"
+  single-kill-happened: "Cette nuit, il y a eu une seule mort..."
+  multiple-kills-happened: "Cette nuit, il y a eu %x% morts..."
+  death-announcement: "**%user%** a été tué(e), son rôle était ||**%role%**||"
 
 commands:
   admin:
@@ -218,7 +222,6 @@ votes:
       new-vote: "**%user%** a voté"
       change-vote: "**%user%** a changé son vote"
       tell-vote: " pour **%user%**"
-    death-announcement: "**%user%** est mort(e), son rôle était **%role%**"
   mayor:
     title: "📩 Vote du Maire"
     description: |-
