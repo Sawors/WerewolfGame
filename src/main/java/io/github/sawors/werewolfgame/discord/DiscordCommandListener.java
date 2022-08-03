@@ -4,7 +4,6 @@ import io.github.sawors.werewolfgame.DatabaseManager;
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.commands.RegisterGuildCommand;
 import io.github.sawors.werewolfgame.commands.RegisterUserCommand;
-import io.github.sawors.werewolfgame.commands.TestCommand;
 import io.github.sawors.werewolfgame.game.GameManager;
 import io.github.sawors.werewolfgame.game.GamePhase;
 import io.github.sawors.werewolfgame.game.GameType;
@@ -22,6 +21,7 @@ import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -40,7 +40,10 @@ public class DiscordCommandListener extends ListenerAdapter {
             }
             switch(args[1].toLowerCase(Locale.ROOT)){
                 case"test":
-                    new TestCommand().execute(event.getMessage());
+                    Map<String,String> cont = texts.getMap("events.story");
+                    for(Map.Entry<String,String> entry : cont.entrySet()){
+                        Main.logAdmin(entry);
+                    }
                     break;
                 case"register":
                 case"reg":
@@ -244,6 +247,8 @@ public class DiscordCommandListener extends ListenerAdapter {
                                         break;
                                 }
                             }
+                            break;
+                        
                     }
                 }
             }

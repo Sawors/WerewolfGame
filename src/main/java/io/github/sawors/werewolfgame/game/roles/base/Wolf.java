@@ -59,8 +59,13 @@ public class Wolf extends WolfLike implements TextRole {
     }
     
     @Override
-    public String getAnnouncementMessage(LoadedLocale locale) {
-        return new TranslatableText(getExtension().getTranslator(), locale).get("roles."+getRoleName()+".announcement");
+    public String getRoundStartAnnouncement(LoadedLocale locale) {
+        return new TranslatableText(getExtension().getTranslator(), locale).get("roles."+getRoleName()+".round-start");
+    }
+    
+    @Override
+    public String getRoundEndAnnouncement(LoadedLocale locale) {
+        return new TranslatableText(getExtension().getTranslator(), locale).get("roles."+getRoleName()+".round-end");
     }
     
     @Override

@@ -4,7 +4,6 @@ import io.github.sawors.werewolfgame.DatabaseManager;
 import io.github.sawors.werewolfgame.DiscordBot;
 import io.github.sawors.werewolfgame.LinkedUser;
 import io.github.sawors.werewolfgame.Main;
-import io.github.sawors.werewolfgame.database.UserDataType;
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.discord.ChannelType;
 import io.github.sawors.werewolfgame.discord.DiscordManager;
@@ -101,6 +100,9 @@ public class GameManager {
     private final float gamehue = (280+(int)(Math.random()*20))/360f;
     private UserId mayor;
     private Set<UserId> pendingdeath = new HashSet<>();
+    private Map<String, List<UserId>> teams = new HashMap<>();
+    private TextChannel deadchannel;
+    private final Narrator narrator;
 
     
     
@@ -113,6 +115,7 @@ public class GameManager {
         this.joinkey = RandomStringUtils.randomNumeric(5);
         this.language = DatabaseManager.getGuildLanguage(guild);
         this.gamephase = GamePhase.BEFORE_GAME;
+        this.narrator = new Narrator(this);
         
         createRoles(
                 a0 -> guild.createCategory("[\uD83D\uDC3A WEREWOLF : "+id+"]")
@@ -210,7 +213,7 @@ public class GameManager {
                         if(owner != null){
                             setAdmin(owner);
                         }
-                        guild.createRole().setName("WW:"+id+":DEAD").setMentionable(false).setHoisted(false).setColor(Color.HSBtoRGB(gamehue,.6f,.1f)).queue(c -> {
+                        guild.createRole().setName("WW:"+id+":DEAD").setMentionable(false).setHoisted(false).setColor(0x333333).queue(c -> {
                             this.deadrole = c;
                             chainedaction.accept(null);
                         });
@@ -338,6 +341,8 @@ public class GameManager {
             setupTextChannel(texts.get("channels.text.waiting"), ChannelType.WAITING);
             // create main text channel
             setupTextChannel(texts.get("channels.text.main"), ChannelType.ANNOUNCEMENTS);
+            // create dead text channel
+            setupTextChannel(texts.get("channels.text.dead"), ChannelType.DEAD);
             
             // create main voice channel
             category.createVoiceChannel(texts.get("channels.voice.main")).queue(channel -> this.mainvoicechannel = channel);
@@ -401,6 +406,12 @@ public class GameManager {
     private void cacheChannel(GuildChannel channel, ChannelType type){
         switch(type){
             case DEAD:
+                deadchannel = (TextChannel) channel;
+                deadchannel.getPermissionContainer().getManager()
+                        .putRolePermissionOverride(adminrole.getIdLong(), List.of(Permission.VIEW_CHANNEL,Permission.MESSAGE_SEND),List.of(Permission.MANAGE_CHANNEL))
+                        .putRolePermissionOverride(deadrole.getIdLong(), List.of(Permission.VIEW_CHANNEL,Permission.MESSAGE_SEND),List.of(Permission.MANAGE_CHANNEL))
+                        .putRolePermissionOverride(playerrole.getIdLong(), List.of(Permission.UNKNOWN),List.of(Permission.VIEW_CHANNEL,Permission.MESSAGE_SEND))
+                        .queue();
                 break;
             case ROLE:
                 break;
@@ -419,6 +430,7 @@ public class GameManager {
                 adminchannel.getPermissionContainer().getManager()
                         .putRolePermissionOverride(adminrole.getIdLong(), List.of(Permission.VIEW_CHANNEL),List.of(Permission.MANAGE_CHANNEL))
                         .putRolePermissionOverride(playerrole.getIdLong(), List.of(Permission.UNKNOWN),List.of(Permission.VIEW_CHANNEL))
+                        .putRolePermissionOverride(deadrole.getIdLong(), List.of(Permission.UNKNOWN),List.of(Permission.VIEW_CHANNEL))
                         .queue();
                 
                 break;
@@ -441,6 +453,7 @@ public class GameManager {
                     msg.addReaction("U+2705").queue();
                 });
                 break;
+            
         }
 
         Main.linkChannel(channel.getIdLong(), id);
@@ -459,11 +472,13 @@ public class GameManager {
         clearInvites();
         eventqueue.clear();
         currentevent = null;
-        for(UserId uid : playerset){
+        for(UserId u : discordlink.keySet()){
             try{
-                getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(uid)), false).queue();
+                getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(u)), false).queue();
             } catch (IllegalArgumentException | IllegalStateException ignored){}
         }
+        // here to safely unlink we could loop through the channel link and remove every channel linked to this GameManager's id, however if we can keep all channels in memory
+        // (like we are doing for the moment) I don't see the point in looping through potentially thousands of channels when we ALREADY know their key and therefore where they are
         Main.unlinkChannel(adminchannel.getIdLong());
         Main.unlinkChannel(maintextchannel.getIdLong());
         Main.unlinkChannel(mainvoicechannel.getIdLong());
@@ -844,6 +859,7 @@ public class GameManager {
                 getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), true).queue();
             } catch (IllegalArgumentException | IllegalStateException ignored){}
         }
+        pendingdeath.remove(id);
     }
     
     public Set<PrimaryRole> getUsedRoles(){
@@ -877,9 +893,116 @@ public class GameManager {
     }
 /*
     |------------------------------------------------|
+    |================[TEAMS OPTIONS]=================|
+    |------------------------------------------------|
+*/
+    public void registerNewTeam(String team){
+        if(team != null){
+            teams.putIfAbsent(team.toUpperCase(Locale.ROOT), new ArrayList<>());
+        }
+    }
+    public void registerNewTeam(DefaultTeam team){
+        registerNewTeam(team.toString());
+    }
+    public List<String> getRegisteredTeams(){
+        return List.copyOf(teams.keySet());
+    }
+    public @Nullable List<UserId> getTeamPlayers(String team){
+        return team != null && teams.containsKey(team) ? List.copyOf(teams.get(team)) : null;
+    }
+    public @Nullable List<UserId> getTeamPlayers(DefaultTeam team){
+        return getTeamPlayers(team.toString());
+    }
+    public void addPlayerToTeam(String team, UserId playerid){
+        List<UserId> list = teams.get(team);
+        if(list != null && !list.contains(playerid)){
+            list.add(playerid);
+        }
+    }
+    public void addPlayerToTeam(DefaultTeam team, UserId playerid){
+        addPlayerToTeam(team.toString(),playerid);
+    }
+    public void removePlayerFromTeam(String team, UserId playerid){
+        List<UserId> list = teams.get(team);
+        if(list != null){
+            list.remove(playerid);
+        }
+    }
+    public void removePlayerFromTeam(DefaultTeam team, UserId playerid){
+        removePlayerFromTeam(team.toString(), playerid);
+    }
+    public @Nullable String getPlayerTeam(UserId playerid){
+        if(playerid != null){
+            for(Map.Entry<String, List<UserId>> entry : teams.entrySet()){
+                if(entry.getValue().contains(playerid)){
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
+    
+    public boolean doTeamExists(String team){
+        if(team == null){
+            return false;
+        }
+        return teams.containsKey(team);
+    }
+    
+    public boolean doTeamExists(DefaultTeam team){
+        return doTeamExists(team.toString());
+    }
+    
+    public List<String> getAllTeams(Iterable<UserId> userlist){
+        List<String> allteams = new ArrayList<>();
+        for(Map.Entry<String, List<UserId>> entry : teams.entrySet()){
+            for(UserId user : userlist){
+                String checkteam = entry.getKey();
+                if(entry.getValue().contains(user) && !allteams.contains(checkteam)){
+                    allteams.add(checkteam);
+                }
+            }
+        }
+        
+        return allteams;
+    }
+
+    public boolean checkSameTeam(List<UserId> userlist){
+        if(userlist.size() > 0){
+            String team = getPlayerTeam(userlist.get(0));
+            List<UserId> players = getTeamPlayers(team);
+            if(team != null && players != null){
+                return new HashSet<>(players).containsAll(userlist);
+            }
+            
+        }
+        return false;
+    }
+/*
+    |------------------------------------------------|
     |=================[EVENT QUEUE]==================|
     |------------------------------------------------|
 */
+    
+    public boolean checkForWinCondition(){
+        List<UserId> aliveplayers = new ArrayList<>(playerlink.keySet());
+        aliveplayers.removeIf(u -> !playerlink.get(u).isAlive() || pendingdeath.contains(u));
+        if(checkSameTeam(aliveplayers)){
+            Main.logAdmin("Teams Victory",getPlayerTeam(aliveplayers.get(0)));
+            eventqueue.clear();
+            currentevent = null;
+            for(UserId u : discordlink.keySet()){
+                try{
+                    DiscordBot.addPendingAction(getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(u)), false));
+                } catch (IllegalArgumentException | IllegalStateException ignored){}
+            }
+            DiscordBot.triggerActionQueue();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     private Set<PlayerRole> getCompleteRolePool(){
         Set<PlayerRole> completeroles = new HashSet<>(Set.copyOf(rolepool.keySet()));
         completeroles.add(new Wolf(Main.getRootExtensionn()));
@@ -899,6 +1022,10 @@ public class GameManager {
         setChannelVisible(maintextchannel, true).queue(c -> setChannelLocked(maintextchannel, true).queue());
         setChannelLocked(waitingchannel, true).queue();
         maintextchannel.sendMessage(guild.getPublicRole().getAsMention()).queue();
+        
+        registerNewTeam(DefaultTeam.VILLAGE);
+        registerNewTeam(DefaultTeam.WOLVES);
+        
         assignRoles();
     
         //create role channels
@@ -985,7 +1112,9 @@ public class GameManager {
         for(int i = 1; fakenames.size()*i <= playerset.size(); i++){
             fakenames.addAll(fakenameslist);
         }
-        playerset.forEach(uid -> votepool.add(new LinkedUser(uid, DatabaseManager.getUserData(uid, UserDataType.NAME) != null ? DatabaseManager.getUserData(uid, UserDataType.NAME) : fakenames.poll(),UUID.randomUUID(),"",null,null)));
+        // is used to put name in the newly created LinkedUser
+        //DatabaseManager.getUserData(uid, UserDataType.NAME) != null ? DatabaseManager.getUserData(uid, UserDataType.NAME) : fakenames.poll()
+        playerset.forEach(uid -> votepool.add(new LinkedUser(uid, uid.toString(),UUID.randomUUID(),"",null,null)));
         return votepool;
     }
     
@@ -1131,6 +1260,7 @@ public class GameManager {
             }
             logEvent("Giving role "+role+" to player "+user+" (Wolf Phase)", LogDestination.CONSOLE);
             usedroles.add(role);
+            addPlayerToTeam(DefaultTeam.WOLVES,user);
             playerlink.put(user, new WerewolfPlayer(user, this, (PrimaryRole) role));
         }
         for(UserId user : pendingusers){
@@ -1140,6 +1270,7 @@ public class GameManager {
             }
             logEvent("Giving role "+role+" to player "+user+" (Village Phase)", LogDestination.CONSOLE);
             usedroles.add(role);
+            addPlayerToTeam(DefaultTeam.VILLAGE,user);
             playerlink.put(user, new WerewolfPlayer(user, this, (PrimaryRole) role));
         }
         logEvent(playerlink, LogDestination.CONSOLE);

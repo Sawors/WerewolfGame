@@ -101,18 +101,20 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
 
 
     public void setVote(UserId voter, String voted){
-        if(UserId.fromString(voted) != null){
-            UserId usvoted = UserId.fromString(voted);
-            if(votemap.containsKey(voter)){
-                onVoteChanged(voter,usvoted);
+        if(voters.contains(voter)){
+            if(UserId.fromString(voted) != null){
+                UserId usvoted = UserId.fromString(voted);
+                if(votemap.containsKey(voter)){
+                    onVoteChanged(voter,usvoted);
+                } else {
+                    onVoteNew(voter,usvoted);
+                }
+                onVote(voter,usvoted);
+                votemap.put(voter,usvoted);
+                Main.logAdmin(votemap);
             } else {
-                onVoteNew(voter,usvoted);
+                doAction(voter, voted);
             }
-            onVote(voter,usvoted);
-            votemap.put(voter,usvoted);
-            Main.logAdmin(votemap);
-        } else {
-            doAction(voter, voted);
         }
         
     }
@@ -169,7 +171,7 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
             TranslatableText textpool = new TranslatableText(Main.getTranslator(),manager.getLanguage());
             embed.addField(textpool.get("votes.generic.time.title"), textpool.get("votes.generic.time.display").replaceAll("%time%",String.valueOf(votetime)), false);
         }
-
+        Main.logAdmin("votestart");
         votechannel.sendMessageEmbeds(embed.build()).setActionRows(votebuttons).queue(msg -> {
             this.buttonmessage.add(msg);
             if(splitrows.size() > 0){

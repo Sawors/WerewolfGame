@@ -53,7 +53,12 @@ public class Villager extends VillagerLike implements TextRole {
     }
     
     @Override
-    public String getAnnouncementMessage(LoadedLocale locale) {
+    public String getRoundStartAnnouncement(LoadedLocale locale) {
+        return null;
+    }
+    
+    @Override
+    public String getRoundEndAnnouncement(LoadedLocale locale) {
         return null;
     }
     

@@ -78,14 +78,37 @@ public class YamlMapParser {
             return null;
         }
     }
-
+    
+    public static Object getObject(@NotNull Map<String, Object> loadedyaml, String key) throws ParseException {
+        if(key == null){
+            return null;
+        }
+        Object got = null;
+        String[] hierarchy = key.split("\\.");
+        Map<?,?> submap = new HashMap<>(loadedyaml);
+        for (String localkey : hierarchy) {
+            if (submap.containsKey(localkey)) {
+                got = submap.get(localkey);
+                if (got instanceof Map<?, ?> nextmap) {
+                    submap = nextmap;
+                } else {
+                    break;
+                }
+            } else {
+                throw new ParseException("error while parsing YAML map, key "+key+" not found (fails at "+localkey+")",hierarchy.length);
+            }
+        }
+        
+        return got;
+    }
+    
     public static List<String> getallkeys(Map<?,?> maptoparse){
         List<String> fields = new ArrayList<>();
 
         Queue<Map<?, ?>> submaps = new LinkedList<>();
         submaps.add(maptoparse);
         //TODO : add full key building mechanic to check for missing fields and warn user (keys like : "roles.witch.channel")
-        //  with each field telling the whole path to it thus making it really unique and removing possible duplications (using YAML default duplicate error)
+        //  with each field telling the whole path to it thus making it unique and removing possible duplications (using YAML default duplicate error)
         while(submaps.size() > 0){
             Map<?, ?> toparse = submaps.poll();
             for(Map.Entry<?, ?> entry : toparse.entrySet()){

@@ -96,6 +96,7 @@ channels:
     main: "📯place-du-village"
     admin: "🔧admin"
     waiting: "🌿attente"
+    dead: "💀morts"
 
 events:
   player-join-message: ":arrow_right: %user% **a rejoint la partie !**"
@@ -108,23 +109,28 @@ events:
     ready-instructions: "Cliquez sur l'emoji %emoji% pour indiquer que vous êtes prêt\n"
     leave-button-indication: "Cliquez sur le bouton [%button%] pour quitter la partie"
   story:
-    1: ">>> Dans “l’Est sauvage”, le petit hameau de Thiercelieux est depuis peu devenu la proie des Loups-Garous."
-    2: ">>> Des meurtres sont commis chaque nuit par certains habitants du village, 
-    devenus Lycanthropes à cause d’un phénomène mystérieux...
-    \nLes Villageois doivent se ressaisir pour éradiquer ce nouveau fléau venu du fond des âges, 
-    avant que le hameau ne perde ses derniers habitants."
-    3: ">>> Ainsi nous voilà tous réunis, 
-    tout le village assis en cercle autour d'un grand feu 
-    pour traquer et tuer ces Loups-Garou qui se dissimulent parmis nous."
-    4: "> Aujourd'hui un Maire doit être élu, que le vote s'ouvre et puisse votre choix être le bon..."
-    night-fall: "> Au loin le soleil se couche, une nouvelle nuit commence"
-    sun-rise: "> Le noir de la nuit laisse place au rose de l'aube, le soleil est en train de se lever"
-  village-sleep: "***\nLe Village s'endort***"
-  village-wakeup: "***\nLe Village se réveille***"
-  no-kill-happened: "Cette nuit, il n'y a eu aucune mort"
-  single-kill-happened: "Cette nuit, il y a eu une seule mort..."
-  multiple-kills-happened: "Cette nuit, il y a eu %x% morts..."
-  death-announcement: "**%user%** a été tué(e), son rôle était ||**%role%**||"
+    intro:
+      - ">>> Dans l’Est sauvage, le petit hameau de Thiercelieux est depuis peu devenu la proie des Loups-Garous."
+      - ">>> Des meurtres sont commis chaque nuit par certains habitants du village, 
+      devenus Lycanthropes à cause d’un phénomène mystérieux..."
+      - ">>> Les Villageois doivent se ressaisir pour éradiquer ce nouveau fléau venu du fond des âges, 
+      avant que le hameau ne perde ses derniers habitants."
+      - ">>> Ainsi nous voilà tous réunis, 
+      tout le village assis en cercle autour d'un grand feu 
+      pour traquer et tuer ces Loups-Garou qui se dissimulent parmis nous."
+      - "> Aujourd'hui un Maire doit être élu, que le vote s'ouvre et puisse votre choix être le bon..."
+    cycles:
+      night-fall:
+        - "> Au loin le soleil se couche, une nouvelle nuit commence"
+      sun-rise:
+        -  "> Le noir de la nuit laisse place au rose de l'aube, le soleil est en train de se lever"
+  game-info:
+    village-sleep: "***\nLe Village s'endort***"
+    village-wakeup: "***\nLe Village se réveille***"
+    no-kill-happened: "Cette nuit, il n'y a eu aucune mort"
+    single-kill-happened: "Cette nuit, il y a eu une seule mort..."
+    multiple-kills-happened: "Cette nuit, il y a eu %x% morts..."
+    death-announcement: "**%user%** a été tué(e), son rôle était ||**%role%**||"
 
 commands:
   admin:
@@ -205,7 +211,8 @@ roles:
   wolf:
     name: "Loup-Garou"
     channel: "🐺loups"
-    announcement: "*Les **Loups** se réveillent et choisissent leur prochaine victime*"
+    round-start: "*Les **Loups** se réveillent et choisissent leur prochaine victime*"
+    round-end: "*Les **Loups** peuvent se rendormir...*"
     text: "*Quand les neiges tombent et que les vents blancs soufflent, le loup solitaire meurt, mais la meute survit*"
     role-description: |- 
       WOLF DESC HERE
@@ -233,7 +240,7 @@ votes:
       Le village doit voter une personne à éliminer.
       
       En cas d'égalité la victime sera désignée par le Maire
-    end: "Vote terminé ! Le Village a décidé d'éliminer %user%"
+    end: "Vote terminé ! Le Village a décidé d'éliminer **%user%**"
   wolves:
     title: "📩 Votez une victime"
     description: |-
@@ -242,6 +249,14 @@ votes:
       Attention : si vous ne parvenez pas à vous décider sur une victime à manger avant la fin du minuteur personne ne sera tué par les Loups cette nuit
     end: "Vote terminé ! Le Maire élu par le Village est..."
 
-
+teams:
+  wolves:
+    name: "Loups"
+    win-message: "Victoire des Loups !"
+    solo: false
+  village:
+    name: "Village"
+    win-message: "Victoire du Village !"
+    solo: false
 # DO NOT EDIT THIS
 do-not-edit-version: 0

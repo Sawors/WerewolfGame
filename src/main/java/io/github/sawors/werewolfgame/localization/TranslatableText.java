@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.security.InvalidKeyException;
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TranslatableText {
 
@@ -48,21 +51,35 @@ public class TranslatableText {
         }
     }
     
-    /*public static @Nullable String get(@NotNull String textkey, @NotNull LoadedLocale locale, boolean suppreserrors){
-        if(!locales.containsKey(locale)){
-            return suppreserrors ? null : "***locale "+locale+" not loaded, it usually indicates an error in locale name***";
+    public Map<String, String> getMap(String key){
+        Map<String, String> result = new HashMap<>();
+        Object output =  null;
+        Map<String, Object> localecontent = translator.getLocaleData(locale);
+        if(localecontent != null && localecontent.size() > 0){
+            try{
+                output = YamlMapParser.getObject(localecontent, key);
+            } catch (ParseException e) {
+                return Map.of();
+            }
         }
-        String error = "***key \""+textkey+"\" in locale "+locale+" not found, report this to the locale's author***";
-        try{
-            return YamlMapParser.getData(locales.get(locale), textkey);
-        } catch (ParseException e) {
-            return suppreserrors ? null : error+" ***"+e.getMessage()+"***";
-        } catch (InvalidKeyException e) {
-            return suppreserrors ? null : error;
+        if(output instanceof Map<?,?>){
+            ((Map<?, ?>) output).forEach((k,value)-> result.put(k.toString(),value.toString()));
+        } else if(output instanceof List<?>){
+            for(int i = 0; i<((List<?>) output).size(); i++){
+                result.put(String.valueOf(i), String.valueOf(((List<?>) output).get(i)));
+            }
+        } else {
+            result.put("0", String.valueOf(result));
         }
-    }*/
-
-
+        
+        return result;
+    }
+    
+    //TODO : add weight system to texts (but I don't think it's *that* useful)
+    public String getVariableText(String key){
+        List<String> texts = List.copyOf(getMap(key).values());
+        return texts.get((int) (Math.random()*(texts.size()-1)));
+    }
 
     public String getPluralForm(String word){
         return word+"s";

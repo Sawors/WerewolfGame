@@ -3,7 +3,6 @@ package io.github.sawors.werewolfgame.game;
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.game.roles.PrimaryRole;
-import io.github.sawors.werewolfgame.game.teams.classic.Village;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,6 @@ public class WerewolfPlayer {
     boolean alive = true;
     boolean awake = true;
     GameManager gm;
-    WerewolfTeam team = new Village();
     List<String> tags = new ArrayList<>();
 
     
@@ -48,14 +46,6 @@ public class WerewolfPlayer {
     @Override
     public String toString() {
         return user+":"+roles+"@"+gm.getId();
-    }
-
-    public void setTeam(WerewolfTeam team){
-        this.team = team;
-    }
-
-    public WerewolfTeam getTeam(){
-        return team;
     }
     
     public UserId getUser() {

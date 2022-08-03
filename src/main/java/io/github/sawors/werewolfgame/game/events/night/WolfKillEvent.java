@@ -40,7 +40,7 @@ public class WolfKillEvent extends GenericVote implements RoleEvent {
         votemessage.setDescription(texts.get("votes.wolves.description"));
         votemessage.setThumbnail(texts.get("roles.wolf.thumbnail"));
 
-        manager.getMainTextChannel().sendMessage(((TextRole)getRole()).getAnnouncementMessage(manager.getLanguage())).queue();
+        manager.getMainTextChannel().sendMessage(((TextRole)getRole()).getRoundStartAnnouncement(manager.getLanguage())).queue();
         
         start(manager,votemessage);
     }
@@ -48,16 +48,19 @@ public class WolfKillEvent extends GenericVote implements RoleEvent {
     @Override
     public void onWin(UserId winner, Map<UserId, Integer> results) {
         Main.logAdmin("Winner",winner);
+        manager.killUser(winner);
+        manager.getMainTextChannel().sendMessage(((TextRole)getRole()).getRoundEndAnnouncement(manager.getLanguage())).queue();
         closeVote();
         manager.setGamePhase(GamePhase.NIGHT_POSTWOLVES);
-        manager.killUser(winner);
         manager.nextEvent();
     }
 
     @Override
     public void onTie(List<UserId> tielist, Map<UserId, Integer> results) {
         Main.logAdmin("Accepting Tie, no victim",tielist);
+        manager.getMainTextChannel().sendMessage(((TextRole)getRole()).getRoundEndAnnouncement(manager.getLanguage())).queue();
         closeVote();
+        manager.getMainTextChannel().sendMessage(((TextRole)getRole()).getRoundStartAnnouncement(manager.getLanguage())).queue();
         manager.setGamePhase(GamePhase.NIGHT_POSTWOLVES);
         manager.nextEvent();
     }

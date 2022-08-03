@@ -25,8 +25,8 @@ public class NightfallEvent extends GameEvent {
     public void start(GameManager manager) {
         manager.setGamePhase(GamePhase.NIGHT_PREWOLVES);
         TranslatableText texts = new TranslatableText(getExtension().getTranslator(), manager.getLanguage());
-        manager.getMainTextChannel().sendMessage(texts.get("events.story.night-fall")).queueAfter(3, TimeUnit.SECONDS);
-        manager.getMainTextChannel().sendMessage(texts.get("events.village-sleep")).queueAfter(3+2, TimeUnit.SECONDS, m -> {
+        manager.getMainTextChannel().sendMessage(texts.getVariableText("events.story.cycles.night-fall")).queueAfter(3, TimeUnit.SECONDS);
+        manager.getMainTextChannel().sendMessage(texts.get("events.game-info.village-sleep")).queueAfter(3+2, TimeUnit.SECONDS, m -> {
             for(Map.Entry<UserId, WerewolfPlayer> entry : manager.getPlayerRoles().entrySet()){
                 try{
                     if(entry.getValue().isAlive()){
@@ -35,8 +35,10 @@ public class NightfallEvent extends GameEvent {
                 } catch (IllegalArgumentException | IllegalStateException ignored){}
             }
         });
-        manager.buildQueue(PhaseType.NIGHT);
         
-        Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,3+2+2,TimeUnit.SECONDS);
+        if(!manager.checkForWinCondition()){
+            manager.buildQueue(PhaseType.NIGHT);
+            Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,3+2+2,TimeUnit.SECONDS);
+        }
     }
 }
