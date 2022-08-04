@@ -58,7 +58,7 @@ public class SunriseEvent extends GameEvent {
             timer += 1;
             manager.getMainTextChannel().sendMessage(texts.get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(3+3+3+2+i, TimeUnit.SECONDS);
         }
-        
+    
         if(!manager.checkForWinCondition()){
             manager.buildQueue(PhaseType.DAY);
             Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,timer, TimeUnit.SECONDS);

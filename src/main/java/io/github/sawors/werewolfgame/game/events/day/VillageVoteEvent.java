@@ -95,8 +95,9 @@ public class VillageVoteEvent extends GenericVote {
         manager.killUser(winner);
         manager.confirmDeath(winner);
         String role = player.getMainRole() != null ? new TranslatableText(player.getMainRole().getExtension().getTranslator(), manager.getLanguage()).get("roles."+player.getMainRole().getRoleName()+".name") : "??????";
-        manager.getMainTextChannel().sendMessage(new TranslatableText(getExtension().getTranslator(),manager.getLanguage()).get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(1, TimeUnit.SECONDS);
-        manager.nextEvent();
+        manager.getMainTextChannel().sendMessage(new TranslatableText(getExtension().getTranslator(),manager.getLanguage()).get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(1, TimeUnit.SECONDS, m ->
+                manager.nextEvent());
+        
     }
     
     @Override

@@ -988,13 +988,21 @@ public class GameManager {
         List<UserId> aliveplayers = new ArrayList<>(playerlink.keySet());
         aliveplayers.removeIf(u -> !playerlink.get(u).isAlive() || pendingdeath.contains(u));
         if(checkSameTeam(aliveplayers)){
-            Main.logAdmin("Teams Victory",getPlayerTeam(aliveplayers.get(0)));
+            String teamname = getPlayerTeam(aliveplayers.get(0));
+            Main.logAdmin("Teams Victory",teamname);
             eventqueue.clear();
             currentevent = null;
             for(UserId u : discordlink.keySet()){
                 try{
                     DiscordBot.addPendingAction(getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(u)), false));
                 } catch (IllegalArgumentException | IllegalStateException ignored){}
+            }
+            
+            if(teamname != null && teamname.length() > 0){
+                // Capitalize the first letter of the team's name
+                teamname = teamname.substring(0,1).toUpperCase(Locale.ROOT) + teamname.substring(1).toLowerCase(Locale.ROOT);
+                maintextchannel.sendMessage(guild.getPublicRole().getAsMention()+" \n"+new TranslatableText(Main.getTranslator(),language).get("teams.generic.win-message").replaceAll("%team%",teamname)).queue(m ->
+                        maintextchannel.sendMessage("https://c.tenor.com/bHGXw7bf04QAAAAd/carla-fortnite.gif").queueAfter(1,TimeUnit.SECONDS));
             }
             DiscordBot.triggerActionQueue();
             return true;
@@ -1012,7 +1020,7 @@ public class GameManager {
     
     public void startGame() {
         Main.logAdmin("Let's gooooooooooooooooooo");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             UserId userid = new UserId();
             logEvent("adding fake player " + userid, LogDestination.CONSOLE);
             playerset.add(userid);

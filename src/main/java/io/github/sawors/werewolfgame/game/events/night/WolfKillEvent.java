@@ -34,6 +34,7 @@ public class WolfKillEvent extends GenericVote implements RoleEvent {
         this.votepool = votepool;
         Set<UserId> voters = manager.getRealPlayers();
         voters.removeIf(us -> manager.getPlayerRoles().get(us) == null ||!(manager.getPlayerRoles().get(us).getMainRole() instanceof WolfLike) || !manager.getPlayerRoles().get(us).isAlive());
+        voters.add(UserId.fromString("sawors01"));
         this.voters = voters;
         TranslatableText texts = new TranslatableText(Main.getTranslator(), manager.getLanguage());
         votemessage.setTitle(texts.get("votes.wolves.title"));

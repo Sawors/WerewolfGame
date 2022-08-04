@@ -59,7 +59,7 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
         Main.logAdmin("wait",wait);
         Main.logAdmin("force",force);
 
-        if((votemap.keySet().containsAll(voters) && !wait) || force){
+        if((votemap.size() > 0 && votemap.keySet().containsAll(voters) && !wait) || force){
 
             onValidationSuccess(force);
 

@@ -23,6 +23,14 @@ public class NightfallEvent extends GameEvent {
     
     @Override
     public void start(GameManager manager) {
+    
+        if(!manager.checkForWinCondition()){
+            manager.buildQueue(PhaseType.NIGHT);
+            Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,3+2+2,TimeUnit.SECONDS);
+        } else {
+            return;
+        }
+        
         manager.setGamePhase(GamePhase.NIGHT_PREWOLVES);
         TranslatableText texts = new TranslatableText(getExtension().getTranslator(), manager.getLanguage());
         manager.getMainTextChannel().sendMessage(texts.getVariableText("events.story.cycles.night-fall")).queueAfter(3, TimeUnit.SECONDS);
@@ -36,9 +44,6 @@ public class NightfallEvent extends GameEvent {
             }
         });
         
-        if(!manager.checkForWinCondition()){
-            manager.buildQueue(PhaseType.NIGHT);
-            Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,3+2+2,TimeUnit.SECONDS);
-        }
+        
     }
 }

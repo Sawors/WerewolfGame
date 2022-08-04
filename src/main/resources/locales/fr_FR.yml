@@ -250,6 +250,8 @@ votes:
     end: "Vote terminé ! Le Maire élu par le Village est..."
 
 teams:
+  generic:
+    win-message: "Victoire de l'équipe **%team%** !"
   wolves:
     name: "Loups"
     win-message: "Victoire des Loups !"

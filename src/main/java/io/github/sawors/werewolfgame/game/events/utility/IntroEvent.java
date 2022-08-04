@@ -23,12 +23,12 @@ public class IntroEvent extends GameEvent {
         chan.sendTyping().queue();
         List<String> messages = List.copyOf(texts.getMap("events.story.intro").values());
         for(int i = 0; i<messages.size(); i++){
-            chan.sendMessage(messages.get(i)).queueAfter(6+(4L*(i+1)), TimeUnit.SECONDS, m -> chan.sendTyping().queue());
+            chan.sendMessage(messages.get(i)).queueAfter(6+(5L*(i+1)), TimeUnit.SECONDS, m -> chan.sendTyping().queue());
         }
 //        chan.sendMessage(texts.get("events.story.1")).queueAfter(6, TimeUnit.SECONDS, m -> chan.sendTyping().queue());
 //        chan.sendMessage(texts.get("events.story.2")).queueAfter(6+4, TimeUnit.SECONDS, m -> chan.sendTyping().queue());
 //        chan.sendMessage(texts.get("events.story.3")).queueAfter(6+4+10, TimeUnit.SECONDS, m -> chan.sendTyping().queue());
 //        chan.sendMessage(texts.get("events.story.4")).queueAfter(6+4+10+8, TimeUnit.SECONDS, m -> chan.sendTyping().queue());
-        Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,6+(4L*messages.size()),TimeUnit.SECONDS);
+        Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,11+(5L*messages.size()),TimeUnit.SECONDS);
     }
 }
