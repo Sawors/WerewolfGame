@@ -1061,15 +1061,6 @@ public class GameManager {
                     if (role.getClass().equals(Wolf.class)) {
                         this.wolfchannel = chan;
                     }
-                    StringBuilder mentions = new StringBuilder();
-                    for (UserId uid : playerswithrole) {
-                        if (DatabaseManager.getDiscordId(uid) != null) {
-                            mentions.append(UserSnowflake.fromId(DatabaseManager.getDiscordId(uid)).getAsMention());
-                        }
-                    }
-                    if (mentions.toString().length() > 1) {
-                        chan.sendMessage(mentions.toString()).queue();
-                    }
                     if (chanrole.getHelpMessageEmbed(language) != null) {
                         chan.sendMessageEmbeds(chanrole.getHelpMessageEmbed(language)).queue();
                     }
