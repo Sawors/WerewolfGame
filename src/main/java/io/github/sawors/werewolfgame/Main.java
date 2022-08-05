@@ -178,7 +178,7 @@ public class Main {
         extensions.add(rootextension);
     
         // add classic extension
-        //extensions.add(new ClassicExtensionLoader());
+        /*//extensions.add(new ClassicExtensionLoader());*/
     }
     
     protected static boolean isInstanceAdmin(String discordid){
