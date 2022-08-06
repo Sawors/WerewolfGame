@@ -8,7 +8,6 @@ import io.github.sawors.werewolfgame.game.GameManager;
 import io.github.sawors.werewolfgame.game.GamePhase;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 
 import java.util.List;
@@ -43,7 +42,7 @@ public class VillageVoteEvent extends GenericVote {
         votemessage.setThumbnail(texts.get("roles.villager.thumbnail"));
         Main.logAdmin("Village vote",votemessage);
         Main.logAdmin("p2");
-        start(manager,votemessage);
+        start(manager,votemessage,true);
         Main.logAdmin("p3");
     }
     
@@ -101,10 +100,5 @@ public class VillageVoteEvent extends GenericVote {
     @Override
     public PlayerRole getRole() {
         return null;
-    }
-    
-    @Override
-    public void start(GameManager manager, EmbedBuilder embed) {
-        super.start(manager, embed);
     }
 }

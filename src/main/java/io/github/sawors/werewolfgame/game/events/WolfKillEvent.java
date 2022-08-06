@@ -41,7 +41,7 @@ public class WolfKillEvent extends GenericVote implements RoleEvent {
 
         manager.getMainTextChannel().sendMessage(((TextRole)getRole()).getRoundStartAnnouncement(manager.getLanguage())).queue();
         
-        start(manager,votemessage);
+        start(manager,votemessage,false);
     }
 
     @Override

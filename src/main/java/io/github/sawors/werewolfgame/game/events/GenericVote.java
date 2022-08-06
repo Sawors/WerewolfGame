@@ -125,7 +125,7 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
         return Map.copyOf(votemap);
     }
 
-    public void start(GameManager manager, EmbedBuilder embed){
+    public void start(GameManager manager, EmbedBuilder embed, boolean createthread){
 
         this.manager = manager;
         if(votechannel == null){
@@ -180,13 +180,15 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
                         votechannel.sendMessage("("+(i+1)+"/"+splitrows.size()+")").setActionRows(splitrows.get(i)).queue(m1 -> buttonmessage.add(m1));
                     } else {
                         votechannel.sendMessage("("+(i+1)+"/"+splitrows.size()+")").setActionRows(splitrows.get(i)).queue(m2 -> {
-                            m2.createThreadChannel(new TranslatableText(extension.getTranslator(), manager.getLanguage()).get("channels.thread-init")).queue();
+                            if(createthread){
+                                m2.createThreadChannel(new TranslatableText(Main.getTranslator(), manager.getLanguage()).get("channels.thread-init")).queue();
+                            }
                             buttonmessage.add(m2);
                         });
                     }
                 }
-            } else {
-                msg.createThreadChannel(new TranslatableText(extension.getTranslator(), manager.getLanguage()).get("channels.thread-init")).queue();
+            } else if(createthread){
+                msg.createThreadChannel(new TranslatableText(Main.getTranslator(), manager.getLanguage()).get("channels.thread-init")).queue();
             }
 
         });

@@ -60,7 +60,7 @@ public class MayorVoteEvent extends GenericVote implements RoleEvent {
         votemessage.addField(texts.get("roles.supplementary.title"),texts.get("roles.supplementary.description"),false);
         votemessage.addField(texts.get("roles.generic.role-description"),texts.get("roles.mayor.role-description"),false);
         votemessage.setThumbnail(texts.get("roles.mayor.thumbnail"));
-        start(manager,votemessage);
+        start(manager,votemessage,true);
     }
     
     @Override
