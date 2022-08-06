@@ -240,9 +240,7 @@ public class DiscordCommandListener extends ListenerAdapter {
                         case"invitations":
                         case"invs":
                         case"inv":
-                            if(args.length >= 3){
-                                manager.sendInvite();
-                            }
+                            manager.sendInvite();
                             break;
                     }
                 }

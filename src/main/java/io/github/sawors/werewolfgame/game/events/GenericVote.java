@@ -195,6 +195,10 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
     }
     
     public void closeVote(){
+        voters.clear();
+        votepool.clear();
+        votemap.clear();
+        votewinnertie.clear();
         for(Message msg : buttonmessage){
             List<ActionRow> rows = new ArrayList<>();
             for(ActionRow row : msg.getActionRows()){
