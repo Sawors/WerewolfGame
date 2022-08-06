@@ -1,8 +1,7 @@
-package io.github.sawors.werewolfgame.game.events.utility;
+package io.github.sawors.werewolfgame.game.events;
 
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.GameManager;
-import io.github.sawors.werewolfgame.game.events.GameEvent;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.entities.TextChannel;
 

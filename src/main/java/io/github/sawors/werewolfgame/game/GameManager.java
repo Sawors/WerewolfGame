@@ -8,15 +8,7 @@ import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.discord.ChannelType;
 import io.github.sawors.werewolfgame.discord.DiscordManager;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
-import io.github.sawors.werewolfgame.game.events.BackgroundEvent;
-import io.github.sawors.werewolfgame.game.events.GameEvent;
-import io.github.sawors.werewolfgame.game.events.RoleEvent;
-import io.github.sawors.werewolfgame.game.events.day.MayorVoteEvent;
-import io.github.sawors.werewolfgame.game.events.day.VillageVoteEvent;
-import io.github.sawors.werewolfgame.game.events.night.WolfKillEvent;
-import io.github.sawors.werewolfgame.game.events.utility.IntroEvent;
-import io.github.sawors.werewolfgame.game.events.utility.NightfallEvent;
-import io.github.sawors.werewolfgame.game.events.utility.SunriseEvent;
+import io.github.sawors.werewolfgame.game.events.*;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.game.roles.PrimaryRole;
 import io.github.sawors.werewolfgame.game.roles.TextRole;
@@ -158,6 +150,21 @@ public class GameManager {
 
     public Map<UserId, WerewolfPlayer> getPlayerRoles(){
         return Map.copyOf(playerlink);
+    }
+
+    public void confirmDeath(UserId id){
+        if(playerlink.containsKey(id)){
+            playerlink.get(id).kill();
+
+            for(BackgroundEvent event : backgroundevents){
+                event.onDeathConfirmed(id);
+            }
+            try{
+                guild.addRoleToMember(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), deadrole).queue();
+                getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), true).queue();
+            } catch (IllegalArgumentException | IllegalStateException ignored){}
+        }
+        pendingdeath.remove(id);
     }
 
     public TextChannel getWaitingChannel(){
@@ -847,21 +854,6 @@ public class GameManager {
         return Set.copyOf(pendingdeath);
     }
     
-    public void confirmDeath(UserId id){
-        if(playerlink.containsKey(id)){
-            playerlink.get(id).kill();
-            
-            for(BackgroundEvent event : backgroundevents){
-                event.onDeathConfirmed(id);
-            }
-            try{
-                guild.addRoleToMember(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), deadrole).queue();
-                getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), true).queue();
-            } catch (IllegalArgumentException | IllegalStateException ignored){}
-        }
-        pendingdeath.remove(id);
-    }
-    
     public Set<PrimaryRole> getUsedRoles(){
         Set<PrimaryRole> allroles = new HashSet<>();
         for(Map.Entry<UserId, WerewolfPlayer> entry : playerlink.entrySet()){
@@ -1053,6 +1045,7 @@ public class GameManager {
                     String discordid = DatabaseManager.getDiscordId(id);
                     if (discordid != null) {
                         createaction = createaction.addMemberPermissionOverride(UserSnowflake.fromId(discordid).getIdLong(), chanrole.getChannelAllow(), chanrole.getChannelDeny());
+
                     }
                 }
                 createaction.queue(chan -> {
@@ -1063,6 +1056,11 @@ public class GameManager {
                     }
                     if (chanrole.getHelpMessageEmbed(language) != null) {
                         chan.sendMessageEmbeds(chanrole.getHelpMessageEmbed(language)).queue();
+                        for(UserId id : playerswithrole){
+                            if(id.toString().equals("sawors01")){
+                                chan.sendMessage(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)).getAsMention()).queue();
+                            }
+                        }
                     }
                     if (chanrole.getIntroMessage(language) != null && chanrole.getIntroMessage(language).length() > 0) {
                         chan.sendMessage(chanrole.getIntroMessage(language)).queue();
@@ -1082,6 +1080,7 @@ public class GameManager {
         } else {
             GameEvent next = eventqueue.poll();
             currentevent = next;
+            Main.logAdmin("Current event",next);
             next.start(this);
         }
     }
@@ -1136,16 +1135,32 @@ public class GameManager {
     
     private Map<GameEvent, GamePhase> getUsedEvents(){
         Map<GameEvent, GamePhase> events = new HashMap<>();
+        Main.logAdmin("GetUsedRoles",getUsedRoles());
         for(PrimaryRole role : getUsedRoles()){
-            boolean isholderalive = true;
-            /*for(WerewolfPlayer player : playerlink.values()){
-                isholderalive = player != null && player.getMainRole().equals(role) && player.isAlive();
-            }*/
+            Main.logAdmin("Role Check", role);
+            boolean isholderalive = false;
+            for(WerewolfPlayer player : playerlink.values()){
+                if(player != null && player.getMainRole().equals(role) && player.isAlive()){
+                    isholderalive = true;
+                    break;
+                }
+                Main.logAdmin("player != null",player != null);
+                try{
+                    Main.logAdmin("player.getMainRole().equals(role)",player.getMainRole().equals(role));
+                } catch (NullPointerException e){
+                    Main.logAdmin("player is null, NullPointerException");
+                }
+                Main.logAdmin("player.isAlive()",player.isAlive());
+            }
             if(isholderalive){
                 events.putAll(role.getEvents());
                 events.putAll(role.getRoundEvents(round));
             }
+            Main.logAdmin("getevents",role.getEvents());
+            Main.logAdmin("holder alive",isholderalive);
+
         }
+        Main.logAdmin("Used Events (debug)",events);
         return events;
     }
 
@@ -1158,6 +1173,11 @@ public class GameManager {
             }
         }
         eventqueue.add(new WolfKillEvent(Main.getRootExtensionn()));
+        for(Map.Entry<GameEvent, GamePhase> entry : events.entrySet()){
+            if(entry.getValue().equals(GamePhase.NIGHT_WOLVES)){
+                eventqueue.add(entry.getKey());
+            }
+        }
         for(Map.Entry<GameEvent, GamePhase> entry : events.entrySet()){
             if(entry.getValue().equals(GamePhase.NIGHT_POSTWOLVES)){
                 eventqueue.add(entry.getKey());
@@ -1176,7 +1196,14 @@ public class GameManager {
                 eventqueue.add(entry.getKey());
             }
         }
+        eventqueue.add(new DeathValidateEvent(Main.getRootExtensionn(), true));
         eventqueue.add(new VillageVoteEvent(Main.getRootExtensionn()));
+        for(Map.Entry<GameEvent, GamePhase> entry : events.entrySet()){
+            if(entry.getValue().equals(GamePhase.VILLAGE_VOTE)){
+                eventqueue.add(entry.getKey());
+            }
+        }
+        eventqueue.add(new DeathValidateEvent(Main.getRootExtensionn(), false));
         for(Map.Entry<GameEvent, GamePhase> entry : events.entrySet()){
             if(entry.getValue().equals(GamePhase.NIGHTFALL)){
                 eventqueue.add(entry.getKey());

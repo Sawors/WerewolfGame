@@ -45,17 +45,17 @@ public class Wolf extends WolfLike implements TextRole {
         TranslatableText textpool = new TranslatableText(getExtension().getTranslator(), language);
         return
                 new EmbedBuilder()
-                        .setTitle(textpool.get("roles.wolf.name",true))
-                        .setDescription(textpool.get("roles.wolf.text",true))
-                        .addField(textpool.get("roles.generic.role-description"), textpool.get("roles.wolf.role-description"),false)
-                        .addField(textpool.get("roles.generic.win-condition"), textpool.get("roles.wolf.win-condition"),false)
-                        .setThumbnail(textpool.get("roles.wolf.thumbnail", true))
+                        .setTitle(textpool.get("roles."+getRoleName()+".name",true))
+                        .setDescription(textpool.get("roles."+getRoleName()+".text",true))
+                        .addField(textpool.get("roles.generic.role-description"), textpool.get("roles."+getRoleName()+".role-description"),false)
+                        .addField(textpool.get("roles.generic.win-condition"), textpool.get("roles."+getRoleName()+".win-condition"),false)
+                        .setThumbnail(textpool.get("roles."+getRoleName()+".thumbnail", true))
                         .build();
     }
     
     @Override
     public String getIntroMessage(LoadedLocale language) {
-        return new TranslatableText(Main.getTranslator(), language).get("roles.wolf.intro",true);
+        return new TranslatableText(Main.getTranslator(), language).get("roles."+getRoleName()+".intro",true);
     }
     
     @Override

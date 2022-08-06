@@ -1,4 +1,4 @@
-package io.github.sawors.werewolfgame.game.events.night;
+package io.github.sawors.werewolfgame.game.events;
 
 import io.github.sawors.werewolfgame.LinkedUser;
 import io.github.sawors.werewolfgame.Main;
@@ -6,8 +6,6 @@ import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.GameManager;
 import io.github.sawors.werewolfgame.game.GamePhase;
-import io.github.sawors.werewolfgame.game.events.GenericVote;
-import io.github.sawors.werewolfgame.game.events.RoleEvent;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.game.roles.TextRole;
 import io.github.sawors.werewolfgame.game.roles.WolfLike;

@@ -13,12 +13,16 @@ import java.util.Objects;
 public abstract class PlayerRole {
         
         WerewolfExtension extension;
-        String rolename = getClass().getSimpleName().toLowerCase(Locale.ROOT);
+        String rolename;
         Map<GameEvent, GamePhase> events = new HashMap<>();
         Map<Integer,Map<GameEvent, GamePhase>> roundevents = new HashMap<>();
+        String roundstart = "";
+        String roundend = "";
         
         public PlayerRole(WerewolfExtension extension){
+
                 this.extension = extension;
+                this.rolename = this.getClass().getSimpleName().toLowerCase(Locale.ROOT);
         }
         @Override
         public String toString(){

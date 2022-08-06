@@ -1,4 +1,4 @@
-package io.github.sawors.werewolfgame.game.events.day;
+package io.github.sawors.werewolfgame.game.events;
 
 import io.github.sawors.werewolfgame.LinkedUser;
 import io.github.sawors.werewolfgame.Main;
@@ -6,8 +6,6 @@ import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.GameManager;
 import io.github.sawors.werewolfgame.game.GamePhase;
-import io.github.sawors.werewolfgame.game.WerewolfPlayer;
-import io.github.sawors.werewolfgame.game.events.GenericVote;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -16,7 +14,6 @@ import net.dv8tion.jda.api.entities.User;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 public class VillageVoteEvent extends GenericVote {
     public VillageVoteEvent(WerewolfExtension extension) {
@@ -89,15 +86,10 @@ public class VillageVoteEvent extends GenericVote {
         closeVote();
         User w = manager.getDiscordUser(winner);
         String name = w != null ? w.getName() : winner.toString();
-        WerewolfPlayer player = manager.getPlayerRoles().get(winner);
         votechannel.sendMessage(new TranslatableText(getExtension().getTranslator(), manager.getLanguage()).get("votes.village.end").replaceAll("%user%", name)).queue();
         manager.setGamePhase(GamePhase.NIGHT_POSTWOLVES);
         manager.killUser(winner);
-        manager.confirmDeath(winner);
-        String role = player.getMainRole() != null ? new TranslatableText(player.getMainRole().getExtension().getTranslator(), manager.getLanguage()).get("roles."+player.getMainRole().getRoleName()+".name") : "??????";
-        manager.getMainTextChannel().sendMessage(new TranslatableText(getExtension().getTranslator(),manager.getLanguage()).get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(1, TimeUnit.SECONDS, m ->
-                manager.nextEvent());
-        
+        manager.nextEvent();
     }
     
     @Override

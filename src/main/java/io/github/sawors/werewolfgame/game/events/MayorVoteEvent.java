@@ -1,12 +1,10 @@
-package io.github.sawors.werewolfgame.game.events.day;
+package io.github.sawors.werewolfgame.game.events;
 
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.GameManager;
 import io.github.sawors.werewolfgame.game.WerewolfPlayer;
-import io.github.sawors.werewolfgame.game.events.GenericVote;
-import io.github.sawors.werewolfgame.game.events.RoleEvent;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.game.roles.base.Mayor;
 import io.github.sawors.werewolfgame.localization.TranslatableText;

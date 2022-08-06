@@ -248,7 +248,12 @@ public class DiscordCommandListener extends ListenerAdapter {
                                 }
                             }
                             break;
-                        
+                        case"next":
+                            manager.nextEvent();
+                            break;
+                        case"kickstart":
+                            manager.getCurrentEvent().start(manager);
+                            break;
                     }
                 }
             }
