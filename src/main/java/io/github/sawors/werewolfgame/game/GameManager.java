@@ -651,7 +651,6 @@ public class GameManager {
         return Main.getGamesList().getOrDefault(id, null);
     }
     
-    // TODO : create a method to send these invites to anybody
     public void sendInvite(){
         TextChannel chan = DatabaseManager.getGuildInvitesChannel(guild);
         if(chan != null){

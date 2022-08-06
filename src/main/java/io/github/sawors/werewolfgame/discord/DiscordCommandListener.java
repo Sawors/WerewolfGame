@@ -106,16 +106,6 @@ public class DiscordCommandListener extends ListenerAdapter {
                         }
                     }
                     break;
-                case"invites":
-                case"invitations":
-                case"invs":
-                    if(args.length >= 3){
-                        GameManager gm = GameManager.fromId(args[2]);
-                        if(gm != null){
-                            gm.sendInvite();
-                        }
-                    }
-                    break;
                 case"create":
                 case"game":
                     Main.logAdmin("Games", Main.getGuildGames(event.getGuild().getIdLong()));
@@ -126,14 +116,6 @@ public class DiscordCommandListener extends ListenerAdapter {
                             jointype = JoinType.PRIVATE;
                         }
                         GameManager gm = new GameManager(event.getGuild(), GameType.DISCORD, jointype);
-                        try{
-                            gm.sendInvite();
-                        }catch (NullPointerException e){
-                            DatabaseManager.registerGuildAuto(event.getGuild());
-                            try {
-                                gm.sendInvite();
-                            }catch (NullPointerException ignored){}
-                        }
                         gm.setOwner(event.getAuthor());
                         event.getChannel().sendMessage(texts.get("commands.ww.create.success").replaceAll("%id%", gm.getId())).queue();
                         if(jointype == JoinType.PRIVATE){
@@ -253,6 +235,14 @@ public class DiscordCommandListener extends ListenerAdapter {
                             break;
                         case"kickstart":
                             manager.getCurrentEvent().start(manager);
+                            break;
+                        case"invites":
+                        case"invitations":
+                        case"invs":
+                        case"inv":
+                            if(args.length >= 3){
+                                manager.sendInvite();
+                            }
                             break;
                     }
                 }
