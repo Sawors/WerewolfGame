@@ -44,9 +44,17 @@ public class DeathValidateEvent extends GameEvent {
             }
             timer += 1;
             if(i < death.size()-1){
-                manager.getMainTextChannel().sendMessage(texts.get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(2+i, TimeUnit.SECONDS, u -> manager.confirmDeath(id));
+                manager.getMainTextChannel().sendMessage(texts.get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(2+i, TimeUnit.SECONDS, u -> {
+                    if(!manager.checkForWinCondition()){
+                        manager.confirmDeath(id);
+                    }
+                });
             } else {
-                manager.getMainTextChannel().sendMessage(texts.get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(2+i, TimeUnit.SECONDS, u -> manager.confirmDeath(id));
+                manager.getMainTextChannel().sendMessage(texts.get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(2+i, TimeUnit.SECONDS, u -> {
+                    if(!manager.checkForWinCondition()){
+                        manager.confirmDeath(id);
+                    }
+                });
             }
         }
 

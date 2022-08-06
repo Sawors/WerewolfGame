@@ -23,7 +23,11 @@ public class VillageVoteEvent extends GenericVote {
 
     @Override
     public void start(GameManager manager) {
-        Main.logAdmin("p0");
+        
+        if(manager.checkForWinCondition()){
+            return;
+        }
+        
         // always add this
         this.votechannel = manager.getMainTextChannel();
         
@@ -33,17 +37,14 @@ public class VillageVoteEvent extends GenericVote {
         this.votepool = votepool;
         Set<UserId> voters = manager.getRealPlayers();
         voters.removeIf(us -> manager.getPlayerRoles().get(us) == null || !manager.getPlayerRoles().get(us).isAlive());
+        voters.add(UserId.fromString("sawors01"));
         this.voters = voters;
         // TODO vote
-        Main.logAdmin("p1");
         TranslatableText texts = new TranslatableText(Main.getTranslator(), manager.getLanguage());
         votemessage.setTitle(texts.get("votes.village.title"));
         votemessage.setDescription(texts.get("votes.village.description"));
         votemessage.setThumbnail(texts.get("roles.villager.thumbnail"));
-        Main.logAdmin("Village vote",votemessage);
-        Main.logAdmin("p2");
         start(manager,votemessage,true);
-        Main.logAdmin("p3");
     }
     
     /*

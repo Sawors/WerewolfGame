@@ -885,6 +885,18 @@ public class GameManager {
         }
         return users;
     }
+    
+    public void addRoleToPlayer(UserId player, PlayerRole role){
+        if(playerlink.containsKey(player)){
+            playerlink.get(player).addRole(role);
+        }
+    }
+    
+    public Set<UserId> getAlivePlayers(){
+        Set<UserId> aliveplayers = new HashSet<>(playerlink.keySet());
+        aliveplayers.removeIf(u -> !playerlink.get(u).isAlive() || pendingdeath.contains(u));
+        return aliveplayers;
+    }
 /*
     |------------------------------------------------|
     |================[TEAMS OPTIONS]=================|
@@ -908,8 +920,9 @@ public class GameManager {
         return getTeamPlayers(team.toString());
     }
     public void addPlayerToTeam(String team, UserId playerid){
-        List<UserId> list = teams.get(team);
-        if(list != null && !list.contains(playerid)){
+        Main.logAdmin("adding user "+playerid+" to team "+team.toUpperCase(Locale.ROOT));
+        List<UserId> list = teams.get(team.toUpperCase(Locale.ROOT));
+        if(teams.containsKey(team.toUpperCase(Locale.ROOT)) && !list.contains(playerid)){
             list.add(playerid);
         }
     }
@@ -917,7 +930,7 @@ public class GameManager {
         addPlayerToTeam(team.toString(),playerid);
     }
     public void removePlayerFromTeam(String team, UserId playerid){
-        List<UserId> list = teams.get(team);
+        List<UserId> list = teams.get(team.toUpperCase(Locale.ROOT));
         if(list != null){
             list.remove(playerid);
         }
@@ -940,7 +953,7 @@ public class GameManager {
         if(team == null){
             return false;
         }
-        return teams.containsKey(team);
+        return teams.containsKey(team.toUpperCase(Locale.ROOT));
     }
     
     public boolean doTeamExists(DefaultTeam team){
@@ -972,12 +985,6 @@ public class GameManager {
         }
         return false;
     }
-    
-    public Set<UserId> getAlivePlayers(){
-        Set<UserId> aliveplayers = new HashSet<>(playerlink.keySet());
-        aliveplayers.removeIf(u -> !playerlink.get(u).isAlive() || pendingdeath.contains(u));
-        return aliveplayers;
-    }
 /*
     |------------------------------------------------|
     |=================[EVENT QUEUE]==================|
@@ -986,6 +993,23 @@ public class GameManager {
     
     public boolean checkForWinCondition(){
         List<UserId> aliveplayers = new ArrayList<>(getAlivePlayers());
+        Main.logAdmin("CheckWin -- alive",aliveplayers);
+        Main.logAdmin("CheckWin -- teams",teams);
+        if(aliveplayers.size()==0){
+            Main.logAdmin("Draw !");
+            eventqueue.clear();
+            currentevent = null;
+            for(UserId u : discordlink.keySet()){
+                try{
+                    DiscordBot.addPendingAction(getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(u)), false));
+                } catch (IllegalArgumentException | IllegalStateException ignored){}
+            }
+    
+            maintextchannel.sendMessage(guild.getPublicRole().getAsMention()+" \n"+new TranslatableText(Main.getTranslator(),language).get("teams.generic.draw-message")).queue(m ->
+            maintextchannel.sendMessage("https://tenor.com/view/facepalm-really-stressed-mad-angry-gif-16109475").queueAfter(1,TimeUnit.SECONDS));
+            DiscordBot.triggerActionQueue();
+            return true;
+        }
         if(checkSameTeam(aliveplayers)){
             String teamname = getPlayerTeam(aliveplayers.get(0));
             Main.logAdmin("Teams Victory",teamname);

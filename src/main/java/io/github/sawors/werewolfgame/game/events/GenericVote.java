@@ -108,9 +108,9 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
                 } else {
                     onVoteNew(voter,usvoted);
                 }
-                onVote(voter,usvoted);
                 votemap.put(voter,usvoted);
                 Main.logAdmin(votemap);
+                onVote(voter,usvoted);
             } else {
                 doAction(voter, voted);
             }

@@ -252,6 +252,7 @@ votes:
 teams:
   generic:
     win-message: "Victoire de l'équipe **%team%** !"
+    draw-message: "Sans déconner, vous avez vraiment réussi à faire une égalité ? ***c'est_honteux.mp3***"
   wolves:
     name: "Loups"
     win-message: "Victoire des Loups !"
