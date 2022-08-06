@@ -36,7 +36,11 @@ public class SunriseEvent extends GameEvent {
         });
 
         manager.buildQueue(PhaseType.DAY);
-        Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,3+3+1, TimeUnit.SECONDS);
+        Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+            if(!this.isDisabled()){
+                manager.nextEvent();
+            }
+        },3+3+1, TimeUnit.SECONDS);
         
     }
 }

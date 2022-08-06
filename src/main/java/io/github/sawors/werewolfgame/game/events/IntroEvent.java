@@ -28,6 +28,10 @@ public class IntroEvent extends GameEvent {
 //        chan.sendMessage(texts.get("events.story.2")).queueAfter(6+4, TimeUnit.SECONDS, m -> chan.sendTyping().queue());
 //        chan.sendMessage(texts.get("events.story.3")).queueAfter(6+4+10, TimeUnit.SECONDS, m -> chan.sendTyping().queue());
 //        chan.sendMessage(texts.get("events.story.4")).queueAfter(6+4+10+8, TimeUnit.SECONDS, m -> chan.sendTyping().queue());
-        Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,11+(5L*messages.size()),TimeUnit.SECONDS);
+        Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+            if(!this.isDisabled()){
+                manager.nextEvent();
+            }
+        },11+(5L*messages.size()),TimeUnit.SECONDS);
     }
 }

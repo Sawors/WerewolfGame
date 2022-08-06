@@ -153,18 +153,21 @@ public class GameManager {
     }
 
     public void confirmDeath(UserId id){
-        if(playerlink.containsKey(id)){
-            playerlink.get(id).kill();
-
-            for(BackgroundEvent event : backgroundevents){
-                event.onDeathConfirmed(id);
+        if(id != null){
+            pendingdeath.remove(id);
+            if(playerlink.containsKey(id)){
+                playerlink.get(id).kill();
+        
+                try{
+                    guild.addRoleToMember(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), deadrole).queue();
+                    getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), true).queue();
+                } catch (IllegalArgumentException | IllegalStateException ignored){}
+        
+                for(BackgroundEvent event : backgroundevents){
+                    event.onDeathConfirmed(id);
+                }
             }
-            try{
-                guild.addRoleToMember(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), deadrole).queue();
-                getGuild().mute(UserSnowflake.fromId(DatabaseManager.getDiscordId(id)), true).queue();
-            } catch (IllegalArgumentException | IllegalStateException ignored){}
         }
-        pendingdeath.remove(id);
     }
 
     public TextChannel getWaitingChannel(){
@@ -969,6 +972,12 @@ public class GameManager {
         }
         return false;
     }
+    
+    public Set<UserId> getAlivePlayers(){
+        Set<UserId> aliveplayers = new HashSet<>(playerlink.keySet());
+        aliveplayers.removeIf(u -> !playerlink.get(u).isAlive() || pendingdeath.contains(u));
+        return aliveplayers;
+    }
 /*
     |------------------------------------------------|
     |=================[EVENT QUEUE]==================|
@@ -976,8 +985,7 @@ public class GameManager {
 */
     
     public boolean checkForWinCondition(){
-        List<UserId> aliveplayers = new ArrayList<>(playerlink.keySet());
-        aliveplayers.removeIf(u -> !playerlink.get(u).isAlive() || pendingdeath.contains(u));
+        List<UserId> aliveplayers = new ArrayList<>(getAlivePlayers());
         if(checkSameTeam(aliveplayers)){
             String teamname = getPlayerTeam(aliveplayers.get(0));
             Main.logAdmin("Teams Victory",teamname);
@@ -1084,9 +1092,9 @@ public class GameManager {
         }
     }
 
+    //TODO : remove this absurdity PLEASE
     public Set<LinkedUser> defaultVotePool(){
         Set<LinkedUser> votepool = new HashSet<>();
-        //TODO : Remove this
         List<String> fakenameslist = new ArrayList<>();
         fakenameslist.add("Pasawors");
         fakenameslist.add("esprit-absent");
@@ -1311,6 +1319,8 @@ public class GameManager {
     }
     
     public void overwriteCurrentEvent(GameEvent event){
+        currentevent.setDisabled(true);
+        Main.logAdmin("Overwriting event",currentevent+"->"+event);
         this.currentevent = event;
     }
 }

@@ -18,7 +18,7 @@ public class DeathValidateEvent extends GameEvent {
         super(extension);
         this.foreshadowing = foreshadowing;
     }
-
+    
     @Override
     public void start(GameManager manager) {
         List<UserId> death = new ArrayList<>(manager.getPendingDeath());
@@ -42,12 +42,19 @@ public class DeathValidateEvent extends GameEvent {
                 name = id.toString();
                 role = manager.getPlayerRoles().get(id).getMainRole() != null ? new TranslatableText(manager.getPlayerRoles().get(id).getMainRole().getExtension().getTranslator(), manager.getLanguage()).get("roles."+manager.getPlayerRoles().get(id).getMainRole().getRoleName()+".name") : "??????";
             }
-            manager.confirmDeath(id);
             timer += 1;
-            manager.getMainTextChannel().sendMessage(texts.get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(2+i, TimeUnit.SECONDS);
+            if(i < death.size()-1){
+                manager.getMainTextChannel().sendMessage(texts.get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(2+i, TimeUnit.SECONDS, u -> manager.confirmDeath(id));
+            } else {
+                manager.getMainTextChannel().sendMessage(texts.get("events.game-info.death-announcement").replaceAll("%user%", name).replaceAll("%role%", role)).queueAfter(2+i, TimeUnit.SECONDS, u -> manager.confirmDeath(id));
+            }
         }
 
-        Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,timer+2, TimeUnit.SECONDS);
+        Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+           if(!this.isDisabled()){
+               manager.nextEvent();
+           }
+        },timer+2, TimeUnit.SECONDS);
 
     }
 }

@@ -25,7 +25,11 @@ public class NightfallEvent extends GameEvent {
     
         if(!manager.checkForWinCondition()){
             manager.buildQueue(PhaseType.NIGHT);
-            Executors.newSingleThreadScheduledExecutor().schedule(manager::nextEvent,3+2+2,TimeUnit.SECONDS);
+            Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+                if(!this.isDisabled()){
+                    manager.nextEvent();
+                }
+            },3+2+2,TimeUnit.SECONDS);
         } else {
             return;
         }

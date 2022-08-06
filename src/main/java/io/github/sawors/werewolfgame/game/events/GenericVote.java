@@ -19,21 +19,20 @@ import java.util.*;
 
 public abstract class GenericVote extends GameEvent implements RoleEvent{
 
-    protected Integer votetime;
-    protected Set<LinkedUser> votepool;
+    protected Integer votetime = 30;
+    protected Set<LinkedUser> votepool = new HashSet<>();
     protected EmbedBuilder votemessage = new EmbedBuilder();
-    protected String messagebody;
+    protected String messagebody = "";
     protected TextChannel votechannel;
     //       |            has voted for
     protected Map<UserId,               UserId> votemap = new HashMap<>();
-    protected Set<UserId> voters;
+    protected Set<UserId> voters = new HashSet<>();
     protected Set<UserId> votewinnertie = new HashSet<>();
     public GameManager manager;
     protected Set<Message> buttonmessage = new HashSet<>();
 
     public GenericVote(WerewolfExtension extension){
         super(extension);
-        this.votetime = 30;
     };
     
     public void setVotePool(Set<LinkedUser> votepool){
