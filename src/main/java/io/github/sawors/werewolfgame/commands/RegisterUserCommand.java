@@ -19,11 +19,11 @@ public class RegisterUserCommand implements GameCommand{
 
     @Override
     public void execute() {
-        DatabaseManager.saveUserData(toreg);
+        DatabaseManager.registerUser(toreg);
     }
 
     public void execute(MessageChannel channel) {
-        DatabaseManager.saveUserData(toreg);
+        DatabaseManager.registerUser(toreg);
         channel.sendMessage("You are now registered with UserID `"+DatabaseManager.getUserId(toreg.getDiscordId())+"`").queue();
     }
 

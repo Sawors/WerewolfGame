@@ -1,5 +1,6 @@
 package io.github.sawors.werewolfgame.game.events;
 
+import io.github.sawors.werewolfgame.DatabaseManager;
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
@@ -8,7 +9,6 @@ import io.github.sawors.werewolfgame.game.WerewolfPlayer;
 import io.github.sawors.werewolfgame.game.roles.PlayerRole;
 import io.github.sawors.werewolfgame.game.roles.base.Mayor;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
-import net.dv8tion.jda.api.entities.User;
 
 import java.util.List;
 import java.util.Map;
@@ -29,8 +29,7 @@ public class MayorVoteEvent extends GenericVote implements RoleEvent {
         Main.logAdmin("Winner",winner);
         closeVote();
         votechannel.sendMessage(new TranslatableText(getExtension().getTranslator(), manager.getLanguage()).get("votes.mayor.end")).queue();
-        User w = manager.getDiscordUser(winner);
-        String name = w != null ? w.getName() : winner.toString();
+        String name = DatabaseManager.getName(winner);
         WerewolfPlayer player = manager.getPlayerRoles().get(winner);
         if(player != null && player.isAlive()){
             player.addRole(new Mayor(getExtension()));

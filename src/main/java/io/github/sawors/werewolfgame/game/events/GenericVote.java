@@ -1,5 +1,6 @@
 package io.github.sawors.werewolfgame.game.events;
 
+import io.github.sawors.werewolfgame.DatabaseManager;
 import io.github.sawors.werewolfgame.LinkedUser;
 import io.github.sawors.werewolfgame.Main;
 import io.github.sawors.werewolfgame.database.UserId;
@@ -134,7 +135,7 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
         List<ActionRow> votebuttons = new ArrayList<>();
         List<Button> tempbuttons = new ArrayList<>();
         for(LinkedUser user : votepool){
-            tempbuttons.add(Button.primary("vote:"+manager.getId()+"#"+user.getId(), user.getName()));
+            tempbuttons.add(Button.primary("vote:"+manager.getId()+"#"+user.getId(), DatabaseManager.getName(user.getId())));
             if(tempbuttons.size() >= 3){
                 votebuttons.add(ActionRow.of(tempbuttons));
                 tempbuttons.clear();
@@ -226,10 +227,8 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
     //  Vote Events
     public void onVote(UserId voter, UserId voted){}
     public void onVoteNew(UserId voter, UserId voted){
-        User u = manager.getDiscordUser(voter);
-        User v = manager.getDiscordUser(voted);
-        String votername = u != null ? u.getName() : voter.toString();
-        String votedname = v != null ? v.getName() : voted.toString();
+        String votername = DatabaseManager.getName(voter);
+        String votedname = DatabaseManager.getName(voted);
         TranslatableText texts = new TranslatableText(Main.getTranslator(),manager.getLanguage());
         String msg = texts.get("votes.generic.messages.new-vote").replaceAll("%user%",votername);
         if(manager.getOptions().tellVotes()){
@@ -240,8 +239,8 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
     public void onVoteChanged(UserId voter, UserId voted){
         User u = manager.getDiscordUser(voter);
         User v = manager.getDiscordUser(voted);
-        String votername = u != null ? u.getName() : voter.toString();
-        String votedname = v != null ? v.getName() : voted.toString();
+        String votername = DatabaseManager.getName(voter);
+        String votedname = DatabaseManager.getName(voted);
         TranslatableText texts = new TranslatableText(Main.getTranslator(),manager.getLanguage());
         String msg = texts.get("votes.generic.messages.change-vote").replaceAll("%user%",votername);
         if(manager.getOptions().tellVotes()){

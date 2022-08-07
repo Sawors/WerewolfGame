@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -69,37 +70,47 @@ public class DatabaseManager {
                 ;
     }
     
-    public static void saveUserData(LinkedUser user){
+    
+    public static void registerUser(LinkedUser linkeduser){
+        registerUser(linkeduser.getId(), linkeduser.getName(),linkeduser.getMinecraftId(),linkeduser.getDiscordId(),linkeduser.getPreferences(),linkeduser.getTags());
+    }
+    public static void registerUser(@NotNull UserId id, @Nullable String name, @Nullable UUID mcid, @Nullable String discordid, @Nullable Set<UserPreference> preferences, @Nullable Set<UserTag> tags){
+        String userid = id.toString();
+        String username = name != null ? name : userid;
+        String usermcid = mcid != null ? mcid.toString() : "";
+        String userdiscordid = discordid != null ? discordid : "";
+        String userpreferences = preferences != null ? preferences.toString() : "[]";
+        String usertags = tags != null ? tags.toString() : "[]";
         try(Connection co = connect()){
             co.prepareStatement("INSERT into Users Values('"
-            +user.getId()+"','"
-            +user.getName()+"','"
-            +user.getMinecraftId()+"','"
-            +user.getDiscordId()+"','"
-            +user.getPreferences()+"','"
-            +user.getTags()+"')"
+            +userid+"','"
+            +username+"','"
+            +usermcid+"','"
+            +userdiscordid+"','"
+            +userpreferences+"','"
+            +usertags+"')"
             ).execute();
             
         } catch(SQLException e){
             try(Connection co = connect()){
                 String query = "UPDATE Users SET "
-                        +UserDataType.NAME+" = '"+user.getName()+"', "
-                        +UserDataType.MCUUID+" = '"+user.getMinecraftId()+"', "
-                        +UserDataType.DISCORDID+" = '"+user.getDiscordId()+"', "
-                        +UserDataType.PREFERENCES+" = '"+user.getPreferences()+"', "
-                        +UserDataType.TAGS+" = '"+user.getTags()+"'";
+                        +UserDataType.NAME+" = '"+username+"', "
+                        +UserDataType.MCUUID+" = '"+usermcid+"', "
+                        +UserDataType.DISCORDID+" = '"+userdiscordid+"', "
+                        +UserDataType.PREFERENCES+" = '"+userpreferences+"', "
+                        +UserDataType.TAGS+" = '"+usertags+"'";
                 // TODO : add overwrite for confirmation if overwrite detected
-                Main.logAdmin("User "+user.getName()+"#"+user.getId()+" has conflicting data with an already registered user, updating it's data...");
-                HashMap<UserDataType, UserId> conflicts = getConflictingDataType(user);
+                Main.logAdmin("User "+username+"#"+userid+" has conflicting data with an already registered user, updating it's data...");
+                HashMap<UserDataType, UserId> conflicts = getConflictingDataType(new LinkedUser(id,username,mcid,userdiscordid,preferences,tags));
                 Main.logAdmin("Conflicts : "+conflicts);
                 if(conflicts.containsKey(UserDataType.USERID)){
                     //overriding the data
-                    query += " WHERE "+UserDataType.USERID+" = '"+user.getId()+"'";
+                    query += " WHERE "+UserDataType.USERID+" = '"+userid+"'";
                     co.prepareStatement(query).execute();
                 } else if(conflicts.containsKey(UserDataType.MCUUID) && conflicts.containsKey(UserDataType.DISCORDID)){
                     if(Objects.equals(conflicts.get(UserDataType.MCUUID).toString(), conflicts.get(UserDataType.DISCORDID).toString())){
                         // same user conflicting for both, overwriting
-                        query += " WHERE "+UserDataType.MCUUID+" = '"+user.getMinecraftId()+"'";
+                        query += " WHERE "+UserDataType.MCUUID+" = '"+usermcid+"'";
                         co.prepareStatement(query).execute();
                     } else {
                         Main.logAdmin("MC : "+conflicts.get(UserDataType.MCUUID));
@@ -108,27 +119,10 @@ public class DatabaseManager {
                         // do nothing since we have multiple matching users
                     }
                 }
-                
-                
-                
-                /*String query = "UPDATE Users SET "
-                        +UserDataType.NAME+" = '"+"user.getName()"+"', "
-                        +UserDataType.MCUUID+" = '"+user.getMinecraftId()+"', "
-                        +UserDataType.DISCORDID+" = '"+user.getDiscordId()+"', "
-                        +UserDataType.PREFERENCES+" = '"+user.getPreferences()+"', "
-                        +UserDataType.TAGS+" = '"+user.getTags()+"' "+
-                        "WHERE "+UserDataType.DISCORDID+" = '"+user.getDiscordId()+"'";*/
-                /*Main.logAdmin(query);
-                co.prepareStatement(query
-                ).execute();*/
             }catch (SQLException e2){
                 e2.printStackTrace();
             }
         }
-    }
-    
-    public static void setUserUUID(UserId user, UUID id){
-    
     }
     
     private static HashMap<UserDataType, UserId> getConflictingDataType(LinkedUser user){
@@ -250,6 +244,14 @@ public class DatabaseManager {
         String id = getUserData(user, UserDataType.MCUUID);
         
         return id != null ? UUID.fromString(id) : null;
+    }
+    
+    public static String getName(UserId user){
+        String name = getUserData(user, UserDataType.NAME);
+        if(name == null || name.length()==0){
+            name = user.toString();
+        }
+        return name;
     }
     
     //

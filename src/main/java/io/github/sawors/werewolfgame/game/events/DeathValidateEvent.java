@@ -1,5 +1,6 @@
 package io.github.sawors.werewolfgame.game.events;
 
+import io.github.sawors.werewolfgame.DatabaseManager;
 import io.github.sawors.werewolfgame.database.UserId;
 import io.github.sawors.werewolfgame.extensionsloader.WerewolfExtension;
 import io.github.sawors.werewolfgame.game.GameManager;
@@ -39,7 +40,7 @@ public class DeathValidateEvent extends GameEvent {
             String role = "";
             UserId id = death.get(i);
             if(manager.getPlayerRoles().containsKey(id)){
-                name = id.toString();
+                name = DatabaseManager.getName(id);
                 role = manager.getPlayerRoles().get(id).getMainRole() != null ? new TranslatableText(manager.getPlayerRoles().get(id).getMainRole().getExtension().getTranslator(), manager.getLanguage()).get("roles."+manager.getPlayerRoles().get(id).getMainRole().getRoleName()+".name") : "??????";
             }
             timer += 1;
