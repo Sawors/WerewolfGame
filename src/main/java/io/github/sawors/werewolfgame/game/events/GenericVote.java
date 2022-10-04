@@ -116,7 +116,6 @@ public abstract class GenericVote extends GameEvent implements RoleEvent{
                 doAction(voter, voted);
             }
         }
-        
     }
     
     public void doAction(UserId user, String action){}

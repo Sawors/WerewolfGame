@@ -14,6 +14,7 @@ import io.github.sawors.werewolfgame.game.roles.PrimaryRole;
 import io.github.sawors.werewolfgame.game.roles.TextRole;
 import io.github.sawors.werewolfgame.game.roles.base.Villager;
 import io.github.sawors.werewolfgame.game.roles.base.Wolf;
+import io.github.sawors.werewolfgame.links.WerewolfLink;
 import io.github.sawors.werewolfgame.localization.LoadedLocale;
 import io.github.sawors.werewolfgame.localization.TranslatableText;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -96,7 +97,8 @@ public class GameManager {
     private TextChannel deadchannel;
     private final Narrator narrator;
 
-    
+    // Platforms and links
+    private HashMap<String, WerewolfLink> linkmap = new HashMap<>();
     
 
     public GameManager(Guild guild, GameType type, JoinType accessibility){
@@ -1347,4 +1349,15 @@ public class GameManager {
         Main.logAdmin("Overwriting event",currentevent+"->"+event);
         this.currentevent = event;
     }
+
+
+    // Links management
+    public void addLink(WerewolfLink link){
+        linkmap.put(link.getId(),link);
+    }
+
+    public void removeLink(String linkid){
+        linkmap.remove(linkid);
+    }
+
 }
